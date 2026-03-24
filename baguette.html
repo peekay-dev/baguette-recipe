@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perth Baguettes — Poolish Method</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #f5f0ea; --white: #fff; --accent: #8b7355; --text: #3a3530; --muted: #9a9185; --border: #ddd5ca; --highlight: rgba(139,115,85,0.06); --done: #ccc5bb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); max-width: 680px; margin: 0 auto; padding: 0 0 60px; line-height: 1.65; font-size: 15px; }
+  h1 { font-family: 'DM Serif Display', Georgia, serif; font-size: 2.2em; font-weight: 400; letter-spacing: -0.5px; margin-bottom: 0; }
+  h2 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.1em; font-weight: 400; margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); letter-spacing: 0.3px; color: var(--accent); }
+  h3 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.05em; font-weight: 400; margin: 16px 0 6px; color: var(--accent); letter-spacing: 0.3px; }
+  .subtitle { color: var(--muted); margin-bottom: 20px; font-size: 0.88em; letter-spacing: 2px; text-transform: uppercase; font-weight: 400; }
+  .header-row { padding: 32px 20px 0; }
+  .controls { padding: 16px 20px; margin-bottom: 8px; background:var(--white); }
+  .control-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 10px; }
+  .control-row:last-child { margin-bottom: 0; }
+  .field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+  .field label { font-size: 0.7em; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  select, input[type=number] { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 0.95em; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: transparent; width: 100%; min-height: 44px; color: var(--text); }
+  select:focus, input:focus { outline: none; border-color: var(--accent); }
+  .toggle { display: flex; gap: 0; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+  .toggle button { flex: 1; padding: 8px 14px; border: none; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.85em; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.2s; min-height: 44px; letter-spacing: 0.3px; }
+  .toggle button.active { background: var(--accent); color: var(--bg); }
+  .blend-row { display: flex; gap: 6px; align-items: center; }
+  .blend-input { width: 52px; text-align: center; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.88em; padding: 6px 2px; border: 1px solid var(--border); border-radius: 4px; background: transparent; color: var(--accent); min-height: 36px; }
+  .blend-input:focus { outline: none; border-color: var(--accent); }
+  input[type=range] { flex: 1; accent-color: var(--accent); min-height: 44px; }
+  .num-field { max-width: 76px; flex: 0 0 76px; }
+  .content { padding: 0 20px; }
+  .white-panel { background: var(--white); border-radius: 8px; padding: 20px; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 0.9em; }
+  th, td { text-align: left; padding: 4px 0; border: none; }
+  th { font-size: 0.65em; font-weight: 500; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  th:last-child, td.amt { text-align: right; }
+  td { border-bottom: 1px solid rgba(0,0,0,0.04); }
+  td.amt { font-weight: 500; font-size: 1.05em; font-variant-numeric: tabular-nums; color: var(--text); text-align: right; }
+  .step { margin-bottom: 4px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04); transition: opacity 0.3s; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .step:last-child { border-bottom: none; }
+  .step.done { opacity: 0.3; }
+  .step.done .step-title { text-decoration: line-through; }
+  .step-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .step-num { font-family: 'DM Serif Display', Georgia, serif; font-size: 1em; color: var(--accent); margin-right: 8px; }
+  .step-title { font-weight: 400; }
+  .step-time { font-size: 0.8em; color: var(--muted); }
+  .step-check { font-size: 0.7em; color: var(--muted); letter-spacing: 0.5px; }
+  .step.done .step-check { color: var(--accent); }
+  .step p { margin: 3px 0; }
+  .tip { background: var(--highlight); padding: 0; margin: 6px 0; border-radius: 4px; font-size: 0.88em; overflow: hidden; }
+  .tip-toggle { display: flex; align-items: center; padding: 6px 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; gap: 5px; font-weight: 400; font-size: 0.8em; color: var(--muted); letter-spacing: 0.3px; }
+  .tip-toggle::before { content: '+'; font-size: 1.1em; color: var(--accent); display: inline-block; }
+  .tip.open .tip-toggle::before { content: '−'; }
+  .tip-hint { color: var(--muted); font-style: italic; }
+  .tip.open .tip-hint { display: none; }
+  .tip-body { padding: 0 10px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; color: var(--text); }
+  .tip.open .tip-body { max-height: 300px; padding: 0 10px 8px; }
+  .temp { font-weight: 500; }
+  .collapsible-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+  .collapsible-header::after { content: '+'; font-size: 1.1em; color: var(--accent); }
+  .collapsible-header.open::after { content: '−'; }
+  .collapsible-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .collapsible-body.open { max-height: 600px; }
+  .schedule { display: grid; grid-template-columns: auto 1fr; gap: 1px 16px; font-size: 0.9em; padding-top: 8px; }
+  .schedule .time { font-weight: 500; white-space: nowrap; color: var(--accent); }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; font-size: 0.85em; }
+  .compare > div { padding: 10px; border-radius: 4px; border: 1px solid var(--border); }
+  .compare > div:last-child { background: var(--highlight); }
+  .compare h4 { font-size: 0.75em; font-weight: 500; margin-bottom: 4px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.8px; }
+  .compare ul { padding-left: 16px; margin: 0; }
+  .compare li { margin-bottom: 1px; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 200; justify-content: center; align-items: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 8px; padding: 20px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
+  .modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none; font-size: 1.3em; cursor: pointer; color: var(--muted); }
+  .info-btn { background: none; border: 1px solid var(--border); border-radius: 50%; width: 32px; height: 32px; font-size: 0.85em; cursor: pointer; color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .method-row { display: flex; gap: 8px; align-items: end; flex: 1; min-width: 0; }
+  .meta { font-size: 0.78em; color: var(--muted); margin-top: 3px; }
+  .formula-meta { font-size: 0.82em; color: var(--muted); letter-spacing: 0.3px; }
+  @media (max-width: 600px) {
+    .control-row { flex-direction: column; gap: 8px; }
+    .num-field { max-width: 100%; flex: 1; }
+    .header-row { padding: 24px 16px 0; }
+    .controls { padding: 12px 16px; }
+    .content { padding: 0 16px; }
+    td.amt { font-size: 1.1em; }
+    .compare { grid-template-columns: 1fr; }
+    .white-panel { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="header-row">
+  <h1>Perth Poolish Baguettes</h1>
+  <p class="subtitle" id="subtitle">Hand-mixed · cold-retarded · season-adjusted</p>
+  <p style="color:var(--muted);font-size:0.78em;letter-spacing:1px">by Paul</p>
+</div>
+<div class="white-panel">
+  <div class="control-row">
+    <div class="field">
+      <label>Season</label>
+      <div class="toggle" id="seasonToggle">
+        <button class="active" data-v="summer" onclick="setSeason('summer')">Summer</button>
+        <button data-v="winter" onclick="setSeason('winter')">Winter</button>
+      </div>
+    </div>
+    <div class="method-row">
+      <div class="field">
+        <label>Method</label>
+        <div class="toggle" id="methodToggle">
+          <button class="active" data-v="retard" onclick="setMethod('retard')">Cold Retard</button>
+          <button data-v="sameday" onclick="setMethod('sameday')">Same Day</button>
+        </div>
+      </div>
+      <button class="info-btn" onclick="document.getElementById('compareModal').classList.add('open')" title="Compare methods">?</button>
+    </div>
+  </div>
+  <div class="control-row">
+    <div class="field">
+      <label>Quantity</label>
+      <input type="number" id="count" value="4" min="1" max="12" onchange="update()">
+    </div>
+    <div class="field">
+      <label>Weight each (g)</label>
+      <input type="number" id="weight" value="250" min="200" max="500" step="10" onchange="update()">
+    </div>
+    <div class="field">
+      <label>Hydration %</label>
+      <input type="number" id="hydration" value="75" min="65" max="85" step="1" onchange="update()">
+    </div>
+  </div>
+  <div class="control-row">
+    <div class="field">
+      <label>Flour A</label>
+      <select id="flourA" onchange="update()">
+        <option value="pizzeria">Caputo Pizzeria Blue (12.5%)</option>
+        <option value="nuvola">Caputo Nuvola (13%)</option>
+        <option value="doppia">Caputo 00 AP (11.5%)</option>
+        <option value="bread">Strong Bread (12–13%)</option>
+        <option value="wholemeal">Wholemeal Wheat</option>
+        <option value="spelt">White Spelt</option>
+      </select>
+    </div>
+    <div class="field num-field">
+      <label>%</label>
+      <input type="number" id="pctA" value="85" min="0" max="100" onchange="syncBlend('a')" style="text-align:center">
+    </div>
+  </div>
+  <div class="control-row">
+    <div class="field">
+      <label>Flour B</label>
+      <select id="flourB" onchange="update()">
+        <option value="pizzeria">Caputo Pizzeria Blue (12.5%)</option>
+        <option value="nuvola">Caputo Nuvola (13%)</option>
+        <option value="doppia">Caputo 00 AP (11.5%)</option>
+        <option value="bread">Strong Bread (12–13%)</option>
+        <option value="wholemeal" selected>Wholemeal Wheat</option>
+        <option value="spelt">White Spelt</option>
+      </select>
+    </div>
+    <div class="field num-field">
+      <label>%</label>
+      <input type="number" id="pctB" value="15" min="0" max="100" onchange="syncBlend('b')" style="text-align:center">
+    </div>
+  </div>
+  <div class="control-row">
+    <input type="range" id="blend" min="0" max="100" value="85" oninput="syncBlend('slider')" style="width:100%">
+  </div>
+</div>
+<div class="content" id="recipe"></div>
+<script>
+let season = 'summer', method = 'retard';
+const doneSteps = new Set();
+let scheduleOpen = false;
+const POOLISH_PCT = 0.50, BASSINAGE_PCT = 0.03;
+
+const S = {
+  summer: {
+    ambient: '28–38°C', waterTemp: '4–8°C', poolishYeast: 0.05, poolishTime: '8–10 hrs',
+    bulkTime: '2–2.5 hrs', proofTime: '30–45 min', samedayProof: '60–75 min', ddt: 23,
+    fridgeNote: 'Dough warms fast — get it into the fridge promptly after bulk.',
+    samedayNote: 'In summer heat, watch the proof carefully — it can run away from you in 45 min.',
+    mixTime: '6:00 AM', fermentolyseEnd: '6:30 AM',
+    sf1: '7:00 AM', sf2: '7:30 AM', cf1: '8:00 AM', cf2: '8:30 AM',
+    bulkEnd: '8:45 AM', fridgeIn: '8:45 AM',
+    nextDay: '7:00 AM next day (~22 hrs)', bakeTime: '~8:30 AM',
+    sdPreshape: '8:45 AM', sdShape: '9:10 AM', sdBake: '~10:15 AM', sdDone: '~10:45 AM'
+  },
+  winter: {
+    ambient: '10–18°C', waterTemp: '28–32°C', poolishYeast: 0.15, poolishTime: '12–16 hrs',
+    bulkTime: '3–3.5 hrs', proofTime: '30–45 min', samedayProof: '90–120 min', ddt: 25,
+    fridgeNote: 'Cold dough takes longer to wake up — give extra proof time after shaping.',
+    samedayNote: 'Winter dough is sluggish — don\'t rush the proof. It may need the full 2 hours.',
+    mixTime: '9:00 AM', fermentolyseEnd: '9:45 AM',
+    sf1: '10:30 AM', sf2: '11:15 AM', cf1: '12:00 PM', cf2: '12:45 PM',
+    bulkEnd: '1:00 PM', fridgeIn: '1:00 PM',
+    nextDay: '8:00 AM next day (~19 hrs)', bakeTime: '~9:45 AM',
+    sdPreshape: '1:00 PM', sdShape: '1:25 PM', sdBake: '~3:00 PM', sdDone: '~3:30 PM'
+  }
+};
+
+const flourInfo = {
+  pizzeria: { name: 'Caputo Pizzeria Blue', hydAdj: 0 },
+  nuvola: { name: 'Caputo Nuvola', hydAdj: +2 },
+  doppia: { name: 'Caputo 00 AP', hydAdj: -2 },
+  bread: { name: 'Strong Bread Flour', hydAdj: 0 },
+  wholemeal: { name: 'Wholemeal Wheat', hydAdj: +3 },
+  spelt: { name: 'White Spelt', hydAdj: -3 }
+};
+
+function setSeason(s) {
+  season = s;
+  document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === s));
+  update();
+}
+function setMethod(m) {
+  method = m;
+  document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === m));
+  document.getElementById('subtitle').textContent = m === 'retard'
+    ? 'Hand-mixed · cold-retarded · season-adjusted'
+    : 'Hand-mixed · same-day bake · season-adjusted';
+  update();
+}
+function r(v) { return Math.round(v); }
+
+function tip(text, hint) {
+  return `<div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')"><div class="tip-toggle"><span class="tip-hint">${hint || ''}</span></div><div class="tip-body">${text}</div></div>`;
+}
+
+function stepStart(num, title, time, id) {
+  const done = doneSteps.has(id) ? ' done' : '';
+  const check = doneSteps.has(id) ? '✓ done' : 'tap to mark done';
+  return `<div class="step${done}" data-step="${id}" onclick="toggleStep('${id}', this)"><div class="step-header"><span><span class="step-num">${num}.</span><span class="step-title">${title}</span></span><span class="step-time">${time}</span></div><div class="step-check">${check}</div>`;
+}
+const stepEnd = '</div>';
+
+function toggleStep(id, el) {
+  if (doneSteps.has(id)) doneSteps.delete(id); else doneSteps.add(id);
+  el.classList.toggle('done');
+  el.querySelector('.step-check').textContent = doneSteps.has(id) ? '✓ done' : 'tap to mark done';
+}
+
+function syncBlend(src) {
+  const slider = document.getElementById('blend');
+  const inputA = document.getElementById('pctA');
+  const inputB = document.getElementById('pctB');
+  if (src === 'slider') { inputA.value = slider.value; inputB.value = 100 - slider.value; }
+  else if (src === 'a') { const v = Math.min(100, Math.max(0, +inputA.value)); inputA.value = v; inputB.value = 100 - v; slider.value = v; }
+  else { const v = Math.min(100, Math.max(0, +inputB.value)); inputB.value = v; inputA.value = 100 - v; slider.value = 100 - v; }
+  update();
+}
+
+function toggleCollapsible(el) {
+  scheduleOpen = !scheduleOpen;
+  el.classList.toggle('open');
+  el.nextElementSibling.classList.toggle('open');
+}
+
+function update() {
+  const count = Math.max(1, +document.getElementById('count').value);
+  const pieceWeight = +document.getElementById('weight').value;
+  const blendA = +document.getElementById('blend').value;
+  const blendB = 100 - blendA;
+  const fA = document.getElementById('flourA').value;
+  const fB = document.getElementById('flourB').value;
+  const userHyd = +document.getElementById('hydration').value;
+
+  const s = S[season];
+  const isRetard = method === 'retard';
+  const totalDough = count * pieceWeight * 1.06;
+  const hydAdj = (flourInfo[fA].hydAdj * blendA + flourInfo[fB].hydAdj * blendB) / 100;
+  const baseHyd = (userHyd + hydAdj) / 100;
+  const totalFlour = totalDough / (1 + baseHyd + 0.02 + 0.004);
+  const totalWater = totalFlour * baseHyd;
+  const salt = totalFlour * 0.0168;
+
+  const poolishFlour = totalFlour * POOLISH_PCT;
+  const poolishWater = poolishFlour;
+  const poolishYeast = totalFlour * (s.poolishYeast / 100);
+  const finalFlour = totalFlour - poolishFlour;
+  const finalFlourA = finalFlour * (blendA / 100);
+  const finalFlourB = finalFlour * (blendB / 100);
+  const poolishFlourA = poolishFlour * (blendA / 100);
+  const poolishFlourB = poolishFlour * (blendB / 100);
+  const bassinage = totalFlour * BASSINAGE_PCT;
+  const fermentolyseWater = totalWater - poolishWater - bassinage;
+  const fermentolyseHyd = ((fermentolyseWater / finalFlour) * 100).toFixed(0);
+  const finalYeast = totalFlour * (isRetard ? 0.002 : 0.003);
+  const fAName = flourInfo[fA].name;
+  const fBName = flourInfo[fB].name;
+  const proofTime = isRetard ? s.proofTime : s.samedayProof;
+  const growthTarget = isRetard ? '50–60%' : '70–80%';
+
+  let scheduleHtml;
+  if (isRetard) {
+    scheduleHtml = `
+      <span class="time">9:00 PM</span><span>Mix poolish → room temp overnight</span>
+      <span class="time">${s.mixTime}</span><span>Mix fermentolyse (${s.poolishTime})</span>
+      <span class="time">${s.fermentolyseEnd}</span><span>Add salt + bassinage + yeast</span>
+      <span class="time">${s.sf1}</span><span>Stretch &amp; fold #1</span>
+      <span class="time">${s.sf2}</span><span>Stretch &amp; fold #2</span>
+      <span class="time">${s.cf1}</span><span>Coil fold #1</span>
+      <span class="time">${s.cf2}</span><span>Coil fold #2 → rest</span>
+      <span class="time">${s.fridgeIn}</span><span>Fridge @ 2°C (18–24 hrs)</span>
+      <span class="time">${s.nextDay}</span><span>Preshape → shape → proof</span>
+      <span class="time">${s.bakeTime}</span><span>Score → bake</span>`;
+  } else {
+    scheduleHtml = `
+      <span class="time">9:00 PM</span><span>Mix poolish → room temp overnight</span>
+      <span class="time">${s.mixTime}</span><span>Mix fermentolyse (${s.poolishTime})</span>
+      <span class="time">${s.fermentolyseEnd}</span><span>Add salt + bassinage + yeast</span>
+      <span class="time">${s.sf1}</span><span>Stretch &amp; fold #1</span>
+      <span class="time">${s.sf2}</span><span>Stretch &amp; fold #2</span>
+      <span class="time">${s.cf1}</span><span>Coil fold #1</span>
+      <span class="time">${s.cf2}</span><span>Coil fold #2 → rest</span>
+      <span class="time">${s.sdPreshape}</span><span>Preshape → bench rest 25 min</span>
+      <span class="time">${s.sdShape}</span><span>Final shape → proof ${proofTime}</span>
+      <span class="time">${s.sdBake}</span><span>Score → bake → done by ${s.sdDone}</span>`;
+  }
+
+  let steps = '', n = 1;
+
+  steps += stepStart(n++, 'Poolish', `9:00 PM · ${s.poolishTime}`, 's1');
+  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover, leave at room temp overnight (${s.poolishTime}).</p>`;
+  steps += tip(
+    `Ready when: bubbly, slightly domed, yeasty-sweet smell. ${season === 'summer' ? 'May peak in 8 hrs — check early.' : 'May need the full 16 hrs — be patient.'} Collapsed and boozy = overripe but still usable.`,
+    'How to tell when it\'s ready'
+  );
+  steps += stepEnd;
+
+  steps += stepStart(n++, 'Fermentolyse', `${s.mixTime} · ${season === 'winter' ? '45' : '30'} min rest`, 's2');
+  steps += `<p>Add fermentolyse water to a large bowl, then the poolish, then the remaining flour (<strong>hold back the ${r(bassinage)}g bassinage</strong>). Mix by hand — pinch and fold until no dry flour remains. Cover, rest ${season === 'winter' ? '45' : '30'} minutes.</p>`;
+  steps += `<p class="meta">Fermentolyse hydration: ${fermentolyseHyd}%</p>`;
+  steps += tip(
+    'Why fermentolyse? The poolish yeast is already in the mix, getting a head start on fermentation during the rest. Builds flavour and structure simultaneously.',
+    'Why fermentolyse over autolyse?'
+  );
+  steps += stepEnd;
+
+  steps += stepStart(n++, 'Salt, Yeast & Bassinage', s.fermentolyseEnd, 's3');
+  steps += `<p>Sprinkle salt and remaining yeast over dough. Pour <strong>${r(bassinage)}g bassinage</strong> on top. Pinch and fold 3–4 min until absorbed and cohesive. Cover and rest <strong>${season === 'winter' ? '45' : '30'} min</strong> before your first fold.</p>`;
+  steps += tip(
+    'Dough will feel like it\'s falling apart when you add the water. Keep pinching — it comes together in 2–3 min. Wet your hands.',
+    'Dough falling apart? That\'s normal'
+  );
+  steps += stepEnd;
+
+  steps += stepStart(n++, 'Bulk Fermentation', s.bulkTime, 's4');
+  steps += `<p>4 folds at 30-min intervals:</p>
+    <table>
+      <tr><td>${s.sf1}</td><td><strong>Stretch &amp; fold #1</strong> — 4 sides</td></tr>
+      <tr><td>${s.sf2}</td><td><strong>Stretch &amp; fold #2</strong> — dough should feel tighter</td></tr>
+      <tr><td>${s.cf1}</td><td><strong>Coil fold #1</strong> — lift from middle, let ends fold under</td></tr>
+      <tr><td>${s.cf2}</td><td><strong>Coil fold #2</strong> — dough should be smooth and pillowy</td></tr>
+    </table>
+    <p>After last fold, ${isRetard ? 'cover and go straight into the fridge — the cold retard finishes the bulk for you.' : `rest undisturbed until dough has grown <strong>${growthTarget} from the start of bulk</strong> (not from the last fold). It should be airy, jiggly, and show bubbles on the sides.`}</p>`;
+  steps += tip(
+    isRetard ? s.fridgeNote : `Same-day: push bulk further (${growthTarget}) since there's no cold retard to continue fermentation. ${s.samedayNote}`,
+    isRetard ? 'Getting it into the fridge' : 'Same-day bulk tips'
+  );
+  steps += stepEnd;
+
+  if (isRetard) {
+    steps += stepStart(n++, 'Cold Retard', `${s.fridgeIn} → ${s.nextDay}`, 's5');
+    steps += `<p>Cover bowl tightly. Fridge at <span class="temp">2°C</span> for <strong>20–24 hrs</strong>. 18–36 hrs is fine at 2°C — sweet spot is 20–24.</p>`;
+    steps += tip(
+      'Dough may rise a little in the fridge — normal. If it more than doubles, bulk went too far or fridge is too warm.',
+      'How much rise is normal?'
+    );
+    steps += stepEnd;
+  }
+
+  steps += stepStart(n++, 'Preshape', isRetard ? 'Next day' : s.sdPreshape, 's6');
+  steps += `<p>Flour bench. Tip dough out gently. Divide into <strong>${count} × ~${r(totalDough / count)}g</strong>. Preshape into loose rounds, flip seam-down, drag with bench scraper for tension. Cover, bench rest <strong>20–25 min</strong>.</p>`;
+  steps += tip(
+    isRetard
+      ? 'Cold dough is firm and easy to handle. Don\'t let it warm up too much before shaping.'
+      : 'Room-temp dough is slacker and stickier. Use more bench flour and work quickly.',
+    isRetard ? 'Working with cold dough' : 'Handling sticky dough'
+  );
+  steps += stepEnd;
+
+  steps += stepStart(n++, 'Final Shape', '', 's7');
+  steps += `<p>Flip seam-up. Pat into rectangle. Fold top third down, seal. Bottom third up, seal. Roll seam-down, elongate to ~35–40cm. Taper ends. Transfer seam-up onto floured couche.</p>`;
+  steps += stepEnd;
+
+  steps += stepStart(n++, 'Final Proof', proofTime, 's8');
+  steps += `<p>Cover couche. Proof at room temp <strong>${proofTime}</strong>. Preheat oven to <span class="temp">250°C</span> with baking stone and steam tray.</p>`;
+  steps += tip(
+    isRetard
+      ? `Poke test: floured finger, slow spring-back with slight indent = ready. ${season === 'summer' ? 'Watch carefully — overproofs fast.' : 'Be patient — cold dough needs time.'}`
+      : `Longer proof since dough is at room temp. ${s.samedayNote} Poke test: slow spring-back with slight indent.`,
+    'When is it ready? The poke test'
+  );
+  steps += stepEnd;
+
+  steps += stepStart(n++, 'Score & Bake', '22–25 min', 's9');
+  steps += `<p>Score 3–5 overlapping cuts at shallow angle. Load onto stone, pour ~1 cup boiling water into steam tray, close door fast.</p>
+    <table>
+      <tr><td><span class="temp">250°C</span> + steam</td><td>12 min</td></tr>
+      <tr><td>Remove steam, vent</td><td>—</td></tr>
+      <tr><td><span class="temp">230°C</span> dry</td><td>10–13 min</td></tr>
+    </table>
+    <p>Cool on wire rack <strong>20 min</strong> before cutting.</p>`;
+  steps += tip(
+    'Crust softens as it cools — normal, it crisps back up. For extra crackle, oven off, door ajar, 5 min.',
+    'Getting a crackly crust'
+  );
+  steps += stepEnd;
+
+  document.getElementById('recipe').innerHTML = `
+    <div class="white-panel">
+      <h2>Formula — ${count} × ${pieceWeight}g</h2>
+      <p class="formula-meta"><strong>${season === 'summer' ? 'Summer' : 'Winter'}</strong> · <strong>${isRetard ? 'Cold Retard' : 'Same Day'}</strong> · Ambient <span class="temp">${s.ambient}</span> · DDT <span class="temp">${s.ddt}°C</span> · Hydration <strong>${(baseHyd*100).toFixed(0)}%</strong></p>
+      <h3>Poolish (${(POOLISH_PCT*100).toFixed(0)}% of flour)</h3>
+      <table>
+        <tr><th>Ingredient</th><th>Amount</th></tr>
+        ${blendA > 0 ? `<tr><td>${fAName}</td><td class="amt">${r(poolishFlourA)}g</td></tr>` : ''}
+        ${blendB > 0 ? `<tr><td>${fBName}</td><td class="amt">${r(poolishFlourB)}g</td></tr>` : ''}
+        <tr><td>Water <span style="color:var(--muted)">(room temp)</span></td><td class="amt">${r(poolishWater)}g</td></tr>
+        <tr><td>Instant Dry Yeast</td><td class="amt">${poolishYeast.toFixed(1)}g</td></tr>
+      </table>
+      <h3>Final Dough</h3>
+      <table>
+        <tr><th>Ingredient</th><th>Amount</th></tr>
+        <tr><td>All poolish</td><td class="amt">${r(poolishFlour + poolishWater)}g</td></tr>
+        ${blendA > 0 ? `<tr><td>${fAName}</td><td class="amt">${r(finalFlourA)}g</td></tr>` : ''}
+        ${blendB > 0 ? `<tr><td>${fBName}</td><td class="amt">${r(finalFlourB)}g</td></tr>` : ''}
+        <tr><td>Water <span style="color:var(--muted)">(fermentolyse @ ${fermentolyseHyd}%)</span></td><td class="amt">${r(fermentolyseWater)}g</td></tr>
+        <tr><td>Water <span style="color:var(--muted)">(bassinage)</span></td><td class="amt">${r(bassinage)}g</td></tr>
+        <tr><td>Fine Salt</td><td class="amt">${salt.toFixed(1)}g</td></tr>
+        <tr><td>Instant Dry Yeast</td><td class="amt">${finalYeast.toFixed(1)}g</td></tr>
+      </table>
+      <h3>Totals</h3>
+      <table>
+        <tr><td>Total flour</td><td class="amt">${r(totalFlour)}g</td></tr>
+        <tr><td>Total water</td><td class="amt">${r(totalWater)}g</td></tr>
+        <tr><td>Total dough</td><td class="amt">~${r(totalDough)}g</td></tr>
+      </table>
+    </div>
+    <div class="white-panel">
+      <h2 class="collapsible-header${scheduleOpen ? ' open' : ''}" onclick="toggleCollapsible(this)">Schedule</h2>
+      <div class="collapsible-body${scheduleOpen ? ' open' : ''}">
+        <div class="schedule">${scheduleHtml}</div>
+      </div>
+    </div>
+    <div class="white-panel">
+      <h2>Method</h2>
+      ${steps}
+    </div>`;
+}
+update();
+</script>
+<div class="modal-overlay" id="compareModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('compareModal').classList.remove('open')">×</button>
+    <h2 style="margin-top:0">Cold Retard vs Same Day</h2>
+    <div class="compare">
+      <div>
+        <h4>Cold Retard</h4>
+        <ul>
+          <li>More complex, nutty flavour</li>
+          <li>Better crust blistering &amp; browning</li>
+          <li>More open, irregular crumb</li>
+          <li>Cold dough = easier to shape</li>
+          <li>Takes 2 days total</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Same Day</h4>
+        <ul>
+          <li>Good baguettes, milder wheaty flavour</li>
+          <li>Decent crust, less blistering</li>
+          <li>Tighter, more even crumb</li>
+          <li>Warm dough = stickier to shape</li>
+          <li>Done in ~5–6 hrs after poolish</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
