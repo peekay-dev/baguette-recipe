@@ -19,8 +19,14 @@
   .control-row:last-child { margin-bottom: 0; }
   .field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
   .field label { font-size: 0.7em; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-  select, input[type=number] { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 0.95em; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: transparent; width: 100%; min-height: 44px; color: var(--text); }
+  select, input[type=number], input[type=time] { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 0.95em; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: transparent; width: 100%; min-height: 44px; color: var(--text); }
   select:focus, input:focus { outline: none; border-color: var(--accent); }
+  /* Force number input spinners to show on mobile */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 44px;
+  }
   .toggle { display: flex; gap: 0; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
   .toggle button { flex: 1; padding: 8px 14px; border: none; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.85em; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.2s; min-height: 44px; letter-spacing: 0.3px; }
   .toggle button.active { background: var(--accent); color: var(--bg); }
@@ -29,6 +35,10 @@
   .blend-input:focus { outline: none; border-color: var(--accent); }
   input[type=range] { flex: 1; accent-color: var(--accent); min-height: 44px; }
   .num-field { max-width: 76px; flex: 0 0 76px; }
+  .stepper { display: flex; align-items: center; gap: 0px; border: 1px solid var(--border); border-radius: 4px; overflow:hidden; }
+  .stepper input[type=number] { border: none; border-radius: 0; text-align: center; -moz-appearance: textfield; padding: 8px 2px; }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper button { width: 38px; min-height: 44px; border: none; background: var(--highlight); color: var(--accent); font-size: 1.2em; cursor: pointer; flex-shrink:0; font-family: 'Inter', sans-serif ;}
   .content { padding: 0 20px; }
   .white-panel { background: var(--white); border-radius: 8px; padding: 20px; margin-bottom: 12px; }
   table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 0.9em; }
@@ -61,7 +71,8 @@
   .collapsible-header::after { content: '+'; font-size: 1.1em; color: var(--accent); }
   .collapsible-header.open::after { content: '−'; }
   .collapsible-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-  .collapsible-body.open { max-height: 600px; }
+  .collapsible-body.open { max-height: 800px; }
+  .sched-day { font-size: 0.72em; color: var(--muted); font-weight: 400; }
   .schedule { display: grid; grid-template-columns: auto 1fr; gap: 1px 16px; font-size: 0.9em; padding-top: 8px; }
   .schedule .time { font-weight: 500; white-space: nowrap; color: var(--accent); }
   .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; font-size: 0.85em; }
@@ -74,7 +85,7 @@
   .modal-overlay.open { display: flex; }
   .modal { background: #fff; border-radius: 8px; padding: 20px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
   .modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none; font-size: 1.3em; cursor: pointer; color: var(--muted); }
-  .info-btn { background: none; border: 1px solid var(--border); border-radius: 50%; width: 32px; height: 32px; font-size: 0.85em; cursor: pointer; color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .info-btn { background: none; border: 1px solid var(--border); border-radius: 50%; width: 18px; height: 18px; font-size: 0.6em; cursor: pointer; color: var(--accent); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; vertical-align: middle; margin-left: 4px; padding: 0; line-height: 1; }
   .method-row { display: flex; gap: 8px; align-items: end; flex: 1; min-width: 0; }
   .meta { font-size: 0.78em; color: var(--muted); margin-top: 3px; }
   .formula-meta { font-size: 0.82em; color: var(--muted); letter-spacing: 0.3px; }
@@ -112,27 +123,38 @@
     </div>
     <div class="method-row">
       <div class="field">
-        <label>Method</label>
+        <label>Method <button class="info-btn" onclick="event.stopPropagation();document.getElementById('compareModal').classList.add('open')" title="Compare methods">?</button></label>
         <div class="toggle" id="methodToggle">
           <button class="active" data-v="retard" onclick="setMethod('retard')">Cold Retard</button>
           <button data-v="sameday" onclick="setMethod('sameday')">Same Day</button>
         </div>
       </div>
-      <button class="info-btn" onclick="document.getElementById('compareModal').classList.add('open')" title="Compare methods">?</button>
     </div>
   </div>
   <div class="control-row">
     <div class="field">
       <label>Quantity</label>
-      <input type="number" id="count" value="4" min="1" max="12" onchange="update()">
+       <div class="stepper">
+        <button onclick="step('count',-1)">-</button>
+        <input type="number" id="count" value="4", min="1", max="12", onchange="update()">
+        <button onclick="step('count', 1)">+</button>
+       </div>
     </div>
     <div class="field">
       <label>Weight each (g)</label>
-      <input type="number" id="weight" value="250" min="200" max="500" step="10" onchange="update()">
+        <div class="stepper">
+          <button onclick="step('weight',-1)">-</button>
+          <input type="number" id="weight" value="4", min="1", max="12", onchange="update()">
+          <button onclick="step('weight', 1)">+</button>
+        </div>
     </div>
     <div class="field">
       <label>Hydration %</label>
-      <input type="number" id="hydration" value="75" min="65" max="85" step="1" onchange="update()">
+      <div class="stepper">
+        <button onclick="step('hydration',-1)">-</button>
+        <input type="number" id="hydration" value="4", min="1", max="12", onchange="update()">
+        <button onclick="step('hydration', 1)">+</button>
+      </div>
     </div>
   </div>
   <div class="control-row">
@@ -178,7 +200,23 @@
 let season = 'summer', method = 'retard';
 const doneSteps = new Set();
 let scheduleOpen = false;
+let poolishStartValue = '21:00';
 const POOLISH_PCT = 0.50, BASSINAGE_PCT = 0.03;
+
+function fmt(absMin) {
+  const norm = ((absMin % 1440) + 1440) % 1440;
+  const h = Math.floor(norm / 60), m = norm % 60;
+  const ap = h >= 12 ? 'PM' : 'AM';
+  return `${h % 12 || 12}:${m.toString().padStart(2, '0')} ${ap}`;
+}
+function fmtSched(absMin) {
+  const t = fmt(absMin);
+  const day = Math.floor(absMin / 1440);
+  if (day === 0) return t;
+  if (day === 1) return `${t} <span class="sched-day">+1d</span>`;
+  return `${t} <span class="sched-day">+${day}d</span>`;
+}
+function setPoolishStart(val) { poolishStartValue = val; update(); }
 
 const S = {
   summer: {
@@ -186,22 +224,14 @@ const S = {
     bulkTime: '2–2.5 hrs', proofTime: '30–45 min', samedayProof: '60–75 min', ddt: 23,
     fridgeNote: 'Dough warms fast — get it into the fridge promptly after bulk.',
     samedayNote: 'In summer heat, watch the proof carefully — it can run away from you in 45 min.',
-    mixTime: '6:00 AM', fermentolyseEnd: '6:30 AM',
-    sf1: '7:00 AM', sf2: '7:30 AM', cf1: '8:00 AM', cf2: '8:30 AM',
-    bulkEnd: '8:45 AM', fridgeIn: '8:45 AM',
-    nextDay: '7:00 AM next day (~22 hrs)', bakeTime: '~8:30 AM',
-    sdPreshape: '8:45 AM', sdShape: '9:10 AM', sdBake: '~10:15 AM', sdDone: '~10:45 AM'
+    foldInterval: 30, poolishOffsetHrs: 9, retardHrs: 22, samedayProofMid: 67
   },
   winter: {
     ambient: '10–18°C', waterTemp: '28–32°C', poolishYeast: 0.15, poolishTime: '12–16 hrs',
     bulkTime: '3–3.5 hrs', proofTime: '30–45 min', samedayProof: '90–120 min', ddt: 25,
     fridgeNote: 'Cold dough takes longer to wake up — give extra proof time after shaping.',
     samedayNote: 'Winter dough is sluggish — don\'t rush the proof. It may need the full 2 hours.',
-    mixTime: '9:00 AM', fermentolyseEnd: '9:45 AM',
-    sf1: '10:30 AM', sf2: '11:15 AM', cf1: '12:00 PM', cf2: '12:45 PM',
-    bulkEnd: '1:00 PM', fridgeIn: '1:00 PM',
-    nextDay: '8:00 AM next day (~19 hrs)', bakeTime: '~9:45 AM',
-    sdPreshape: '1:00 PM', sdShape: '1:25 PM', sdBake: '~3:00 PM', sdDone: '~3:30 PM'
+    foldInterval: 45, poolishOffsetHrs: 12, retardHrs: 19, samedayProofMid: 105
   }
 };
 
@@ -262,6 +292,13 @@ function toggleCollapsible(el) {
   el.nextElementSibling.classList.toggle('open');
 }
 
+function step(id, delta) {
+  const el = document.getElementById(id);
+  const v = Math.min(+el.max, Math.max(+el.min, +el.value + delta));
+  el.value = v;
+  update();
+}
+
 function update() {
   const count = Math.max(1, +document.getElementById('count').value);
   const pieceWeight = +document.getElementById('weight').value;
@@ -297,44 +334,64 @@ function update() {
   const proofTime = isRetard ? s.proofTime : s.samedayProof;
   const growthTarget = isRetard ? '50–60%' : '70–80%';
 
+  const [ph, pmins] = poolishStartValue.split(':').map(Number);
+  const poolishMins = ph * 60 + pmins;
+  const foldInt = s.foldInterval;
+  const T = {};
+  T.poolish = poolishMins;
+  T.mix = poolishMins + s.poolishOffsetHrs * 60;
+  T.fermentolyseEnd = T.mix + foldInt;
+  T.sf1 = T.fermentolyseEnd + foldInt;
+  T.sf2 = T.sf1 + foldInt;
+  T.cf1 = T.sf2 + foldInt;
+  T.cf2 = T.cf1 + foldInt;
+  T.bulkEnd = T.cf2 + 15;
+  T.fridgeIn = T.bulkEnd;
+  T.sdPreshape = T.bulkEnd;
+  T.sdShape = T.sdPreshape + 25;
+  T.sdBake = T.sdShape + s.samedayProofMid;
+  T.sdDone = T.sdBake + 30;
+  T.retardOut = T.fridgeIn + s.retardHrs * 60;
+  T.bake = T.retardOut + 90;
+
   let scheduleHtml;
   if (isRetard) {
     scheduleHtml = `
-      <span class="time">9:00 PM</span><span>Mix poolish → room temp overnight</span>
-      <span class="time">${s.mixTime}</span><span>Mix fermentolyse (${s.poolishTime})</span>
-      <span class="time">${s.fermentolyseEnd}</span><span>Add salt + bassinage + yeast</span>
-      <span class="time">${s.sf1}</span><span>Stretch &amp; fold #1</span>
-      <span class="time">${s.sf2}</span><span>Stretch &amp; fold #2</span>
-      <span class="time">${s.cf1}</span><span>Coil fold #1</span>
-      <span class="time">${s.cf2}</span><span>Coil fold #2 → rest</span>
-      <span class="time">${s.fridgeIn}</span><span>Fridge @ 2°C (18–24 hrs)</span>
-      <span class="time">${s.nextDay}</span><span>Preshape → shape → proof</span>
-      <span class="time">${s.bakeTime}</span><span>Score → bake</span>`;
+      <span class="time">${fmtSched(T.poolish)}</span><span>Mix poolish → room temp overnight</span>
+      <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${s.poolishTime})</span>
+      <span class="time">${fmtSched(T.fermentolyseEnd)}</span><span>Add salt + bassinage + yeast</span>
+      <span class="time">${fmtSched(T.sf1)}</span><span>Stretch &amp; fold #1</span>
+      <span class="time">${fmtSched(T.sf2)}</span><span>Stretch &amp; fold #2</span>
+      <span class="time">${fmtSched(T.cf1)}</span><span>Coil fold #1</span>
+      <span class="time">${fmtSched(T.cf2)}</span><span>Coil fold #2 → rest</span>
+      <span class="time">${fmtSched(T.fridgeIn)}</span><span>Fridge @ 2°C (18–24 hrs)</span>
+      <span class="time">${fmtSched(T.retardOut)}</span><span>Preshape → shape → proof</span>
+      <span class="time">${fmtSched(T.bake)}</span><span>Score → bake</span>`;
   } else {
     scheduleHtml = `
-      <span class="time">9:00 PM</span><span>Mix poolish → room temp overnight</span>
-      <span class="time">${s.mixTime}</span><span>Mix fermentolyse (${s.poolishTime})</span>
-      <span class="time">${s.fermentolyseEnd}</span><span>Add salt + bassinage + yeast</span>
-      <span class="time">${s.sf1}</span><span>Stretch &amp; fold #1</span>
-      <span class="time">${s.sf2}</span><span>Stretch &amp; fold #2</span>
-      <span class="time">${s.cf1}</span><span>Coil fold #1</span>
-      <span class="time">${s.cf2}</span><span>Coil fold #2 → rest</span>
-      <span class="time">${s.sdPreshape}</span><span>Preshape → bench rest 25 min</span>
-      <span class="time">${s.sdShape}</span><span>Final shape → proof ${proofTime}</span>
-      <span class="time">${s.sdBake}</span><span>Score → bake → done by ${s.sdDone}</span>`;
+      <span class="time">${fmtSched(T.poolish)}</span><span>Mix poolish → room temp overnight</span>
+      <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${s.poolishTime})</span>
+      <span class="time">${fmtSched(T.fermentolyseEnd)}</span><span>Add salt + bassinage + yeast</span>
+      <span class="time">${fmtSched(T.sf1)}</span><span>Stretch &amp; fold #1</span>
+      <span class="time">${fmtSched(T.sf2)}</span><span>Stretch &amp; fold #2</span>
+      <span class="time">${fmtSched(T.cf1)}</span><span>Coil fold #1</span>
+      <span class="time">${fmtSched(T.cf2)}</span><span>Coil fold #2 → rest</span>
+      <span class="time">${fmtSched(T.sdPreshape)}</span><span>Preshape → bench rest 25 min</span>
+      <span class="time">${fmtSched(T.sdShape)}</span><span>Final shape → proof ${proofTime}</span>
+      <span class="time">${fmtSched(T.sdBake)}</span><span>Score → bake → done by ${fmt(T.sdDone)}</span>`;
   }
 
   let steps = '', n = 1;
 
-  steps += stepStart(n++, 'Poolish', `9:00 PM · ${s.poolishTime}`, 's1');
-  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover, leave at room temp overnight (${s.poolishTime}).</p>`;
+  steps += stepStart(n++, 'Poolish', `${fmt(T.poolish)} · ${s.poolishTime}`, 's1');
+  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover, ${season === 'summer' ? 'leave at room temp for 3-4 hrs and then in the fridge overnight' : 'leave at room temp overnight (8-10 hrs)'} (${s.poolishTime}).</p>`;
   steps += tip(
     `Ready when: bubbly, slightly domed, yeasty-sweet smell. ${season === 'summer' ? 'May peak in 8 hrs — check early.' : 'May need the full 16 hrs — be patient.'} Collapsed and boozy = overripe but still usable.`,
     'How to tell when it\'s ready'
   );
   steps += stepEnd;
 
-  steps += stepStart(n++, 'Fermentolyse', `${s.mixTime} · ${season === 'winter' ? '45' : '30'} min rest`, 's2');
+  steps += stepStart(n++, 'Fermentolyse', `${fmt(T.mix)} · ${foldInt} min rest`, 's2');
   steps += `<p>Add fermentolyse water to a large bowl, then the poolish, then the remaining flour (<strong>hold back the ${r(bassinage)}g bassinage</strong>). Mix by hand — pinch and fold until no dry flour remains. Cover, rest ${season === 'winter' ? '45' : '30'} minutes.</p>`;
   steps += `<p class="meta">Fermentolyse hydration: ${fermentolyseHyd}%</p>`;
   steps += tip(
@@ -343,7 +400,7 @@ function update() {
   );
   steps += stepEnd;
 
-  steps += stepStart(n++, 'Salt, Yeast & Bassinage', s.fermentolyseEnd, 's3');
+  steps += stepStart(n++, 'Salt, Yeast & Bassinage', fmt(T.fermentolyseEnd), 's3');
   steps += `<p>Sprinkle salt and remaining yeast over dough. Pour <strong>${r(bassinage)}g bassinage</strong> on top. Pinch and fold 3–4 min until absorbed and cohesive. Cover and rest <strong>${season === 'winter' ? '45' : '30'} min</strong> before your first fold.</p>`;
   steps += tip(
     'Dough will feel like it\'s falling apart when you add the water. Keep pinching — it comes together in 2–3 min. Wet your hands.',
@@ -352,12 +409,12 @@ function update() {
   steps += stepEnd;
 
   steps += stepStart(n++, 'Bulk Fermentation', s.bulkTime, 's4');
-  steps += `<p>4 folds at 30-min intervals:</p>
+  steps += `<p>4 folds at ${foldInt}-min intervals:</p>
     <table>
-      <tr><td>${s.sf1}</td><td><strong>Stretch &amp; fold #1</strong> — 4 sides</td></tr>
-      <tr><td>${s.sf2}</td><td><strong>Stretch &amp; fold #2</strong> — dough should feel tighter</td></tr>
-      <tr><td>${s.cf1}</td><td><strong>Coil fold #1</strong> — lift from middle, let ends fold under</td></tr>
-      <tr><td>${s.cf2}</td><td><strong>Coil fold #2</strong> — dough should be smooth and pillowy</td></tr>
+      <tr><td>${fmt(T.sf1)}</td><td><strong>Stretch &amp; fold #1</strong> — 4 sides</td></tr>
+      <tr><td>${fmt(T.sf2)}</td><td><strong>Stretch &amp; fold #2</strong> — dough should feel tighter</td></tr>
+      <tr><td>${fmt(T.cf1)}</td><td><strong>Coil fold #1</strong> — lift from middle, let ends fold under</td></tr>
+      <tr><td>${fmt(T.cf2)}</td><td><strong>Coil fold #2</strong> — dough should be smooth and pillowy</td></tr>
     </table>
     <p>After last fold, ${isRetard ? 'cover and go straight into the fridge — the cold retard finishes the bulk for you.' : `rest undisturbed until dough has grown <strong>${growthTarget} from the start of bulk</strong> (not from the last fold). It should be airy, jiggly, and show bubbles on the sides.`}</p>`;
   steps += tip(
@@ -367,7 +424,7 @@ function update() {
   steps += stepEnd;
 
   if (isRetard) {
-    steps += stepStart(n++, 'Cold Retard', `${s.fridgeIn} → ${s.nextDay}`, 's5');
+    steps += stepStart(n++, 'Cold Retard', `${fmt(T.fridgeIn)} → ${fmtSched(T.retardOut)}`, 's5');
     steps += `<p>Cover bowl tightly. Fridge at <span class="temp">2°C</span> for <strong>20–24 hrs</strong>. 18–36 hrs is fine at 2°C — sweet spot is 20–24.</p>`;
     steps += tip(
       'Dough may rise a little in the fridge — normal. If it more than doubles, bulk went too far or fridge is too warm.',
@@ -376,7 +433,7 @@ function update() {
     steps += stepEnd;
   }
 
-  steps += stepStart(n++, 'Preshape', isRetard ? 'Next day' : s.sdPreshape, 's6');
+  steps += stepStart(n++, 'Preshape', isRetard ? fmtSched(T.retardOut) : fmt(T.sdPreshape), 's6');
   steps += `<p>Flour bench. Tip dough out gently. Divide into <strong>${count} × ~${r(totalDough / count)}g</strong>. Preshape into loose rounds, flip seam-down, drag with bench scraper for tension. Cover, bench rest <strong>20–25 min</strong>.</p>`;
   steps += tip(
     isRetard
@@ -447,6 +504,10 @@ function update() {
     <div class="white-panel">
       <h2 class="collapsible-header${scheduleOpen ? ' open' : ''}" onclick="toggleCollapsible(this)">Schedule</h2>
       <div class="collapsible-body${scheduleOpen ? ' open' : ''}">
+        <div style="display:flex;align-items:center;gap:8px;padding-top:10px;padding-bottom:4px">
+          <label style="font-size:0.7em;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;flex-shrink:0">Poolish start</label>
+          <input type="time" value="${poolishStartValue}" onchange="setPoolishStart(this.value)" style="width:auto;min-height:34px;padding:4px 8px;font-size:0.88em;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--text);font-family:inherit">
+        </div>
         <div class="schedule">${scheduleHtml}</div>
       </div>
     </div>
