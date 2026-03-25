@@ -19,7 +19,8 @@
   .control-row:last-child { margin-bottom: 0; }
   .field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
   .field label { font-size: 0.7em; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-  select, input[type=number], input[type=time] { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 16px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: transparent; width: 100%; height: 44px; line-height: 1.2; color: var(--text); -webkit-appearance: none; appearance: none; }
+  select, input[type=number], input[type=time] { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 16px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: transparent; width: 100%; height: 44px; line-height: 1.2; color: var(--text); }
+  input[type=number], input[type=time] { -webkit-appearance: none; appearance: none; }
   select:focus, input:focus { outline: none; border-color: var(--accent); }
   /* Force number input spinners to show on mobile — stepper only */
   .stepper input[type=number]::-webkit-inner-spin-button,
