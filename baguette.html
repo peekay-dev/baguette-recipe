@@ -136,7 +136,7 @@
       <label>Quantity</label>
        <div class="stepper">
         <button onclick="step('count',-1)">-</button>
-        <input type="number" id="count" value="4", min="1", max="12", onchange="update()">
+        <input type="number" id="count" value="4", min="1", onchange="update()">
         <button onclick="step('count', 1)">+</button>
        </div>
     </div>
@@ -144,7 +144,7 @@
       <label>Weight each (g)</label>
         <div class="stepper">
           <button onclick="step('weight',-1)">-</button>
-          <input type="number" id="weight" value="4", min="1", max="12", onchange="update()">
+          <input type="number" id="weight" value="250", min="150", max="500", onchange="update()">
           <button onclick="step('weight', 1)">+</button>
         </div>
     </div>
@@ -152,7 +152,7 @@
       <label>Hydration %</label>
       <div class="stepper">
         <button onclick="step('hydration',-1)">-</button>
-        <input type="number" id="hydration" value="4", min="1", max="12", onchange="update()">
+        <input type="number" id="hydration" value="75", min="50", max="", onchange="update()">
         <button onclick="step('hydration', 1)">+</button>
       </div>
     </div>
@@ -257,6 +257,46 @@ function setMethod(m) {
     : 'Hand-mixed · same-day bake · season-adjusted';
   update();
 }
+
+function savePrefs() {
+  try {
+    localStorage.setItem('baguette_prefs', JSON.stringify({
+      season, method, poolishStartValue,
+      count: document.getElementById('count').value,
+      weight: document.getElementById('weight').value,
+      hydration: document.getElementById('hydration').value,
+      flourA: document.getElementById('flourA').value,
+      flourB: document.getElementById('flourB').value,
+      pctA: document.getElementById('pctA').value
+    }));
+  } catch(e) {}
+}
+
+function loadPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem('baguette_prefs') || 'null');
+    if (!p) return;
+    if (p.count)   document.getElementById('count').value = p.count;
+    if (p.weight)  document.getElementById('weight').value = p.weight;
+    if (p.hydration) document.getElementById('hydration').value = p.hydration;
+    if (p.flourA)  document.getElementById('flourA').value = p.flourA;
+    if (p.flourB)  document.getElementById('flourB').value = p.flourB;
+    if (p.pctA != null) {
+      document.getElementById('pctA').value = p.pctA;
+      document.getElementById('pctB').value = 100 - p.pctA;
+      document.getElementById('blend').value = p.pctA;
+    }
+    if (p.poolishStartValue) poolishStartValue = p.poolishStartValue;
+    if (p.season) { season = p.season; document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === season)); }
+    if (p.method) {
+      method = p.method;
+      document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === method));
+      document.getElementById('subtitle').textContent = method === 'retard'
+        ? 'Hand-mixed · cold-retarded · season-adjusted'
+        : 'Hand-mixed · same-day bake · season-adjusted';
+    }
+  } catch(e) {}
+}
 function r(v) { return Math.round(v); }
 
 function tip(text, hint) {
@@ -300,6 +340,7 @@ function step(id, delta) {
 }
 
 function update() {
+  savePrefs();
   const count = Math.max(1, +document.getElementById('count').value);
   const pieceWeight = +document.getElementById('weight').value;
   const blendA = +document.getElementById('blend').value;
@@ -516,6 +557,7 @@ function update() {
       ${steps}
     </div>`;
 }
+loadPrefs();
 update();
 </script>
 <div class="modal-overlay" id="compareModal" onclick="if(event.target===this)this.classList.remove('open')">
