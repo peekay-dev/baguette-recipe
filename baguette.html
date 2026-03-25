@@ -28,7 +28,7 @@
     height: 44px;
   }
   .toggle { display: flex; gap: 0; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
-  .toggle button { flex: 1; padding: 8px 14px; border: none; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.85em; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.2s; min-height: 44px; letter-spacing: 0.3px; }
+  .toggle button { flex: 1; padding: 8px 14px; border: none; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.85em; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.2s; min-height: 44px; letter-spacing: 0.3px; white-space: nowrap; }
   .toggle button.active { background: var(--accent); color: var(--bg); }
   .blend-row { display: flex; gap: 6px; align-items: center; }
   .blend-input { width: 52px; text-align: center; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.88em; padding: 6px 2px; border: 1px solid var(--border); border-radius: 4px; background: transparent; color: var(--accent); min-height: 36px; }
@@ -99,9 +99,9 @@
     .white-panel { padding: 16px; }
     .control-row { flex-wrap: wrap; gap: 8px; }
     .control-row .field { min-width: calc(50% - 4px); }
-    .control-row .num-field { min-width: 0; flex: 1; max-width: none; }
-    .method-row { flex-wrap: wrap;}
-    .method-row .field { min-width:  calc(100% - 40px);}
+    .control-row .num-field { min-width: 0; flex: 0 0 72px; max-width: 72px; }
+    .method-row { flex-wrap: wrap; }
+    .method-row .field { min-width: 100%; }
     .blend-row { flex-wrap: nowrap; }
   }
 </style>
