@@ -28,7 +28,7 @@
     height: 44px;
   }
   /* Hide spinners on plain % fields so they match select height */
-  .num-field input[type=number] { -webkit-appearance: none; -moz-appearance: textfield; }
+  .num-field input[type=number] { -webkit-appearance: none; -moz-appearance: textfield; height: 44px; min-height: 0; padding-top: 0; padding-bottom: 0; }
   .num-field input[type=number]::-webkit-inner-spin-button,
   .num-field input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   .toggle { display: flex; gap: 0; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
@@ -430,7 +430,7 @@ function update() {
   let steps = '', n = 1;
 
   steps += stepStart(n++, 'Poolish', `${fmt(T.poolish)} · ${s.poolishTime}`, 's1');
-  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover, ${season === 'summer' ? 'leave at room temp for 3-4 hrs and then in the fridge overnight' : 'leave at room temp overnight (8-10 hrs)'} (${s.poolishTime}).</p>`;
+  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover, ${season === 'summer' ? 'leave at room temp for 3-4 hrs and then in the fridge overnight' : 'leave at room temp overnight (8-12 hrs)'} (${s.poolishTime}).</p>`;
   steps += tip(
     `Ready when: bubbly, slightly domed, yeasty-sweet smell. ${season === 'summer' ? 'May peak in 8 hrs — check early.' : 'May need the full 16 hrs — be patient.'} Collapsed and boozy = overripe but still usable.`,
     'How to tell when it\'s ready'
