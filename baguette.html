@@ -19,7 +19,7 @@
   .control-row:last-child { margin-bottom: 0; }
   .field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
   .field label { font-size: 0.7em; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-  select, input[type=number], input[type=time] { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 0.95em; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: transparent; width: 100%; min-height: 44px; color: var(--text); }
+  select, input[type=number], input[type=time] { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 16px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: transparent; width: 100%; height: 44px; line-height: 1.2; color: var(--text); -webkit-appearance: none; appearance: none; }
   select:focus, input:focus { outline: none; border-color: var(--accent); }
   /* Force number input spinners to show on mobile — stepper only */
   .stepper input[type=number]::-webkit-inner-spin-button,
@@ -28,9 +28,9 @@
     height: 44px;
   }
   /* Hide spinners on plain % fields so they match select height */
-  .num-field input[type=number] { -webkit-appearance: none; -moz-appearance: textfield; height: 44px; min-height: 0; padding-top: 0; padding-bottom: 0; }
+  .num-field input[type=number] { -moz-appearance: textfield; }
   .num-field input[type=number]::-webkit-inner-spin-button,
-  .num-field input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .num-field input[type=number]::-webkit-outer-spin-button { display: none; }
   .toggle { display: flex; gap: 0; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
   .toggle button { flex: 1; padding: 8px 14px; border: none; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.85em; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.2s; min-height: 44px; letter-spacing: 0.3px; white-space: nowrap; -webkit-appearance: none; }
   .toggle button.active { background: var(--accent); color: var(--bg); }
