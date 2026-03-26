@@ -227,17 +227,17 @@ function setPoolishStart(val) { poolishStartValue = val; update(); }
 const S = {
   summer: {
     ambient: '28–38°C', waterTemp: '4–8°C', poolishYeast: 0.05, poolishTime: '8–10 hrs',
-    bulkTime: '2–2.5 hrs', proofTime: '30–45 min', samedayProof: '60–75 min', ddt: 23,
+    bulkTime: '3–3.5 hrs', proofTime: '30–45 min', samedayProof: '60–75 min', ddt: 23,
     fridgeNote: 'Dough warms fast — get it into the fridge promptly after bulk.',
     samedayNote: 'In summer heat, watch the proof carefully — it can run away from you in 45 min.',
-    foldInterval: 30, poolishOffsetHrs: 12, retardHrs: 22, samedayProofMid: 67
+    foldInterval: 30, coilInterval: 60, poolishOffsetHrs: 12, retardHrs: 22, samedayProofMid: 67
   },
   winter: {
     ambient: '10–18°C', waterTemp: '28–32°C', poolishYeast: 0.15, poolishTime: '12–16 hrs',
-    bulkTime: '3–3.5 hrs', proofTime: '30–45 min', samedayProof: '90–120 min', ddt: 25,
+    bulkTime: '4–4.5 hrs', proofTime: '30–45 min', samedayProof: '90–120 min', ddt: 25,
     fridgeNote: 'Cold dough takes longer to wake up — give extra proof time after shaping.',
     samedayNote: 'Winter dough is sluggish — don\'t rush the proof. It may need the full 2 hours.',
-    foldInterval: 45, poolishOffsetHrs: 12, retardHrs: 19, samedayProofMid: 105
+    foldInterval: 45, coilInterval: 75, poolishOffsetHrs: 12, retardHrs: 19, samedayProofMid: 105
   }
 };
 
@@ -391,7 +391,7 @@ function update() {
   T.sf1 = T.fermentolyseEnd + foldInt;
   T.sf2 = T.sf1 + foldInt;
   T.cf1 = T.sf2 + foldInt;
-  T.cf2 = T.cf1 + foldInt;
+  T.cf2 = T.cf1 + s.coilInterval;
   T.bulkEnd = T.cf2 + 15;
   T.fridgeIn = T.bulkEnd;
   T.sdPreshape = T.bulkEnd;
@@ -405,7 +405,7 @@ function update() {
   if (isRetard) {
     scheduleHtml = `
       <span class="time">${fmtSched(T.poolish)}</span><span>Mix poolish → room temp overnight</span>
-      <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse</span>
+      <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${s.poolishTime})</span>
       <span class="time">${fmtSched(T.fermentolyseEnd)}</span><span>Add salt + bassinage + yeast</span>
       <span class="time">${fmtSched(T.sf1)}</span><span>Stretch &amp; fold #1</span>
       <span class="time">${fmtSched(T.sf2)}</span><span>Stretch &amp; fold #2</span>
