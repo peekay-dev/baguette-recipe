@@ -207,7 +207,9 @@ let season = 'summer', method = 'retard';
 const doneSteps = new Set();
 let scheduleOpen = false;
 let poolishStartValue = '21:00';
-const POOLISH_PCT = 0.50, BASSINAGE_PCT = 0.03;
+const POOLISH_PCT = 0.50, BASSINAGE_PCT = 0.03, SALT_PCT = 0.0168;
+const YEAST_PCT = 0.0033;
+const POOLISH_YEAST_PCT = 0.002; // base (summer); multiplied by season
 
 function fmt(absMin) {
   const norm = ((absMin % 1440) + 1440) % 1440;
@@ -226,14 +228,14 @@ function setPoolishStart(val) { poolishStartValue = val; update(); }
 
 const S = {
   summer: {
-    ambient: '28–38°C', waterTemp: '4–8°C', poolishYeast: 0.05, poolishTime: '8–10 hrs',
+    ambient: '28–38°C', waterTemp: '4–8°C', poolishYeastMult: 1, poolishTime: '8–10 hrs',
     bulkTime: '3–3.5 hrs', proofTime: '30–45 min', samedayProof: '60–75 min', ddt: 23,
     fridgeNote: 'Dough warms fast — get it into the fridge promptly after bulk.',
     samedayNote: 'In summer heat, watch the proof carefully — it can run away from you in 45 min.',
     foldInterval: 30, coilInterval: 60, poolishOffsetHrs: 12, retardHrs: 22, samedayProofMid: 67
   },
   winter: {
-    ambient: '10–18°C', waterTemp: '28–32°C', poolishYeast: 0.15, poolishTime: '12–16 hrs',
+    ambient: '10–18°C', waterTemp: '28–32°C', poolishYeastMult: 2, poolishTime: '12–16 hrs',
     bulkTime: '4–4.5 hrs', proofTime: '30–45 min', samedayProof: '90–120 min', ddt: 25,
     fridgeNote: 'Cold dough takes longer to wake up — give extra proof time after shaping.',
     samedayNote: 'Winter dough is sluggish — don\'t rush the proof. It may need the full 2 hours.',
@@ -360,13 +362,16 @@ function update() {
   const totalDough = count * pieceWeight * 1.06;
   const hydAdj = (flourInfo[fA].hydAdj * blendA + flourInfo[fB].hydAdj * blendB) / 100;
   const baseHyd = (userHyd + hydAdj) / 100;
-  const totalFlour = totalDough / (1 + baseHyd + 0.02 + 0.004);
+  const poolishYeastPct = POOLISH_YEAST_PCT * s.poolishYeastMult;
+  const finalYeastPct = YEAST_PCT * s.poolishYeastMult;
+  const yeastPct = poolishYeastPct + finalYeastPct;
+  const totalFlour = totalDough / (1 + baseHyd + SALT_PCT + yeastPct);
   const totalWater = totalFlour * baseHyd;
-  const salt = totalFlour * 0.0168;
+  const salt = totalFlour * SALT_PCT;
 
   const poolishFlour = totalFlour * POOLISH_PCT;
   const poolishWater = poolishFlour;
-  const poolishYeast = totalFlour * (s.poolishYeast / 100);
+  const poolishYeast = totalFlour * poolishYeastPct;
   const finalFlour = totalFlour - poolishFlour;
   const finalFlourA = finalFlour * (blendA / 100);
   const finalFlourB = finalFlour * (blendB / 100);
@@ -375,7 +380,7 @@ function update() {
   const bassinage = totalFlour * BASSINAGE_PCT;
   const fermentolyseWater = totalWater - poolishWater - bassinage;
   const fermentolyseHyd = ((fermentolyseWater / finalFlour) * 100).toFixed(0);
-  const finalYeast = totalFlour * (isRetard ? 0.002 : 0.003);
+  const finalYeast = totalFlour * finalYeastPct;
   const fAName = flourInfo[fA].name;
   const fBName = flourInfo[fB].name;
   const proofTime = isRetard ? s.proofTime : s.samedayProof;
