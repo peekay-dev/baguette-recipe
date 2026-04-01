@@ -207,7 +207,7 @@ let season = 'summer', method = 'retard';
 const doneSteps = new Set();
 let scheduleOpen = false;
 let poolishStartValue = '21:00';
-const POOLISH_PCT = 0.50, BASSINAGE_PCT = 0.03, SALT_PCT = 0.0168;
+const POOLISH_PCT = 0.50, BASSINAGE_PCT = 0.03, SALT_PCT = 0.0185;
 const YEAST_PCT = 0.0033;
 const POOLISH_YEAST_PCT = 0.002; // base (summer); multiplied by season
 
@@ -229,14 +229,14 @@ function setPoolishStart(val) { poolishStartValue = val; update(); }
 const S = {
   summer: {
     ambient: '28–38°C', waterTemp: '4–8°C', poolishYeastMult: 1, poolishTime: '8–10 hrs',
-    bulkTime: '3.5–4 hrs', proofTime: '30–45 min', samedayProof: '60–75 min', ddt: 23,
+    bulkTime: '3.5–4 hrs', proofTime: '60-80 min', samedayProof: '60–75 min', ddt: 23,
     fridgeNote: 'Dough warms fast — get it into the fridge promptly after bulk.',
     samedayNote: 'In summer heat, watch the proof carefully — it can run away from you in 45 min.',
     fermentolyseTime: 45, foldInterval: 30, coilInterval: 60, poolishOffsetHrs: 12, retardHrs: 22, samedayProofMid: 67, shapeToOvenMin: 90
   },
   winter: {
     ambient: '10–18°C', waterTemp: '28–32°C', poolishYeastMult: 2, poolishTime: '12–16 hrs',
-    bulkTime: '5.5–6 hrs', proofTime: '30–45 min', samedayProof: '90–120 min', ddt: 25,
+    bulkTime: '5.5–6 hrs', proofTime: '90-120 min', samedayProof: '90–120 min', ddt: 25,
     fridgeNote: 'Cold dough takes longer to wake up — give extra proof time after shaping.',
     samedayNote: 'Winter dough is sluggish — don\'t rush the proof. It may need the full 2 hours.',
     fermentolyseTime: 90, foldInterval: 45, coilInterval: 90, poolishOffsetHrs: 12, retardHrs: 19, samedayProofMid: 105, shapeToOvenMin: 90
@@ -500,7 +500,7 @@ function update() {
   steps += stepEnd;
 
   steps += stepStart(n++, 'Final Proof', proofTime, 's8');
-  steps += `<p>Cover couche. Proof at room temp <strong>${proofTime}</strong>. Preheat oven to <span class="temp">250°C</span> with baking stone and steam tray.</p>`;
+  steps += `<p>Cover couche. Proof at room temp <strong>${proofTime}</strong>. Preheat oven to <span class="temp">240°C</span> with baking stone and steam tray.</p>`;
   steps += tip(
     isRetard
       ? `Poke test: floured finger, slow spring-back with slight indent = ready. ${season === 'summer' ? 'Watch carefully — overproofs fast.' : 'Be patient — cold dough needs time.'}`
