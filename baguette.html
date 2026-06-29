@@ -162,6 +162,14 @@
         <button onclick="step('hydration', 1)">+</button>
       </div>
     </div>
+    <div class="field">
+      <label>Room Temp (°C)</label>
+      <div class="stepper">
+        <button onclick="step('ambientTemp',-1)">-</button>
+        <input type="number" id="ambientTemp" value="18" min="10" max="35" onchange="update()">
+        <button onclick="step('ambientTemp', 1)">+</button>
+      </div>
+    </div>
   </div>
   <div class="control-row">
     <div class="field">
@@ -208,6 +216,7 @@ const doneSteps = new Set();
 let scheduleOpen = false;
 let poolishStartValue = '21:00';
 const POOLISH_PCT = 0.50, BASSINAGE_PCT = 0.03, SALT_PCT = 0.0175;
+const DDT = 24; // Desired Dough Temperature (°C) — Hamelman standard for poolish baguette
 const YEAST_PCT = 0.0033;
 const POOLISH_YEAST_PCT = 0.002; // base (summer); multiplied by season
 
@@ -228,18 +237,14 @@ function setPoolishStart(val) { poolishStartValue = val; update(); }
 
 const S = {
   summer: {
-    ambient: '28–38°C', waterTemp: '4–8°C', poolishYeastMult: 1, poolishTime: '8–10 hrs',
-    bulkTime: '3.5–4 hrs', proofTime: '60-80 min', samedayProof: '60–75 min', ddt: 23,
     fridgeNote: 'Dough warms fast — get it into the fridge promptly after bulk.',
-    samedayNote: 'In summer heat, watch the proof carefully — it can run away from you in 45 min.',
-    fermentolyseTime: 45, foldInterval: 30, coilInterval: 60, poolishOffsetHrs: 12, retardHrs: 22, samedayProofMid: 67, shapeToOvenMin: 90
+    samedayNote: 'In summer heat, watch the proof carefully — it can run away from you.',
+    poolishOffsetHrs: 12, retardHrs: 22
   },
   winter: {
-    ambient: '10–18°C', waterTemp: '28–32°C', poolishYeastMult: 2, poolishTime: '12–16 hrs',
-    bulkTime: '5.5–6 hrs', proofTime: '90-120 min', samedayProof: '90–120 min', ddt: 25,
     fridgeNote: 'Cold dough takes longer to wake up — give extra proof time after shaping.',
-    samedayNote: 'Winter dough is sluggish — don\'t rush the proof. It may need the full 2 hours.',
-    fermentolyseTime: 90, foldInterval: 45, coilInterval: 90, poolishOffsetHrs: 12, retardHrs: 19, samedayProofMid: 105, shapeToOvenMin: 90
+    samedayNote: 'Winter dough is sluggish — don\'t rush the proof. It may need the full time.',
+    poolishOffsetHrs: 12, retardHrs: 19
   }
 };
 
@@ -275,7 +280,8 @@ function savePrefs() {
       hydration: document.getElementById('hydration').value,
       flourA: document.getElementById('flourA').value,
       flourB: document.getElementById('flourB').value,
-      pctA: document.getElementById('pctA').value
+      pctA: document.getElementById('pctA').value,
+      ambientTemp: document.getElementById('ambientTemp').value
     }));
   } catch(e) {}
 }
@@ -295,6 +301,7 @@ function loadPrefs() {
       document.getElementById('blend').value = p.pctA;
     }
     if (p.poolishStartValue) poolishStartValue = p.poolishStartValue;
+    if (p.ambientTemp != null) document.getElementById('ambientTemp').value = p.ambientTemp;
     if (p.season) { season = p.season; document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === season)); }
     if (p.method) {
       method = p.method;
@@ -359,11 +366,43 @@ function update() {
 
   const s = S[season];
   const isRetard = method === 'retard';
+
+  // Temperature-scaled timing (Q10 rule: rate doubles every 10°C, baseline 25°C)
+  const tempC = Math.max(10, Math.min(35, +document.getElementById('ambientTemp').value));
+  const mult = Math.pow(2, (25 - tempC) / 10);
+  const r5 = v => Math.round(v / 5) * 5;
+  const fermentolyseTime = r5(45 * mult);
+  const foldInterval = r5(30 * mult);
+  const coilInterval = r5(30 * mult);
+  const proofMid = r5(67 * mult);
+  const samedayProofMid = proofMid;
+  const shapeToOvenMin = 25 + proofMid;
+  const proofLow = Math.max(r5(proofMid * 0.85), 30);
+  const proofHigh = r5(proofMid * 1.15);
+  const proofTimeStr = `${proofLow}–${proofHigh} min`;
+  // Poolish yeast scales at half the Q10 rate (sqrt of mult) — partial compensation
+  // so overnight timing stays in a predictable range without fully eliminating time variation
+  const yeastMult = Math.pow(2, (25 - tempC) / 20);
+  const poolishHrsMid = 9 * yeastMult; // reflects adjusted yeast + temp
+  const poolishLow = Math.round(poolishHrsMid * 0.85);
+  const poolishHigh = Math.round(poolishHrsMid * 1.15);
+  const poolishTime = `${poolishLow}–${poolishHigh} hrs`;
+  const bulkMins = fermentolyseTime + 3 * foldInterval + coilInterval + 15;
+  const bulkHrsLow = Math.floor((bulkMins / 60) * 2) / 2;
+  const bulkHrsHigh = Math.ceil((bulkMins / 60) * 2) / 2;
+  const bulkTime = `${bulkHrsLow}–${bulkHrsHigh} hrs`;
+  // Water temp: 4-factor DDT formula (room, flour≈room, friction 3°C hand-mix, poolish)
+  // Summer poolish goes in fridge → ~5°C; winter poolish stays at room temp
+  const poolishTempAssumption = season === 'summer' ? 5 : tempC;
+  const waterTempCalc = Math.round((DDT * 4) - tempC - tempC - 3 - poolishTempAssumption);
+  const waterTempDisplay = waterTempCalc <= 2
+    ? `${waterTempCalc}°C (ice water)`
+    : `~${waterTempCalc}°C`;
   const totalDough = count * pieceWeight * 1.06;
   const hydAdj = (flourInfo[fA].hydAdj * blendA + flourInfo[fB].hydAdj * blendB) / 100;
   const baseHyd = (userHyd + hydAdj) / 100;
-  const poolishYeastPct = POOLISH_YEAST_PCT * s.poolishYeastMult;
-  const finalYeastPct = YEAST_PCT * s.poolishYeastMult;
+  const poolishYeastPct = POOLISH_YEAST_PCT * yeastMult;
+  const finalYeastPct = YEAST_PCT * yeastMult;
   const yeastPct = poolishYeastPct + finalYeastPct;
   const totalFlour = totalDough / (1 + baseHyd + SALT_PCT + yeastPct);
   const totalWater = totalFlour * baseHyd;
@@ -383,34 +422,34 @@ function update() {
   const finalYeast = totalFlour * finalYeastPct;
   const fAName = flourInfo[fA].name;
   const fBName = flourInfo[fB].name;
-  const proofTime = isRetard ? s.proofTime : s.samedayProof;
+  const proofTime = proofTimeStr;
   const growthTarget = isRetard ? '50–60%' : '70–80%';
 
   const [ph, pmins] = poolishStartValue.split(':').map(Number);
   const poolishMins = ph * 60 + pmins;
-  const foldInt = s.foldInterval;
+  const foldInt = foldInterval;
   const T = {};
   T.poolish = poolishMins;
   T.mix = poolishMins + s.poolishOffsetHrs * 60;
-  T.fermentolyseEnd = T.mix + s.fermentolyseTime;
+  T.fermentolyseEnd = T.mix + fermentolyseTime;
   T.sf1 = T.fermentolyseEnd + foldInt;
   T.sf2 = T.sf1 + foldInt;
   T.cf1 = T.sf2 + foldInt;
-  T.cf2 = T.cf1 + s.coilInterval;
+  T.cf2 = T.cf1 + coilInterval;
   T.bulkEnd = T.cf2 + 15;
   T.fridgeIn = T.bulkEnd;
   T.sdPreshape = T.bulkEnd;
   T.sdShape = T.sdPreshape + 25;
-  T.sdBake = T.sdShape + s.samedayProofMid;
+  T.sdBake = T.sdShape + samedayProofMid;
   T.sdDone = T.sdBake + 30;
   T.retardOut = T.fridgeIn + s.retardHrs * 60;
-  T.bake = T.retardOut + s.shapeToOvenMin;
+  T.bake = T.retardOut + shapeToOvenMin;
 
   let scheduleHtml;
   if (isRetard) {
     scheduleHtml = `
       <span class="time">${fmtSched(T.poolish)}</span><span>Mix poolish → room temp overnight</span>
-      <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${s.poolishTime})</span>
+      <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${poolishTime})</span>
       <span class="time">${fmtSched(T.fermentolyseEnd)}</span><span>Add salt + bassinage + yeast</span>
       <span class="time">${fmtSched(T.sf1)}</span><span>Stretch &amp; fold #1</span>
       <span class="time">${fmtSched(T.sf2)}</span><span>Stretch &amp; fold #2</span>
@@ -422,7 +461,7 @@ function update() {
   } else {
     scheduleHtml = `
       <span class="time">${fmtSched(T.poolish)}</span><span>Mix poolish → room temp overnight</span>
-      <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${s.poolishTime})</span>
+      <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${poolishTime})</span>
       <span class="time">${fmtSched(T.fermentolyseEnd)}</span><span>Add salt + bassinage + yeast</span>
       <span class="time">${fmtSched(T.sf1)}</span><span>Stretch &amp; fold #1</span>
       <span class="time">${fmtSched(T.sf2)}</span><span>Stretch &amp; fold #2</span>
@@ -435,16 +474,16 @@ function update() {
 
   let steps = '', n = 1;
 
-  steps += stepStart(n++, 'Poolish', `${fmt(T.poolish)} · ${s.poolishTime}`, 's1');
-  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover, ${season === 'summer' ? 'leave at room temp for 3-4 hrs and then in the fridge overnight' : 'leave at room temp overnight (8-12 hrs)'} (${s.poolishTime}).</p>`;
+  steps += stepStart(n++, 'Poolish', `${fmt(T.poolish)} · ${poolishTime}`, 's1');
+  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover and leave at room temp (${tempC}°C) for ${poolishTime}. ${season === 'summer' && tempC >= 25 ? 'If your kitchen is very warm, check early — it can peak before the upper end.' : ''}</p>`;
   steps += tip(
-    `Ready when: bubbly, slightly domed, yeasty-sweet smell. ${season === 'summer' ? 'May peak in 8 hrs — check early.' : 'May need the full 16 hrs — be patient.'} Collapsed and boozy = overripe but still usable.`,
+    `Ready when: bubbly, slightly domed, yeasty-sweet smell. At ${tempC}°C expect${tempC <= 18 ? ' the upper end of the range or longer' : tempC >= 28 ? ' the lower end — check early' : ' somewhere in the middle'}. Collapsed and boozy = overripe but still usable.`,
     'How to tell when it\'s ready'
   );
   steps += stepEnd;
 
-  steps += stepStart(n++, 'Fermentolyse', `${fmt(T.mix)} · ${s.fermentolyseTime} min rest`, 's2');
-  steps += `<p>Add fermentolyse water to a large bowl, then the poolish, then the remaining flour (<strong>hold back the ${r(bassinage)}g bassinage</strong>). Mix by hand — pinch and fold until no dry flour remains. Cover, rest <strong>${s.fermentolyseTime} minutes</strong>.</p>`;
+  steps += stepStart(n++, 'Fermentolyse', `${fmt(T.mix)} · ${fermentolyseTime} min rest`, 's2');
+  steps += `<p>Add fermentolyse water to a large bowl, then the poolish, then the remaining flour (<strong>hold back the ${r(bassinage)}g bassinage</strong>). Mix by hand — pinch and fold until no dry flour remains. Cover, rest <strong>${fermentolyseTime} minutes</strong>.</p>`;
   steps += `<p class="meta">Fermentolyse hydration: ${fermentolyseHyd}%</p>`;
   steps += tip(
     'Why fermentolyse? The poolish yeast is already in the mix, getting a head start on fermentation during the rest. Builds flavour and structure simultaneously.',
@@ -460,8 +499,8 @@ function update() {
   );
   steps += stepEnd;
 
-  steps += stepStart(n++, 'Bulk Fermentation', s.bulkTime, 's4');
-  steps += `<p>2 stretch &amp; folds at ${foldInt}-min intervals, followed by 2 coil folds ${s.coilInterval} min apart.</p>
+  steps += stepStart(n++, 'Bulk Fermentation', bulkTime, 's4');
+  steps += `<p>2 stretch &amp; folds at ${foldInt}-min intervals, followed by 2 coil folds ${coilInterval} min apart.</p>
     <table>
       <tr><td>${fmt(T.sf1)}</td><td><strong>Stretch &amp; fold #1</strong> — 4 sides</td></tr>
       <tr><td>${fmt(T.sf2)}</td><td><strong>Stretch &amp; fold #2</strong> — dough should feel tighter</td></tr>
@@ -526,7 +565,7 @@ function update() {
   document.getElementById('recipe').innerHTML = `
     <div class="white-panel">
       <h2>Formula — ${count} × ${pieceWeight}g</h2>
-      <p class="formula-meta"><strong>${season === 'summer' ? 'Summer' : 'Winter'}</strong> · <strong>${isRetard ? 'Cold Retard' : 'Same Day'}</strong> · Ambient <span class="temp">${s.ambient}</span> · DDT <span class="temp">${s.ddt}°C</span> · Hydration <strong>${(baseHyd*100).toFixed(0)}%</strong></p>
+      <p class="formula-meta"><strong>${season === 'summer' ? 'Summer' : 'Winter'}</strong> · <strong>${isRetard ? 'Cold Retard' : 'Same Day'}</strong> · Room Temp <span class="temp">${tempC}°C</span> · DDT <span class="temp">${DDT}°C</span> · Water <span class="temp">${waterTempDisplay}</span> · Hydration <strong>${(baseHyd*100).toFixed(0)}%</strong></p>
       <h3>Poolish (${(POOLISH_PCT*100).toFixed(0)}% of flour)</h3>
       <table>
         <tr><th>Ingredient</th><th>Amount</th></tr>
