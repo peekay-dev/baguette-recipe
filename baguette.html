@@ -367,13 +367,20 @@ function update() {
   const s = S[season];
   const isRetard = method === 'retard';
 
-  // Temperature-scaled timing (Q10 rule: rate doubles every 10°C, baseline 25°C)
   const tempC = Math.max(10, Math.min(35, +document.getElementById('ambientTemp').value));
   const mult = Math.pow(2, (25 - tempC) / 10);
   const r5 = v => Math.round(v / 5) * 5;
-  const fermentolyseTime = r5(45 * mult);
-  const foldInterval = r5(30 * mult);
-  const coilInterval = r5(30 * mult);
+
+  // Fold intervals and fermentolyse are FIXED.
+  // Dough leaves the mix at DDT (~24°C) and drifts toward ambient slowly — ambient temp
+  // misreads the early bulk, and the poolish is already fermenting so fermentolyse
+  // can't run long without risking gluten breakdown. Go by visual cues, not the clock.
+  const fermentolyseTime = 45;   // fixed; cap 60 min hard
+  const foldInterval = 30;        // fixed regardless of room temp
+  const coilInterval = 30;        // fixed regardless of room temp
+
+  // Temperature scaling applies to phases where dough has equilibrated to ambient:
+  // poolish (sits overnight) and final proof (after shaping / retard).
   const proofMid = r5(67 * mult);
   const samedayProofMid = proofMid;
   const shapeToOvenMin = 25 + proofMid;
@@ -383,14 +390,12 @@ function update() {
   // Poolish yeast scales at half the Q10 rate (sqrt of mult) — partial compensation
   // so overnight timing stays in a predictable range without fully eliminating time variation
   const yeastMult = Math.pow(2, (25 - tempC) / 20);
-  const poolishHrsMid = 9 * yeastMult; // reflects adjusted yeast + temp
+  const poolishHrsMid = 9 * yeastMult;
   const poolishLow = Math.round(poolishHrsMid * 0.85);
   const poolishHigh = Math.round(poolishHrsMid * 1.15);
   const poolishTime = `${poolishLow}–${poolishHigh} hrs`;
   const bulkMins = fermentolyseTime + 3 * foldInterval + coilInterval + 15;
-  const bulkHrsLow = Math.floor((bulkMins / 60) * 2) / 2;
-  const bulkHrsHigh = Math.ceil((bulkMins / 60) * 2) / 2;
-  const bulkTime = `${bulkHrsLow}–${bulkHrsHigh} hrs`;
+  const bulkTime = `${+(bulkMins / 60).toFixed(1).replace(/\.0$/, '')} hrs`;
   // Water temp: 4-factor DDT formula (room, flour≈room, friction 3°C hand-mix, poolish)
   // Summer poolish goes in fridge → ~5°C; winter poolish stays at room temp
   const poolishTempAssumption = season === 'summer' ? 5 : tempC;
@@ -499,8 +504,8 @@ function update() {
   );
   steps += stepEnd;
 
-  steps += stepStart(n++, 'Bulk Fermentation', bulkTime, 's4');
-  steps += `<p>2 stretch &amp; folds at ${foldInt}-min intervals, followed by 2 coil folds ${coilInterval} min apart.</p>
+  steps += stepStart(n++, 'Bulk Fermentation', `${bulkTime} fold schedule`, 's4');
+  steps += `<p>Fold intervals are fixed — dough is still warm from DDT. Use the times as a kitchen schedule, not a go/no-go signal. <strong>Visual cues decide readiness.</strong></p>
     <table>
       <tr><td>${fmt(T.sf1)}</td><td><strong>Stretch &amp; fold #1</strong> — 4 sides</td></tr>
       <tr><td>${fmt(T.sf2)}</td><td><strong>Stretch &amp; fold #2</strong> — dough should feel tighter</td></tr>
