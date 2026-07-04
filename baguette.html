@@ -71,6 +71,8 @@
   .tip.open .tip-hint { display: none; }
   .tip-body { padding: 0 10px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; color: var(--text); }
   .tip.open .tip-body { max-height: 300px; padding: 0 10px 8px; }
+  .shaping-gif { width: 100%; border-radius: 4px; margin: 8px 0 2px; display: block; }
+  .gif-caption { font-size: 0.75em; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 6px; }
   .temp { font-weight: 500; }
   .collapsible-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
   .collapsible-header::after { content: '+'; font-size: 1.1em; color: var(--accent); }
@@ -531,6 +533,7 @@ function update() {
 
   steps += stepStart(n++, 'Preshape', isRetard ? fmtSched(T.retardOut) : fmt(T.sdPreshape), 's6');
   steps += `<p>Flour bench. Tip dough out gently. Divide into <strong>${count} × ~${r(totalDough / count)}g</strong>. Preshape into loose rounds, flip seam-down, drag with bench scraper for tension. Cover, bench rest <strong>20–25 min</strong>.</p>`;
+  steps += `<img src="images/1b_pat_preshape_alt.gif" alt="Preshape technique" class="shaping-gif"><p class="gif-caption">Pat & preshape</p>`;
   steps += tip(
     isRetard
       ? 'Cold dough is firm and easy to handle. Don\'t let it warm up too much before shaping.'
@@ -541,6 +544,11 @@ function update() {
 
   steps += stepStart(n++, 'Final Shape', '', 's7');
   steps += `<p>Flip seam-up. Pat into rectangle. Fold top third down, seal. Bottom third up, seal. Roll seam-down, elongate to ~35–40cm. Taper ends. Transfer seam-up onto floured couche.</p>`;
+  steps += `<img src="images/2b_tuck_and_fold_alt.gif" alt="Tuck and fold" class="shaping-gif"><p class="gif-caption">Tuck & fold</p>`;
+  steps += `<img src="images/3b_seal_press_volume_alt.gif" alt="Seal and press" class="shaping-gif"><p class="gif-caption">Seal & press</p>`;
+  steps += `<img src="images/4b_roll_elongate_alt.gif" alt="Roll to elongate" class="shaping-gif"><p class="gif-caption">Roll & elongate</p>`;
+  steps += `<img src="images/5b_motorbike_tuck_alt.gif" alt="Motorbike tuck" class="shaping-gif"><p class="gif-caption">Motorbike tuck</p>`;
+  steps += `<img src="images/6b_taper_ends_alt.gif" alt="Taper ends" class="shaping-gif"><p class="gif-caption">Taper ends</p>`;
   steps += stepEnd;
 
   steps += stepStart(n++, 'Final Proof', proofTime, 's8');
