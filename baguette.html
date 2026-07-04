@@ -533,7 +533,6 @@ function update() {
 
   steps += stepStart(n++, 'Preshape', isRetard ? fmtSched(T.retardOut) : fmt(T.sdPreshape), 's6');
   steps += `<p>Flour bench. Tip dough out gently. Divide into <strong>${count} × ~${r(totalDough / count)}g</strong>. Preshape into loose rounds, flip seam-down, drag with bench scraper for tension. Cover, bench rest <strong>20–25 min</strong>.</p>`;
-  steps += `<img src="images/1b_pat_preshape_alt.gif" alt="Preshape technique" class="shaping-gif"><p class="gif-caption">Pat & preshape</p>`;
   steps += tip(
     isRetard
       ? 'Cold dough is firm and easy to handle. Don\'t let it warm up too much before shaping.'
@@ -544,11 +543,12 @@ function update() {
 
   steps += stepStart(n++, 'Final Shape', '', 's7');
   steps += `<p>Flip seam-up. Pat into rectangle. Fold top third down, seal. Bottom third up, seal. Roll seam-down, elongate to ~35–40cm. Taper ends. Transfer seam-up onto floured couche.</p>`;
-  steps += `<img src="images/2b_tuck_and_fold_alt.gif" alt="Tuck and fold" class="shaping-gif"><p class="gif-caption">Tuck & fold</p>`;
-  steps += `<img src="images/3b_seal_press_volume_alt.gif" alt="Seal and press" class="shaping-gif"><p class="gif-caption">Seal & press</p>`;
-  steps += `<img src="images/4b_roll_elongate_alt.gif" alt="Roll to elongate" class="shaping-gif"><p class="gif-caption">Roll & elongate</p>`;
-  steps += `<img src="images/5b_motorbike_tuck_alt.gif" alt="Motorbike tuck" class="shaping-gif"><p class="gif-caption">Motorbike tuck</p>`;
-  steps += `<img src="images/6b_taper_ends_alt.gif" alt="Taper ends" class="shaping-gif"><p class="gif-caption">Taper ends</p>`;
+  steps += `<img src="images/1_pat_down_alt.gif" alt="Pat down" class="shaping-gif"><p class="gif-caption">1. Pat down to remove large air bubbles, keeping a rectangular shape</p>`;
+  steps += `<img src="images/2_fold_from_top_alt.gif" alt="Fold from top" class="shaping-gif"><p class="gif-caption">2. Fold from the top, lightly seal</p>`;
+  steps += `<img src="images/3_flip_fold_again_alt.gif" alt="Flip and fold again" class="shaping-gif"><p class="gif-caption">3. Flip around, fold and seal again</p>`;
+  steps += `<img src="images/4_roll_for_volume_alt.gif" alt="Roll for volume" class="shaping-gif"><p class="gif-caption">4. Roll upward from the centre to build volume on the top half</p>`;
+  steps += `<img src="images/5_motorbike_fold_alt.gif" alt="Motorbike fold" class="shaping-gif"><p class="gif-caption">5. Final tuck and crease (motorbike fold)</p>`;
+  steps += `<img src="images/6_roll_seal_even_alt.gif" alt="Roll to seal" class="shaping-gif"><p class="gif-caption">6. Roll gently to seal the seam and even out the thickness</p>`;
   steps += stepEnd;
 
   steps += stepStart(n++, 'Final Proof', proofTime, 's8');
