@@ -160,7 +160,7 @@
       <label>Hydration %</label>
       <div class="stepper">
         <button onclick="step('hydration',-1)">-</button>
-        <input type="number" id="hydration" value="75", min="50", max="100", onchange="update()">
+        <input type="number" id="hydration" value="70", min="50", max="100", onchange="update()">
         <button onclick="step('hydration', 1)">+</button>
       </div>
     </div>
@@ -170,6 +170,14 @@
         <button onclick="step('ambientTemp',-1)">-</button>
         <input type="number" id="ambientTemp" value="18" min="10" max="35" onchange="update()">
         <button onclick="step('ambientTemp', 1)">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Poolish %</label>
+      <div class="stepper">
+        <button onclick="step('poolishPct',-1)">-</button>
+        <input type="number" id="poolishPct" value="30", min="20", max="40", onchange="update()">
+        <button onclick="step('poolishPct', 1)">+</button>
       </div>
     </div>
   </div>
@@ -217,7 +225,7 @@ let season = 'summer', method = 'retard';
 const doneSteps = new Set();
 let scheduleOpen = false;
 let poolishStartValue = '21:00';
-const POOLISH_PCT = 0.50, BASSINAGE_PCT = 0.03, SALT_PCT = 0.0175;
+const BASSINAGE_PCT = 0.03, SALT_PCT = 0.0175;
 const DDT = 24; // Desired Dough Temperature (°C) — Hamelman standard for poolish baguette
 const YEAST_PCT = 0.0033;
 const POOLISH_YEAST_PCT = 0.002; // base (summer); multiplied by season
@@ -283,7 +291,8 @@ function savePrefs() {
       flourA: document.getElementById('flourA').value,
       flourB: document.getElementById('flourB').value,
       pctA: document.getElementById('pctA').value,
-      ambientTemp: document.getElementById('ambientTemp').value
+      ambientTemp: document.getElementById('ambientTemp').value,
+      poolishPct: document.getElementById('poolishPct').value
     }));
   } catch(e) {}
 }
@@ -304,6 +313,7 @@ function loadPrefs() {
     }
     if (p.poolishStartValue) poolishStartValue = p.poolishStartValue;
     if (p.ambientTemp != null) document.getElementById('ambientTemp').value = p.ambientTemp;
+    if (p.poolishPct != null) document.getElementById('poolishPct').value = p.poolishPct;
     if (p.season) { season = p.season; document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === season)); }
     if (p.method) {
       method = p.method;
@@ -365,6 +375,7 @@ function update() {
   const fA = document.getElementById('flourA').value;
   const fB = document.getElementById('flourB').value;
   const userHyd = +document.getElementById('hydration').value;
+  const poolishPct = Math.min(0.40, Math.max(0.20, (+document.getElementById('poolishPct').value) / 100));
 
   const s = S[season];
   const isRetard = method === 'retard';
@@ -415,7 +426,7 @@ function update() {
   const totalWater = totalFlour * baseHyd;
   const salt = totalFlour * SALT_PCT;
 
-  const poolishFlour = totalFlour * POOLISH_PCT;
+  const poolishFlour = totalFlour * poolishPct;
   const poolishWater = poolishFlour;
   const poolishYeast = totalFlour * poolishYeastPct;
   const finalFlour = totalFlour - poolishFlour;
@@ -578,7 +589,7 @@ function update() {
     <div class="white-panel">
       <h2>Formula — ${count} × ${pieceWeight}g</h2>
       <p class="formula-meta"><strong>${season === 'summer' ? 'Summer' : 'Winter'}</strong> · <strong>${isRetard ? 'Cold Retard' : 'Same Day'}</strong> · Room Temp <span class="temp">${tempC}°C</span> · DDT <span class="temp">${DDT}°C</span> · Water <span class="temp">${waterTempDisplay}</span> · Hydration <strong>${(baseHyd*100).toFixed(0)}%</strong></p>
-      <h3>Poolish (${(POOLISH_PCT*100).toFixed(0)}% of flour)</h3>
+      <h3>Poolish (${(poolishPct*100).toFixed(0)}% of flour)</h3>
       <table>
         <tr><th>Ingredient</th><th>Amount</th></tr>
         ${blendA > 0 ? `<tr><td>${fAName}</td><td class="amt">${r(poolishFlourA)}g</td></tr>` : ''}
