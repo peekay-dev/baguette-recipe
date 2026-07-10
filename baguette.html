@@ -588,9 +588,11 @@ function update() {
       <tr><td>${fmt(T.sf2)}</td><td><strong>Stretch &amp; fold #2</strong> — dough should feel tighter</td></tr>
       <tr><td>${fmt(T.cf1)}</td><td><strong>Coil fold #1</strong> — lift from middle, let ends fold under</td></tr>
       <tr><td>${fmt(T.cf2)}</td><td><strong>Coil fold #2</strong> — smooth and pillowy</td></tr>
-      ${undisturbedRestMins > 0
-        ? `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong> — ${undisturbedRestMins} min rest to reach ${bulkTime} bulk total · then ~${retardHrs}h @ ${FRIDGE_TEMP}°C (15h × 2<sup>((4−${FRIDGE_TEMP})/10)</sup>)</td></tr>`
-        : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong> — ~${retardHrs}h @ ${FRIDGE_TEMP}°C (15h × 2<sup>((4−${FRIDGE_TEMP})/10)</sup>)</td></tr>`
+      ${isRetard
+        ? (undisturbedRestMins > 0
+          ? `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong> — ${undisturbedRestMins} min rest for a total of ${bulkTime} bulk</td></tr>`
+          : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong></td></tr>`)
+        : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Divide &amp; preshape</strong></td></tr>`
       }
     </table>
     <p>${isRetard ? '' : `Rest undisturbed until dough has grown <strong>${growthTarget} from the start of bulk</strong>. It should be airy, jiggly, and show bubbles on the sides.`}</p>`;
@@ -660,9 +662,9 @@ function update() {
   steps += stepStart(n++, 'Score & Bake', '22–25 min', 's9');
   steps += `<p>Score 3–5 overlapping cuts at shallow angle. Load onto stone, pour ~1 cup boiling water into steam tray, close door fast.</p>
     <table>
-      <tr><td><span class="temp">250°C</span> + steam</td><td>12 min</td></tr>
+      <tr><td><span class="temp">240°C</span> + steam</td><td>12 min</td></tr>
       <tr><td>Remove steam, vent</td><td>—</td></tr>
-      <tr><td><span class="temp">230°C</span> dry</td><td>10–13 min</td></tr>
+      <tr><td><span class="temp">240°C</span> dry</td><td>10–13 min</td></tr>
     </table>
     <p>Cool on wire rack <strong>20 min</strong> before cutting.</p>`;
   steps += tip(
