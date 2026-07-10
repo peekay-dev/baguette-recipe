@@ -137,6 +137,14 @@
           <button data-v="sameday" onclick="setMethod('sameday')">Same Day</button>
         </div>
       </div>
+      <div class="field">
+        <label>Bowl</label>
+        <div class="toggle" id="bowlToggle">
+          <button class="active" data-v="60" onclick="setTemperTau(60)">Metal</button>
+          <button data-v="90" onclick="setTemperTau(90)">Glass</button>
+          <button data-v="111" onclick="setTemperTau(111)">Plastic tub</button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="control-row">
@@ -221,7 +229,7 @@
 </div>
 <div class="content" id="recipe"></div>
 <script>
-let season = 'summer', method = 'retard';
+let season = 'summer', method = 'retard', temperTau = 60;
 const doneSteps = new Set();
 let scheduleOpen = false;
 let poolishStartValue = '21:00';
@@ -229,6 +237,11 @@ const BASSINAGE_PCT = 0.03, SALT_PCT = 0.018;
 const DDT = 24; // Desired Dough Temperature (°C) — Hamelman standard for poolish baguette
 const YEAST_PCT = 0.0033;
 const POOLISH_YEAST_PCT = 0.002; // base (summer); multiplied by season
+const FRIDGE_TEMP = 3;    // °C — dough core temp out of fridge
+const TEMPER_TARGET = 10; // °C — target core temp before dividing
+const TAU_DIVIDED = 30;   // min — Newton's law τ for divided rounds on bench
+const TAU_SHAPED = 20;    // min — Newton's law τ for shaped baguettes in couche
+const FRICTION = 2;       // °C — heat from hand mixing
 
 function fmt(absMin) {
   const norm = ((absMin % 1440) + 1440) % 1440;
@@ -249,12 +262,12 @@ const S = {
   summer: {
     fridgeNote: 'Dough warms fast — get it into the fridge promptly after bulk.',
     samedayNote: 'In summer heat, watch the proof carefully — it can run away from you.',
-    poolishOffsetHrs: 12, retardHrs: 22
+    poolishOffsetHrs: 12
   },
   winter: {
     fridgeNote: 'Cold dough takes longer to wake up — give extra proof time after shaping.',
     samedayNote: 'Winter dough is sluggish — don\'t rush the proof. It may need the full time.',
-    poolishOffsetHrs: 12, retardHrs: 19
+    poolishOffsetHrs: 12
   }
 };
 
@@ -280,11 +293,16 @@ function setMethod(m) {
     : 'Hand-mixed · same-day bake · season-adjusted';
   update();
 }
+function setTemperTau(v) {
+  temperTau = v;
+  document.querySelectorAll('#bowlToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === v));
+  update();
+}
 
 function savePrefs() {
   try {
     localStorage.setItem('baguette_prefs', JSON.stringify({
-      season, method, poolishStartValue,
+      season, method, temperTau, poolishStartValue,
       count: document.getElementById('count').value,
       weight: document.getElementById('weight').value,
       hydration: document.getElementById('hydration').value,
@@ -315,6 +333,7 @@ function loadPrefs() {
     if (p.ambientTemp != null) document.getElementById('ambientTemp').value = p.ambientTemp;
     if (p.poolishPct != null) document.getElementById('poolishPct').value = p.poolishPct;
     if (p.season) { season = p.season; document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === season)); }
+    if (p.temperTau != null) { temperTau = p.temperTau; document.querySelectorAll('#bowlToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === temperTau)); }
     if (p.method) {
       method = p.method;
       document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === method));
@@ -325,6 +344,19 @@ function loadPrefs() {
   } catch(e) {}
 }
 function r(v) { return Math.round(v); }
+
+function solveStageDuration(anchor, anchorTemp, tau, T_start, T_amb) {
+  // Solve t = anchor × 2^((anchorTemp − T_mean(t)) / 10) by fixed-point iteration,
+  // where T_mean is the time-averaged dough temp under Newton's law cooling.
+  let t = anchor;
+  for (let i = 0; i < 10; i++) {
+    const T_mean = (T_start === T_amb)
+      ? T_amb
+      : T_amb + (T_start - T_amb) * (tau / t) * (1 - Math.exp(-t / tau));
+    t = anchor * Math.pow(2, (anchorTemp - T_mean) / 10);
+  }
+  return t;
+}
 
 function tip(text, hint) {
   return `<div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')"><div class="tip-toggle"><span class="tip-hint">${hint || ''}</span></div><div class="tip-body">${text}</div></div>`;
@@ -381,7 +413,6 @@ function update() {
   const isRetard = method === 'retard';
 
   const tempC = Math.max(10, Math.min(35, +document.getElementById('ambientTemp').value));
-  const mult = Math.pow(2, (25 - tempC) / 10);
   const r5 = v => Math.round(v / 5) * 5;
 
   // Fold intervals and fermentolyse are FIXED.
@@ -392,14 +423,27 @@ function update() {
   const foldInterval = 30;        // fixed regardless of room temp
   const coilInterval = 30;        // fixed regardless of room temp
 
-  // Temperature scaling applies to phases where dough has equilibrated to ambient:
-  // poolish (sits overnight) and final proof (after shaping / retard).
-  const proofMid = r5(67 * mult);
-  const samedayProofMid = proofMid;
-  const shapeToOvenMin = 25 + proofMid;
-  const proofLow = Math.max(r5(proofMid * 0.85), 30);
-  const proofHigh = r5(proofMid * 1.15);
+  // Détente: t = 40 × 2^((17 − T_mean) / 10), hard floor 20 min.
+  // Solved iteratively with time-averaged T_mean under Newton's law (τ = TAU_DIVIDED).
+  // Same-day dough is at ambient throughout so no iteration needed.
+  const retardDetenteDuration = solveStageDuration(40, 17, TAU_DIVIDED, TEMPER_TARGET, tempC);
+  const retardDetenteMins = Math.max(20, Math.round(retardDetenteDuration));
+  const samedayDetenteMins = Math.max(20, Math.round(40 * Math.pow(2, (17 - tempC) / 10)));
+  const detenteMins = isRetard ? retardDetenteMins : samedayDetenteMins;
+
+  // End-of-détente dough temp (Newton's law, τ = TAU_DIVIDED) — input to proof formula.
+  const retardDoughEndTemp = tempC + (TEMPER_TARGET - tempC) * Math.exp(-retardDetenteMins / TAU_DIVIDED);
+  const proofDoughTemp = isRetard ? retardDoughEndTemp : tempC;
+
+  // Final proof: t = 50 × 2^((22 − T_mean) / 10). Solved iteratively (τ = TAU_SHAPED).
+  // Floor = formula at ambient — dough can never proof faster than if already at room temp.
+  const proofFloor = 50 * Math.pow(2, (22 - tempC) / 10);
+  const proofDuration = Math.max(solveStageDuration(50, 22, TAU_SHAPED, proofDoughTemp, tempC), proofFloor);
+  const proofMid = r5(proofDuration);
+  const proofLow = r5(Math.max(proofDuration * 0.85, proofFloor));
+  const proofHigh = r5(proofDuration * 1.15);
   const proofTimeStr = `${proofLow}–${proofHigh} min`;
+  const shapeToOvenMin = detenteMins + proofMid;
   // Poolish yeast scales at half the Q10 rate (sqrt of mult) — partial compensation
   // so overnight timing stays in a predictable range without fully eliminating time variation
   const yeastMult = Math.pow(2, (25 - tempC) / 20);
@@ -407,12 +451,22 @@ function update() {
   const poolishLow = Math.round(poolishHrsMid * 0.85);
   const poolishHigh = Math.round(poolishHrsMid * 1.15);
   const poolishTime = `${poolishLow}–${poolishHigh} hrs`;
-  const bulkMins = fermentolyseTime + 3 * foldInterval + coilInterval + 15;
-  const bulkTime = `${+(bulkMins / 60).toFixed(1).replace(/\.0$/, '')} hrs`;
+  // Bulk time: mean dough temp over the reference 3h (Newton's law, same τ as container),
+  // then t = 180 × 2^((23 − T_mean) / 10). Extra time goes as undisturbed rest after CF2.
+  const bulkMeanTemp = tempC + (DDT - tempC) * (temperTau / 180) * (1 - Math.exp(-180 / temperTau));
+  const bulkFormulaMins = 180 * Math.pow(2, (23 - bulkMeanTemp) / 10);
+  const fixedFoldsMins = fermentolyseTime + 3 * foldInterval + coilInterval; // up to and including CF2
+  const bulkMins = Math.min(Math.max(Math.round(bulkFormulaMins), fixedFoldsMins), 240);
+  const undisturbedRestMins = bulkMins - fixedFoldsMins;
+  const bulkTime = `${Math.floor(bulkMins / 60)}h${bulkMins % 60 ? ` ${bulkMins % 60}m` : ''}`;
+  const k_bulk = (temperTau / 180) * (1 - Math.exp(-180 / temperTau));
+  const bulkTooLongBelow = Math.round((23 - 10 * Math.log2(240 / 180) - DDT * k_bulk) / (1 - k_bulk));
+  // Retard duration: anchored at 15h @ 4°C, scaled by Q10 for FRIDGE_TEMP
+  const retardHrs = Math.round(15 * Math.pow(2, (4 - FRIDGE_TEMP) / 10));
   // Water temp: 4-factor DDT formula (room, flour≈room, friction 3°C hand-mix, poolish)
-  // Summer poolish goes in fridge → ~5°C; winter poolish stays at room temp
-  const poolishTempAssumption = season === 'summer' ? 5 : tempC;
-  const waterTempCalc = Math.round((DDT * 4) - tempC - tempC - 3 - poolishTempAssumption);
+  // Poolish ferments at room temp and is added at room temp regardless of season.
+  const poolishTempAssumption = tempC;
+  const waterTempCalc = Math.round((DDT * 4) - tempC - tempC - FRICTION - poolishTempAssumption);
   const waterTempDisplay = waterTempCalc <= 2
     ? `${waterTempCalc}°C (ice water)`
     : `~${waterTempCalc}°C`;
@@ -454,14 +508,16 @@ function update() {
   T.sf2 = T.sf1 + foldInt;
   T.cf1 = T.sf2 + foldInt;
   T.cf2 = T.cf1 + coilInterval;
-  T.bulkEnd = T.cf2 + 15;
+  T.bulkEnd = T.cf2 + undisturbedRestMins;
   T.fridgeIn = T.bulkEnd;
   T.sdPreshape = T.bulkEnd;
-  T.sdShape = T.sdPreshape + 25;
-  T.sdBake = T.sdShape + samedayProofMid;
+  T.sdShape = T.sdPreshape + samedayDetenteMins;
+  T.sdBake = T.sdShape + proofMid;
   T.sdDone = T.sdBake + 30;
-  T.retardOut = T.fridgeIn + s.retardHrs * 60;
-  T.bake = T.retardOut + shapeToOvenMin;
+  T.fridgeOut = T.fridgeIn + retardHrs * 60;
+  const warmupMins = (isRetard && tempC > TEMPER_TARGET) ? Math.round(temperTau * Math.log((tempC - FRIDGE_TEMP) / (tempC - TEMPER_TARGET))) : 0;
+  T.warmupEnd = T.fridgeOut + warmupMins;
+  T.bake = T.warmupEnd + shapeToOvenMin;
 
   let scheduleHtml;
   if (isRetard) {
@@ -473,8 +529,9 @@ function update() {
       <span class="time">${fmtSched(T.sf2)}</span><span>Stretch &amp; fold #2</span>
       <span class="time">${fmtSched(T.cf1)}</span><span>Coil fold #1</span>
       <span class="time">${fmtSched(T.cf2)}</span><span>Coil fold #2 → rest</span>
-      <span class="time">${fmtSched(T.fridgeIn)}</span><span>Fridge @ 2°C (18–24 hrs)</span>
-      <span class="time">${fmtSched(T.retardOut)}</span><span>Preshape → shape → proof</span>
+      <span class="time">${fmtSched(T.fridgeIn)}</span><span>Fridge @ ${FRIDGE_TEMP}°C (~${retardHrs}h)</span>
+      <span class="time">${fmtSched(T.fridgeOut)}</span><span>Take out of fridge → warm-up ~${warmupMins} min</span>
+      <span class="time">${fmtSched(T.warmupEnd)}</span><span>Preshape → shape → proof</span>
       <span class="time">${fmtSched(T.bake)}</span><span>Score → bake</span>`;
   } else {
     scheduleHtml = `
@@ -485,7 +542,7 @@ function update() {
       <span class="time">${fmtSched(T.sf2)}</span><span>Stretch &amp; fold #2</span>
       <span class="time">${fmtSched(T.cf1)}</span><span>Coil fold #1</span>
       <span class="time">${fmtSched(T.cf2)}</span><span>Coil fold #2 → rest</span>
-      <span class="time">${fmtSched(T.sdPreshape)}</span><span>Preshape → bench rest 25 min</span>
+      <span class="time">${fmtSched(T.sdPreshape)}</span><span>Preshape → bench rest ${samedayDetenteMins} min</span>
       <span class="time">${fmtSched(T.sdShape)}</span><span>Final shape → proof ${proofTime}</span>
       <span class="time">${fmtSched(T.sdBake)}</span><span>Score → bake → done by ${fmt(T.sdDone)}</span>`;
   }
@@ -502,7 +559,14 @@ function update() {
 
   steps += stepStart(n++, 'Fermentolyse', `${fmt(T.mix)} · ${fermentolyseTime} min rest`, 's2');
   steps += `<p>Add fermentolyse water to a large bowl, then the poolish, then the remaining flour (<strong>hold back the ${r(bassinage)}g bassinage</strong>). Mix by hand — pinch and fold until no dry flour remains. Cover, rest <strong>${fermentolyseTime} minutes</strong>.</p>`;
-  steps += `<p class="meta">Fermentolyse hydration: ${fermentolyseHyd}%</p>`;
+  steps += `<p class="meta">Fermentolyse hydration: ${fermentolyseHyd}% · Use water at <span class="temp">${waterTempDisplay}</span> → DDT ${DDT}°C</p>`;
+  steps += tip(
+    `To hit DDT ${DDT}°C, your inputs must total ${DDT * 4}.<br><br>
+    <strong>1. Add up:</strong> flour + room + poolish = ${tempC} + ${tempC} + ${Math.round(poolishTempAssumption)} = <strong>${tempC * 2 + Math.round(poolishTempAssumption)}°C</strong><br>
+    <strong>2. Water temp:</strong> ${DDT * 4} − ${tempC * 2 + Math.round(poolishTempAssumption)} − ${FRICTION}°C friction = <strong>${waterTempCalc}°C</strong><br><br>
+    <em>Winter: don't use water above 40°C — it stresses the yeast. Use warm water and proof bulk in the oven with just the light on instead.</em>`,
+    'DDT formula'
+  );
   steps += tip(
     'Why fermentolyse? The poolish yeast is already in the mix, getting a head start on fermentation during the rest. Builds flavour and structure simultaneously.',
     'Why fermentolyse over autolyse?'
@@ -517,24 +581,28 @@ function update() {
   );
   steps += stepEnd;
 
-  steps += stepStart(n++, 'Bulk Fermentation', `${bulkTime} fold schedule`, 's4');
-  steps += `<p>Fold intervals are fixed — dough is still warm from DDT. Use the times as a kitchen schedule, not a go/no-go signal. <strong>Visual cues decide readiness.</strong></p>
+  steps += stepStart(n++, 'Bulk Fermentation', bulkTime, 's4');
+  steps += `<p>Folds are structural — keep 30-minute intervals exactly as scheduled. The formula-derived extra time goes as undisturbed rest <strong>after CF2</strong>.</p>
     <table>
       <tr><td>${fmt(T.sf1)}</td><td><strong>Stretch &amp; fold #1</strong> — 4 sides</td></tr>
       <tr><td>${fmt(T.sf2)}</td><td><strong>Stretch &amp; fold #2</strong> — dough should feel tighter</td></tr>
       <tr><td>${fmt(T.cf1)}</td><td><strong>Coil fold #1</strong> — lift from middle, let ends fold under</td></tr>
-      <tr><td>${fmt(T.cf2)}</td><td><strong>Coil fold #2</strong> — dough should be smooth and pillowy</td></tr>
+      <tr><td>${fmt(T.cf2)}</td><td><strong>Coil fold #2</strong> — smooth and pillowy</td></tr>
+      ${undisturbedRestMins > 0
+        ? `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong> — ${undisturbedRestMins} min rest to reach ${bulkTime} bulk total · then ~${retardHrs}h @ ${FRIDGE_TEMP}°C (15h × 2<sup>((4−${FRIDGE_TEMP})/10)</sup>)</td></tr>`
+        : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong> — ~${retardHrs}h @ ${FRIDGE_TEMP}°C (15h × 2<sup>((4−${FRIDGE_TEMP})/10)</sup>)</td></tr>`
+      }
     </table>
-    <p>After last fold, ${isRetard ? 'cover and go straight into the fridge — the cold retard finishes the bulk for you.' : `rest undisturbed until dough has grown <strong>${growthTarget} from the start of bulk</strong> (not from the last fold). It should be airy, jiggly, and show bubbles on the sides.`}</p>`;
+    <p>${isRetard ? '' : `Rest undisturbed until dough has grown <strong>${growthTarget} from the start of bulk</strong>. It should be airy, jiggly, and show bubbles on the sides.`}</p>`;
   steps += tip(
-    isRetard ? s.fridgeNote : `Same-day: push bulk further (${growthTarget}) since there's no cold retard to continue fermentation. ${s.samedayNote}`,
-    isRetard ? 'Getting it into the fridge' : 'Same-day bulk tips'
+    `Visual cue overrides the clock: into the fridge at <strong>30–50% expanded</strong> — domed, jiggly, bubbles visible at the edges, nowhere near doubled.<br><br>Cap at 4 hours. Below ~${bulkTooLongBelow}°C ambient the formula wants longer — use a proofing chamber set to 22–24°C.`,
+    'Visual cue & cap'
   );
   steps += stepEnd;
 
   if (isRetard) {
-    steps += stepStart(n++, 'Cold Retard', `${fmt(T.fridgeIn)} → ${fmtSched(T.retardOut)}`, 's5');
-    steps += `<p>Cover bowl tightly. Fridge at <span class="temp">2°C</span> for <strong>20–24 hrs</strong>. 18–36 hrs is fine at 2°C — sweet spot is 20–24.</p>`;
+    steps += stepStart(n++, 'Cold Retard', `${fmt(T.fridgeIn)} → ${fmtSched(T.fridgeOut)}`, 's5');
+    steps += `<p>Cover bowl tightly. Fridge at <span class="temp">${FRIDGE_TEMP}°C</span> for <strong>~${retardHrs}h</strong>. Formula: 15h @ 4°C × 2<sup>((4−${FRIDGE_TEMP})/10)</sup> = ${retardHrs}h @ ${FRIDGE_TEMP}°C. 18–36h is safe if needed.</p>`;
     steps += tip(
       'Dough may rise a little in the fridge — normal. If it more than doubles, bulk went too far or fridge is too warm.',
       'How much rise is normal?'
@@ -542,18 +610,32 @@ function update() {
     steps += stepEnd;
   }
 
-  steps += stepStart(n++, 'Preshape', isRetard ? fmtSched(T.retardOut) : fmt(T.sdPreshape), 's6');
-  steps += `<p>Flour bench. Tip dough out gently. Divide into <strong>${count} × ~${r(totalDough / count)}g</strong>. Preshape into loose rounds, flip seam-down, drag with bench scraper for tension. Cover, bench rest <strong>20–25 min</strong>.</p>`;
+  if (isRetard) {
+    steps += stepStart(n++, 'Take out of fridge', `${fmtSched(T.fridgeOut)} · ~${warmupMins} min`, 's5b');
+    steps += tempC < 13 ? `<p style="color:var(--accent);font-weight:500">At ${tempC}°C the warm-up takes a very long time and the formula becomes unreliable. Find a warmer spot — top of the fridge, near the oven, or a proofing box.</p>` : '';
+    steps += `<p>Remove the covered bowl. Leave it at room temp (<span class="temp">${tempC}°C</span>) for <strong>~${warmupMins} min</strong>. Stop when the <strong>core</strong> reads <strong>${TEMPER_TARGET}°C, or within 1°C of ambient</strong> — whichever comes first. Then divide and start preshaping immediately; smaller pieces warm up roughly twice as fast.</p>`;
+    steps += tip(
+      `Probe the core, not the surface — surface reads 2–4°C warm and will make you move too early. Formula: t = τ × ln((T − ${FRIDGE_TEMP}) / (T − ${TEMPER_TARGET})), τ = ${temperTau} (metal τ=60, glass τ=90, tall plastic tub τ=111).`,
+      'Probe placement matters'
+    );
+    steps += stepEnd;
+  }
+
+  steps += stepStart(n++, 'Preshape', isRetard ? fmtSched(T.warmupEnd) : fmt(T.sdPreshape), 's6');
+  steps += `<p>Flour bench. Tip dough out gently. Divide into <strong>${count} × ~${r(totalDough / count)}g</strong>. Preshape into loose rounds, flip seam-down, drag with bench scraper for tension. Cover, bench rest <strong>${detenteMins} min</strong>${detenteMins === 20 ? ' <span style="color:var(--muted);font-size:0.85em">(floor — gluten needs real time)</span>' : ''}.</p>`;
   steps += tip(
     isRetard
-      ? 'Cold dough is firm and easy to handle. Don\'t let it warm up too much before shaping.'
+      ? 'At ~10°C the dough is firm but not brittle — it should hold its shape without springing back aggressively. Work cleanly and quickly; don\'t let it sit uncovered on the bench.'
       : 'Room-temp dough is slacker and stickier. Use more bench flour and work quickly.',
     isRetard ? 'Working with cold dough' : 'Handling sticky dough'
+  );
+  steps += tip(
+    `If timing by probe: read the core at the start and end of bench rest, average the two — that's the temperature for the formula.${detenteMins === 20 ? ' (Formula wanted less — 20 min floor applies.)' : ''}`,
+    'Using a thermometer for détente'
   );
   steps += stepEnd;
 
   steps += stepStart(n++, 'Final Shape', '', 's7');
-  steps += `<p>Flip seam-up. Pat into rectangle. Fold top third down, seal. Bottom third up, seal. Roll seam-down, elongate to ~35–40cm. Taper ends. Transfer seam-up onto floured couche.</p>`;
   steps += `<img src="images/1_pat_down_alt.gif" alt="Pat down" class="shaping-gif"><p class="gif-caption">1. Pat down to remove large air bubbles, keeping a rectangular shape</p>`;
   steps += `<img src="images/2_fold_and_seal_before_flip.gif" alt="Fold and seal" class="shaping-gif"><p class="gif-caption">2. Fold from the top and seal</p>`;
   steps += `<img src="images/4_fold_and_roll_seal_after_flip.gif" alt="Flip, fold and roll to seal" class="shaping-gif"><p class="gif-caption">3. Flip, fold again and roll to seal, building volume</p>`;
@@ -562,12 +644,16 @@ function update() {
   steps += stepEnd;
 
   steps += stepStart(n++, 'Final Proof', proofTime, 's8');
-  steps += `<p>Cover couche. Proof at room temp <strong>${proofTime}</strong>. Preheat oven to <span class="temp">240°C</span> with baking stone and steam tray.</p>`;
+  steps += `<p>Cover couche. Proof at room temp <strong>${proofTime}</strong> — start checking at <strong>${Math.round(proofDuration * 0.8)} min</strong>. Preheat oven to <span class="temp">240°C</span> with baking stone and steam tray.</p>`;
   steps += tip(
-    isRetard
-      ? `Poke test: floured finger, slow spring-back with slight indent = ready. ${season === 'summer' ? 'Watch carefully — overproofs fast.' : 'Be patient — cold dough needs time.'}`
-      : `Longer proof since dough is at room temp. ${s.samedayNote} Poke test: slow spring-back with slight indent.`,
-    'When is it ready? The poke test'
+    `<table>
+      <tr><th>Response</th><th style="text-align:right">Reading</th></tr>
+      <tr><td>Springs back instantly and fully</td><td class="amt" style="color:var(--muted)">Under</td></tr>
+      <tr><td>Springs back fast, faint dent</td><td class="amt" style="color:var(--muted)">Still under</td></tr>
+      <tr><td>Springs back slowly, dent fades but stays visible</td><td class="amt" style="color:var(--accent);font-weight:500">Ready — bake</td></tr>
+      <tr><td>Barely springs back, dent stays</td><td class="amt">Over</td></tr>
+    </table>`,
+    'The finger test'
   );
   steps += stepEnd;
 
