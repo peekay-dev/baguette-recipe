@@ -87,10 +87,7 @@
   .control-row:last-child { margin-bottom: 0; }
   .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
   .adv-times .field { min-width: calc(50% - 5px); }
-  /* Fields stretch to equal height; steppers pin to the bottom so they stay aligned
-     even when one label (e.g. Pre-mix rest + reset pill) wraps to two lines. */
-  .control-row.adv-times { align-items: stretch; }
-  .adv-times .field .stepper { margin-top: auto; }
+  .control-row.adv-times { align-items: flex-start; }
   .field label { font-size: 0.68rem; font-weight: 600; color: var(--muted);
                  text-transform: uppercase; letter-spacing: 0.08em;
                  display: flex; align-items: center; gap: 4px; flex-wrap: wrap; min-height: 22px; }
@@ -886,7 +883,7 @@ function shortFlour(name) {
 function setPill(key) {
   const el = document.getElementById('src-' + key);
   if (!el) return;
-  if (userOverride[key] != null) { el.style.display = ''; el.textContent = 'custom · tap to reset'; return; }
+  if (userOverride[key] != null) { el.style.display = ''; el.textContent = '↺ reset'; return; }
   const s = sourceOf(key, ctxNow());
   const label = s === 'default' ? '' : s.startsWith('blend of ') ? 'blend' : shortFlour(s);
   el.textContent = label;
@@ -1240,7 +1237,7 @@ ${foldTableRows}
   document.querySelectorAll('#maltToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === maltPct));
   setPill('hydration'); setPill('fermentolyse'); setPill('detente'); setPill('develop'); setPill('malt');
   const srcFoldsEl = document.getElementById('src-folds');
-  if (srcFoldsEl) srcFoldsEl.textContent = foldOverride != null ? 'custom · tap to reset' : shortFlour(flourInfo[domFlour].name);
+  if (srcFoldsEl) srcFoldsEl.textContent = foldOverride != null ? '↺ reset' : shortFlour(flourInfo[domFlour].name);
 
   // ── Blend label ───────────────────────────────────────────────────────
   const blLabel = document.getElementById('blend-label');
