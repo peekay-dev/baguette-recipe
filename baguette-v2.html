@@ -87,7 +87,10 @@
   .control-row:last-child { margin-bottom: 0; }
   .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
   .adv-times .field { min-width: calc(50% - 5px); }
-  .control-row.adv-times { align-items: flex-start; }
+  /* Fields stretch to equal height; steppers pin to the bottom so they stay aligned
+     even when one label (e.g. Pre-mix rest + reset pill) wraps to two lines. */
+  .control-row.adv-times { align-items: stretch; }
+  .adv-times .field .stepper { margin-top: auto; }
   .field label { font-size: 0.68rem; font-weight: 600; color: var(--muted);
                  text-transform: uppercase; letter-spacing: 0.08em;
                  display: flex; align-items: center; gap: 4px; flex-wrap: wrap; min-height: 22px; }
