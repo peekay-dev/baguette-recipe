@@ -614,7 +614,7 @@ function sourceOf(key, ctx) {
 function tapStage(name) {
   currentStage = name;
   updateStageStrip();
-  const el = document.getElementById(STAGE_STEP[name]);
+  const el = document.querySelector('[data-step="' + STAGE_STEP[name] + '"]');
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function updateStageStrip() {
@@ -624,6 +624,21 @@ function updateStageStrip() {
     if (!el) return;
     el.classList.toggle('done', i < idx);
     el.classList.toggle('now', i === idx);
+  });
+}
+function setupStageObserver() {
+  if (typeof IntersectionObserver === 'undefined') return;
+  if (window._sObs) window._sObs.disconnect();
+  window._sObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const stage = Object.keys(STAGE_STEP).find(k => STAGE_STEP[k] === e.target.dataset.step);
+      if (stage) { currentStage = stage; updateStageStrip(); }
+    });
+  }, { rootMargin: '-5% 0px -55% 0px', threshold: 0 });
+  Object.entries(STAGE_STEP).forEach(([, id]) => {
+    const el = document.querySelector('[data-step="' + id + '"]');
+    if (el) window._sObs.observe(el);
   });
 }
 function setMethod(m) {
@@ -1139,6 +1154,7 @@ ${foldTableRows}
   // Stage strip: hide Retard pill in same-day mode; re-apply done/now state after rebuild
   document.getElementById('st-retard').style.display = isRetard ? '' : 'none';
   updateStageStrip();
+  setupStageObserver();
 }
 loadPrefs();
 update();
