@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Boulangerie: Oven Spring (overdrive)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif:opsz@12..24&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#FFFFFF; --surface:#FBF7F4; --ink:#1C1B1A; --muted:#6E5A54; --line:#EADFD8;
+    --accent:#9E3B2E; --accent-ink:#F7ECE4; --accent-soft:#F6E7E1; --accent-soft-ink:#8A3226;
+    --s2:8px; --s3:12px; --s4:16px; --s6:24px; --s8:32px;
+    --disp:'Hedvig Letters Serif'; --body:'Figtree';
+    --ease:cubic-bezier(0.16,1,0.3,1);
+  }
+  body { font-family: var(--body), system-ui, sans-serif; background:#E4DCCF; color:#3A342D; line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .page { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  .page > h1 { font-family: var(--disp); font-weight: 400; font-size: 1.8rem; letter-spacing:-0.01em; }
+  .page > p { color:#6E5A54; margin: 8px 0 24px; max-width: 62ch; font-size: 0.92rem; }
+
+  .phone { max-width: 400px; margin: 0 auto; background: var(--bg); color: var(--ink); border-radius: 24px; overflow: hidden; box-shadow: 0 20px 56px rgba(0,0,0,0.45); }
+
+  /* header */
+  .head { background: var(--accent); color: var(--accent-ink); padding: var(--s6) var(--s4) var(--s4); }
+  .head h2 { font-family: var(--disp); font-weight: 400; font-size: 1.95rem; line-height: 1.0; letter-spacing:-0.01em; max-width: 9ch; }
+  .head .tagline { font-size: 0.72rem; letter-spacing: 0.04em; opacity: 0.85; margin-top: 8px; text-transform: uppercase; }
+  .stages { display: flex; gap: 6px; margin-top: var(--s4); overflow-x: auto; scrollbar-width: none; }
+  .stages::-webkit-scrollbar { display: none; }
+  .stage { flex: 0 0 auto; font-size: 0.68rem; font-weight: 600; padding: 5px 11px; border-radius: 20px; white-space: nowrap; border: 1px solid rgba(247,236,228,0.35); opacity: 0.5; }
+  .stage.done { opacity: 0.4; }
+  .stage.now { background: var(--accent-ink); color: var(--accent); opacity: 1; border-color: var(--accent-ink); animation: nowglow 4s ease-in-out infinite; }
+
+  /* OVEN SPRING hero */
+  .hero { display: flex; align-items: center; gap: var(--s6); padding: var(--s8) var(--s4); background: radial-gradient(120% 90% at 30% 20%, #FBF0E2, #FFFFFF 70%); border-bottom: 1px solid var(--line); }
+
+  .loaf-wrap { flex: 0 0 auto; position: relative; width: 116px; height: 122px; display: grid; place-items: center; }
+  .halo { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(48% 46% at 52% 52%, rgba(201,123,74,0.30), rgba(201,123,74,0) 72%); animation: ovenglow 4.5s ease-in-out infinite; }
+  .loaf-svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+  .spring  { transform-box: fill-box; transform-origin: 50% 88%; animation: spring 1.15s var(--ease) both; }
+  .breathe { transform-box: fill-box; transform-origin: 50% 50%; animation: breathe 5.5s ease-in-out 1.25s infinite; }
+  .ear     { transform-box: fill-box; transform-origin: 8% 80%; transform: rotate(10deg) scale(0.2); animation: scoreopen 0.6s var(--ease) var(--sd,1s) forwards; }
+  .steam   { transform-box: fill-box; transform-origin: 50% 50%; fill: none; stroke: #C9B79A; stroke-width: 2.4; stroke-linecap: round; opacity: 0; animation: steam var(--st,4s) ease-out var(--sdl,1.4s) infinite; }
+
+  .hero-text { flex: 1; min-width: 0; }
+  .hero-text .k { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); }
+  .hero-text .risen { font-family: var(--disp); font-weight: 400; font-size: 1.05rem; color: var(--ink); margin-top: 4px; line-height: 1.15; }
+  .hero-text .risen .pct { font-size: 2.6rem; display: block; letter-spacing: -0.02em; line-height: 1; }
+  .hero-text .next { margin-top: var(--s3); font-size: 0.85rem; color: var(--muted); }
+  .hero-text .next b { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  .body { padding: var(--s4); }
+
+  /* primary flour */
+  .lead { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--s2); }
+  .flour-pick { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s4); border: 1.5px solid var(--ink); border-radius: 14px; margin-bottom: var(--s8); transition: box-shadow .2s var(--ease); }
+  .flour-pick:hover { box-shadow: 0 6px 18px rgba(28,27,26,0.10); }
+  .flour-pick .name { font-family: var(--disp); font-weight: 400; font-size: 1.25rem; line-height: 1.05; }
+  .flour-pick .meta { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+  .flour-pick .caret { color: var(--muted); }
+
+  /* numeric cluster */
+  .cluster { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); margin-bottom: var(--s6); }
+  .dial { padding: var(--s3) var(--s4); background: var(--surface); border-radius: 12px; }
+  .dial.wide { grid-column: 1 / -1; }
+  .dial .lbl { font-size: 0.74rem; color: var(--muted); font-weight: 500; }
+  .dial .row { display: flex; align-items: baseline; justify-content: space-between; margin-top: 2px; }
+  .dial .v { font-family: var(--disp); font-weight: 400; font-size: 2rem; line-height: 1; letter-spacing:-0.01em; font-variant-numeric: tabular-nums; }
+  .dial .u { font-size: 0.72rem; color: var(--muted); margin-left: 2px; }
+  .dial .src { font-size: 0.64rem; color: var(--accent-soft-ink); background: var(--accent-soft); display: inline-block; padding: 2px 8px; border-radius: 10px; margin-top: 7px; }
+  .pmset { display: flex; gap: 5px; }
+  .pm { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 1rem; cursor: pointer; transition: transform .1s var(--ease), background .1s; }
+  .pm:active { transform: scale(0.9); background: var(--accent-soft); }
+
+  .method { margin-bottom: var(--s6); }
+  .method .lbl { font-size: 0.74rem; color: var(--muted); font-weight: 500; margin-bottom: var(--s2); }
+  .toggle { display: flex; gap: 4px; padding: 4px; background: var(--surface); border-radius: 12px; }
+  .seg { flex: 1; border: none; background: transparent; color: var(--muted); font-family: inherit; font-weight: 600; font-size: 0.85rem; padding: 10px; border-radius: 9px; cursor: pointer; transition: transform .1s var(--ease); }
+  .seg:active { transform: scale(0.97); }
+  .seg.active { background: var(--accent); color: var(--accent-ink); }
+
+  .adv { display: flex; align-items: center; justify-content: space-between; padding: var(--s4) 0 var(--s2); border-top: 1px solid var(--line); font-weight: 600; font-size: 0.85rem; }
+  .adv .chev { color: var(--muted); }
+  .adv-note { font-size: 0.72rem; color: var(--muted); }
+
+  .readout { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s4); }
+  .chip { background: var(--surface); border: 1px solid var(--line); border-radius: 9px; padding: 7px 11px; font-size: 0.7rem; color: var(--muted); }
+  .chip b { display: block; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); font-size: 1.05rem; margin-top: 2px; }
+
+  .caption { max-width: 400px; margin: 12px auto 0; font-size: 0.75rem; color: #8a8177; text-align: center; }
+
+  /* keyframes */
+  @keyframes spring { from { transform: scale(0.86, 0.72); } to { transform: scale(1, 1); } }
+  @keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+  @keyframes scoreopen { from { transform: rotate(10deg) scale(0.2); } to { transform: rotate(-18deg) scale(1); } }
+  @keyframes ovenglow { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+  @keyframes steam { 0% { opacity: 0; transform: translateY(5px); } 30% { opacity: 0.5; } 100% { opacity: 0; transform: translateY(-18px); } }
+  @keyframes nowglow {
+    0%,100% { box-shadow: 0 0 0 0 rgba(247,236,228,0.0); }
+    50%     { box-shadow: 0 0 12px 1px rgba(247,236,228,0.45); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    .ear { transform: rotate(-18deg) scale(1); }
+    .steam { opacity: 0; }
+    .halo { opacity: 0.7; }
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <h1>Oven Spring (overdrive)</h1>
+    <p>Maxed direction: a baguette hero with oven spring (it rises and expands) and the scores blooming open, plus warm oven glow and rising steam. New fonts: Hedvig Letters serif with Figtree. All CSS, 60fps, honours reduced-motion. Same terracotta palette, stage strip, and hierarchy.</p>
+
+    <div class="phone">
+      <div class="head">
+        <h2>Poolish Baguettes</h2>
+        <div class="tagline">Temperature-scaled · flour-aware</div>
+        <div class="stages">
+          <span class="stage done">Poolish</span>
+          <span class="stage done">Mix</span>
+          <span class="stage now">Bulk</span>
+          <span class="stage">Retard</span>
+          <span class="stage">Shape</span>
+          <span class="stage">Bake</span>
+        </div>
+      </div>
+
+      <div class="hero">
+        <div class="loaf-wrap">
+          <div class="halo"></div>
+          <svg class="loaf-svg" viewBox="0 0 138 116" aria-hidden="true">
+            <defs>
+              <linearGradient id="crust" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#EDC584"/>
+                <stop offset="0.5" stop-color="#D89A4C"/>
+                <stop offset="1" stop-color="#B26E2C"/>
+              </linearGradient>
+            </defs>
+            <path class="steam" style="--st:4.2s; --sdl:1.6s" d="M70 32 q-5 -8 0 -16"/>
+            <path class="steam" style="--st:5.0s; --sdl:2.3s" d="M84 27 q5 -8 0 -16"/>
+            <path class="steam" style="--st:4.6s; --sdl:3.0s" d="M58 36 q-5 -8 0 -16"/>
+            <g transform="translate(69 66) rotate(-40)">
+              <g class="spring">
+                <g class="breathe">
+                  <path fill="url(#crust)" d="M-50 0 C -42 -15, 42 -15, 50 0 C 42 15, -42 15, -50 0 Z"/>
+                  <ellipse cx="0" cy="-4" rx="42" ry="4" fill="#F0D49A" opacity="0.45"/>
+                  <g transform="translate(-18 -1)"><path class="ear" style="--sd:0.95s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+                  <g transform="translate(2 -2.5)"><path class="ear" style="--sd:1.08s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+                  <g transform="translate(22 -1)"><path class="ear" style="--sd:1.21s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+                </g>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="hero-text">
+          <div class="k">Now · Bulk fermentation</div>
+          <div class="risen"><span class="pct">30%</span> risen</div>
+          <div class="next">Next — <b>coil fold</b> · in <b>24 min</b></div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="lead">Flour</div>
+        <div class="flour-pick">
+          <div>
+            <div class="name">Miller &amp; Baker Plain Flour</div>
+            <div class="meta">Strong · low extensibility · high enzyme</div>
+          </div>
+          <span class="caret">▾</span>
+        </div>
+
+        <div class="cluster">
+          <div class="dial">
+            <div class="lbl">Hydration</div>
+            <div class="row"><span><span class="v">72</span><span class="u">%</span></span><span class="pmset"><button class="pm">−</button><button class="pm">+</button></span></div>
+            <span class="src">from Yitpi</span>
+          </div>
+          <div class="dial">
+            <div class="lbl">Room temp</div>
+            <div class="row"><span><span class="v">18</span><span class="u">°C</span></span><span class="pmset"><button class="pm">−</button><button class="pm">+</button></span></div>
+          </div>
+          <div class="dial wide">
+            <div class="lbl">Batch</div>
+            <div class="row"><span><span class="v">4</span><span class="u">× 250g</span></span><span class="pmset"><button class="pm">−</button><button class="pm">+</button></span></div>
+          </div>
+        </div>
+
+        <div class="method">
+          <div class="lbl">Method</div>
+          <div class="toggle"><button class="seg active">Cold Retard</button><button class="seg">Same Day</button></div>
+        </div>
+
+        <div class="adv"><span>Advanced · flour tuning</span><span class="chev">▾</span></div>
+        <div class="adv-note">Folds, fermentolyse, development, malt — defaults from your flour.</div>
+
+        <div class="readout">
+          <span class="chip">Water<b>8°C</b></span>
+          <span class="chip">DDT<b>24°C</b></span>
+          <span class="chip">Bulk<b>3h 10m</b></span>
+          <span class="chip">Proof<b>55m</b></span>
+        </div>
+      </div>
+    </div>
+    <p class="caption">Watch the loaf: oven spring on load, the scores bloom open, with warm glow and rising steam.</p>
+  </div>
+</body>
+</html>

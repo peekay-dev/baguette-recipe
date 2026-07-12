@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Boulangerie — number font options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hanken Grotesk', system-ui, sans-serif; background: #201e1c; color: #e8e4de; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+  .page-head { max-width: 900px; margin: 0 auto; padding: 40px 20px 4px; }
+  .page-head h1 { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 1.8rem; letter-spacing: -0.02em; }
+  .page-head p { color: #a8a29a; margin-top: 8px; max-width: 62ch; font-size: 0.95rem; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; max-width: 1200px; margin: 26px auto 60px; padding: 0 16px; align-items: start; }
+
+  .variant-label { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+  .variant-label .n { font-family: 'Bricolage Grotesque'; font-weight: 700; font-size: 1.05rem; color: #f3efe8; }
+  .variant-label .f { font-size: 0.72rem; color: #8a8177; font-family: 'IBM Plex Mono', monospace; }
+
+  /* ---- Boulangerie themed card ---- */
+  .card { --bg:#FFFFFF; --surface:#FBF7F4; --ink:#1C1B1A; --muted:#6E5A54; --line:#EADFD8; --accent:#9E3B2E; --accent-ink:#F7ECE4;
+    background: var(--bg); color: var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 16px 44px rgba(0,0,0,0.4); }
+
+  .head { background: var(--accent); color: var(--accent-ink); padding: 20px 18px 18px; }
+  .head h2 { font-family: 'Bricolage Grotesque'; font-weight: 700; font-size: 1.5rem; line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
+  .head .sub { font-size: 0.74rem; opacity: 0.82; margin-top: 5px; }
+
+  .body { padding: 18px; }
+
+  .row { display: flex; justify-content: space-between; align-items: baseline; padding: 13px 0; border-top: 1px solid var(--line); }
+  .row:first-child { border-top: none; }
+  .row .lbl { font-size: 0.86rem; font-weight: 500; }
+  .row .lbl .src { display: block; font-size: 0.66rem; color: var(--accent); margin-top: 2px; }
+  .val { font-family: var(--num); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 1.55rem; color: var(--ink); line-height: 1; }
+  .val .u { font-size: 0.7rem; color: var(--muted); font-family: 'Hanken Grotesk'; margin-left: 2px; font-weight: 500; }
+
+  .readout { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .chip { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font-size: 0.7rem; color: var(--muted); }
+  .chip b { display: block; font-family: var(--num); font-variant-numeric: tabular-nums; color: var(--ink); font-size: 1.05rem; font-weight: 600; margin-top: 2px; }
+
+  /* number-font variants */
+  .v-sans    { --num: 'Hanken Grotesk'; }
+  .v-mono    { --num: 'IBM Plex Mono'; }
+  .v-display { --num: 'Bricolage Grotesque'; }
+  .v-soft    { --num: 'Spline Sans Mono'; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>Which font for the numbers?</h1>
+    <p>Modern Boulangerie lane, real fonts (Bricolage Grotesque + Hanken Grotesk). Only the <em>numeric values</em> change between these four — everything else is identical. The numbers are the busiest part of this app (hydration, temps, timings), so this choice sets a lot of the feel.</p>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="variant-label"><span class="n">A · Sans figures</span><span class="f">Hanken Grotesk · tabular</span></div>
+      <div class="card v-sans">
+        <div class="head"><h2>Perth Poolish Baguettes</h2><div class="sub">Poolish · temperature-scaled · flour-aware</div></div>
+        <div class="body">
+          <div class="row"><span class="lbl">Hydration<span class="src">auto · from Yitpi</span></span><span class="val">72<span class="u">%</span></span></div>
+          <div class="row"><span class="lbl">Room temp</span><span class="val">18<span class="u">°C</span></span></div>
+          <div class="row"><span class="lbl">Fermentolyse<span class="src">auto · from Yitpi</span></span><span class="val">60<span class="u">m</span></span></div>
+          <div class="row"><span class="lbl">Folds<span class="src">2 coil</span></span><span class="val">2</span></div>
+          <div class="readout"><span class="chip">Water<b>8°C</b></span><span class="chip">DDT<b>24°C</b></span><span class="chip">Bulk<b>3h 10m</b></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="variant-label"><span class="n">B · Mono</span><span class="f">IBM Plex Mono</span></div>
+      <div class="card v-mono">
+        <div class="head"><h2>Perth Poolish Baguettes</h2><div class="sub">Poolish · temperature-scaled · flour-aware</div></div>
+        <div class="body">
+          <div class="row"><span class="lbl">Hydration<span class="src">auto · from Yitpi</span></span><span class="val">72<span class="u">%</span></span></div>
+          <div class="row"><span class="lbl">Room temp</span><span class="val">18<span class="u">°C</span></span></div>
+          <div class="row"><span class="lbl">Fermentolyse<span class="src">auto · from Yitpi</span></span><span class="val">60<span class="u">m</span></span></div>
+          <div class="row"><span class="lbl">Folds<span class="src">2 coil</span></span><span class="val">2</span></div>
+          <div class="readout"><span class="chip">Water<b>8°C</b></span><span class="chip">DDT<b>24°C</b></span><span class="chip">Bulk<b>3h 10m</b></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="variant-label"><span class="n">C · Display figures</span><span class="f">Bricolage Grotesque</span></div>
+      <div class="card v-display">
+        <div class="head"><h2>Perth Poolish Baguettes</h2><div class="sub">Poolish · temperature-scaled · flour-aware</div></div>
+        <div class="body">
+          <div class="row"><span class="lbl">Hydration<span class="src">auto · from Yitpi</span></span><span class="val">72<span class="u">%</span></span></div>
+          <div class="row"><span class="lbl">Room temp</span><span class="val">18<span class="u">°C</span></span></div>
+          <div class="row"><span class="lbl">Fermentolyse<span class="src">auto · from Yitpi</span></span><span class="val">60<span class="u">m</span></span></div>
+          <div class="row"><span class="lbl">Folds<span class="src">2 coil</span></span><span class="val">2</span></div>
+          <div class="readout"><span class="chip">Water<b>8°C</b></span><span class="chip">DDT<b>24°C</b></span><span class="chip">Bulk<b>3h 10m</b></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="variant-label"><span class="n">D · Soft mono</span><span class="f">Spline Sans Mono</span></div>
+      <div class="card v-soft">
+        <div class="head"><h2>Perth Poolish Baguettes</h2><div class="sub">Poolish · temperature-scaled · flour-aware</div></div>
+        <div class="body">
+          <div class="row"><span class="lbl">Hydration<span class="src">auto · from Yitpi</span></span><span class="val">72<span class="u">%</span></span></div>
+          <div class="row"><span class="lbl">Room temp</span><span class="val">18<span class="u">°C</span></span></div>
+          <div class="row"><span class="lbl">Fermentolyse<span class="src">auto · from Yitpi</span></span><span class="val">60<span class="u">m</span></span></div>
+          <div class="row"><span class="lbl">Folds<span class="src">2 coil</span></span><span class="val">2</span></div>
+          <div class="readout"><span class="chip">Water<b>8°C</b></span><span class="chip">DDT<b>24°C</b></span><span class="chip">Bulk<b>3h 10m</b></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
