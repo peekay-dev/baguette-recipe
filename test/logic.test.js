@@ -13,7 +13,7 @@ const vals = { count:'4', weight:'250', hydration:'70', ambientTemp:'18', poolis
                flourA:'mb', flourB:'wholemeal', blend:'85', pctA:'85', pctB:'15', foldCount:'2' };
 const stub = id => ({ get value(){ return vals[id]; }, set value(v){ vals[id] = String(v); },
   set innerHTML(v){}, classList:{ toggle(){}, add(){}, remove(){}, contains(){ return false; } },
-  textContent:'', dataset:{}, max:'6', min:'1', querySelector(){ return { textContent:'' }; } });
+  textContent:'', dataset:{}, max:'6', min:'1', style:{}, querySelector(){ return { textContent:'' }; } });
 global.document = { getElementById: stub, querySelectorAll: () => [] };
 global.localStorage = { getItem: () => null, setItem: () => {} };
 global.window = {};

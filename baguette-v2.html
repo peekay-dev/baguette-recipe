@@ -4,147 +4,336 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Perth Baguettes v2 — Poolish Method</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif:opsz@12..24&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #f5f0ea; --white: #fff; --accent: #8b7355; --text: #3a3530; --muted: #9a9185; --border: #ddd5ca; --highlight: rgba(139,115,85,0.06); --done: #ccc5bb; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', -apple-system, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); max-width: 680px; margin: 0 auto; padding: 0 0 60px; line-height: 1.65; font-size: 15px; }
-  h1 { font-family: 'DM Serif Display', Georgia, serif; font-size: 2.2em; font-weight: 400; letter-spacing: -0.5px; margin-bottom: 0; }
-  h2 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.1em; font-weight: 400; margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); letter-spacing: 0.3px; color: var(--accent); }
-  h3 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.05em; font-weight: 400; margin: 16px 0 6px; color: var(--accent); letter-spacing: 0.3px; }
-  .subtitle { color: var(--muted); margin-bottom: 20px; font-size: 0.88em; letter-spacing: 2px; text-transform: uppercase; font-weight: 400; }
-  .header-row { padding: 32px 20px 0; }
-  .controls { padding: 0; margin: 0 20px 12px; }
-  .control-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 10px; }
-  .control-row:last-child { margin-bottom: 0; }
-  .field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
-  .field label { font-size: 0.7em; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-  select, input[type=number], input[type=time] { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 16px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: transparent; width: 100%; height: 44px; line-height: 1.2; color: var(--text); }
-  input[type=number], input[type=time] { -webkit-appearance: none; appearance: none; }
-  select:focus, input:focus { outline: none; border-color: var(--accent); }
-  /* Force number input spinners to show on mobile — stepper only */
-  .stepper input[type=number]::-webkit-inner-spin-button,
-  .stepper input[type=number]::-webkit-outer-spin-button {
-    opacity: 1;
-    height: 44px;
+  :root {
+    --bg: #FFFFFF; --surface: #FBF7F4; --ink: #1C1B1A; --muted: #6E5A54;
+    --line: #EADFD8; --accent: #9E3B2E; --accent-ink: #F7ECE4;
+    --accent-soft: #F6E7E1; --accent-soft-ink: #8A3226;
+    --disp: 'Hedvig Letters Serif'; --body: 'Figtree';
+    --ease: cubic-bezier(0.25, 0, 0, 1);
   }
-  /* Hide spinners on plain % fields so they match select height */
-  .num-field input[type=number] { -moz-appearance: textfield; }
-  .num-field input[type=number]::-webkit-inner-spin-button,
-  .num-field input[type=number]::-webkit-outer-spin-button { display: none; }
-  .toggle { display: flex; gap: 0; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
-  .toggle button { flex: 1; padding: 8px 14px; border: none; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.85em; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.2s; min-height: 44px; letter-spacing: 0.3px; white-space: nowrap; -webkit-appearance: none; }
-  .toggle button.active { background: var(--accent); color: var(--bg); }
-  .blend-row { display: flex; gap: 6px; align-items: center; }
-  .blend-input { width: 52px; text-align: center; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.88em; padding: 6px 2px; border: 1px solid var(--border); border-radius: 4px; background: transparent; color: var(--accent); min-height: 36px; }
-  .blend-input:focus { outline: none; border-color: var(--accent); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body), system-ui, sans-serif; font-size: 15px; line-height: 1.65;
+         background: var(--bg); color: var(--ink); max-width: 680px; margin: 0 auto;
+         padding: 0 0 60px; -webkit-font-smoothing: antialiased; }
+
+  /* ── Header ─────────────────────────────────────────────────────────── */
+  .head { background: var(--accent); color: var(--accent-ink); padding: 24px 20px 16px; }
+  .head h1 { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 2rem;
+             line-height: 1.05; letter-spacing: -0.01em; }
+  .head .formula-line { font-size: 0.82rem; opacity: 0.88; margin-top: 5px;
+                        font-variant-numeric: tabular-nums; }
+  .stages { display: flex; gap: 6px; margin-top: 14px; overflow-x: auto; scrollbar-width: none; }
+  .stages::-webkit-scrollbar { display: none; }
+  .stage { flex: 0 0 auto; font-size: 0.68rem; font-weight: 600; padding: 5px 11px;
+           border-radius: 20px; white-space: nowrap; border: 1px solid rgba(247,236,228,0.35);
+           color: var(--accent-ink); opacity: 0.45; }
+  .stage.now { background: var(--accent-ink); color: var(--accent); opacity: 1;
+               border-color: var(--accent-ink); }
+
+  /* ── Oven Spring hero ────────────────────────────────────────────────── */
+  .hero { display: flex; align-items: center; gap: 24px; padding: 28px 20px;
+          background: radial-gradient(120% 90% at 30% 20%, #FBF0E2, #FFFFFF 70%);
+          border-bottom: 1px solid var(--line); }
+  .loaf-wrap { flex: 0 0 auto; position: relative; width: 116px; height: 122px;
+               display: grid; place-items: center; }
+  .halo { position: absolute; inset: 0; pointer-events: none;
+          background: radial-gradient(48% 46% at 52% 52%, rgba(201,123,74,0.30), rgba(201,123,74,0) 72%);
+          animation: ovenglow 4.5s ease-in-out infinite; }
+  .loaf-svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+  .spring  { transform-box: fill-box; transform-origin: 50% 88%;
+             animation: spring 1.15s var(--ease) both; }
+  .breathe { transform-box: fill-box; transform-origin: 50% 50%;
+             animation: breathe 5.5s ease-in-out 1.25s infinite; }
+  .ear     { transform-box: fill-box; transform-origin: 8% 80%;
+             transform: rotate(10deg) scale(0.2);
+             animation: scoreopen 0.6s var(--ease) var(--sd, 1s) forwards; }
+  .steam   { transform-box: fill-box; transform-origin: 50% 50%;
+             fill: none; stroke: #C9B79A; stroke-width: 2.4; stroke-linecap: round;
+             opacity: 0; animation: steam var(--st, 4s) ease-out var(--sdl, 1.4s) infinite; }
+  .hero-text { flex: 1; min-width: 0; }
+  .hero-text .k { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em;
+                  text-transform: uppercase; color: var(--accent); }
+  .hero-text .risen { font-family: var(--disp), Georgia, serif; font-weight: 400;
+                      font-size: 1.05rem; color: var(--ink); margin-top: 4px; line-height: 1.15; }
+  .hero-text .risen .pct { font-size: 2.6rem; display: block; letter-spacing: -0.02em;
+                            line-height: 1; font-variant-numeric: tabular-nums; }
+  .hero-text .next { margin-top: 12px; font-size: 0.85rem; color: var(--muted); }
+  .hero-text .next b { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  /* ── Controls ────────────────────────────────────────────────────────── */
+  .controls { padding: 16px; margin: 16px 20px; background: var(--surface); border-radius: 14px; }
+  .group-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+                 letter-spacing: 0.1em; color: var(--muted); margin: 14px 0 6px; }
+  .group-label:first-child { margin-top: 0; }
+  .control-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 10px; }
+  .control-row:last-child { margin-bottom: 0; }
+  .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+  .field label { font-size: 0.68rem; font-weight: 600; color: var(--muted);
+                 text-transform: uppercase; letter-spacing: 0.08em;
+                 display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+
+  /* Select */
+  select { font-family: var(--body), system-ui; font-size: 15px; padding: 9px 28px 9px 10px;
+           border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg);
+           width: 100%; height: 44px; color: var(--ink); appearance: none; -webkit-appearance: none;
+           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236E5A54' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+           background-repeat: no-repeat; background-position: right 10px center; }
+  select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(158,59,46,0.12); }
+
+  /* Number / time inputs */
+  input[type=number], input[type=time] { font-family: var(--body), system-ui; font-size: 15px;
+    padding: 9px 10px; border: 1.5px solid var(--line); border-radius: 10px;
+    background: var(--bg); width: 100%; height: 44px; color: var(--ink);
+    -webkit-appearance: none; appearance: none; }
+  input[type=number]:focus, input[type=time]:focus { outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(158,59,46,0.12); }
   input[type=range] { flex: 1; accent-color: var(--accent); min-height: 44px; }
+
+  /* Stepper */
+  .stepper { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .stepper input[type=number] { border: none; border-radius: 0; text-align: center;
+    -moz-appearance: textfield; padding: 8px 2px; box-shadow: none; height: 44px; }
+  .stepper input::-webkit-outer-spin-button,
+  .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper button { width: 40px; min-height: 44px; border: none; background: transparent;
+    color: var(--accent); font-size: 1.15rem; cursor: pointer; flex-shrink: 0;
+    font-family: var(--body); transition: background 0.12s; }
+  .stepper button:hover { background: var(--accent-soft); }
+  .stepper button:active { background: var(--line); }
+
+  /* Toggle group */
+  .toggle { display: flex; gap: 3px; padding: 3px; background: var(--bg); border-radius: 12px;
+            border: 1.5px solid var(--line); }
+  .toggle button { flex: 1; padding: 8px 10px; border: none; font-family: var(--body), system-ui;
+    font-weight: 600; font-size: 0.83rem; cursor: pointer; background: transparent;
+    color: var(--muted); transition: background 0.15s var(--ease), color 0.15s;
+    min-height: 38px; border-radius: 9px; white-space: nowrap; -webkit-appearance: none; }
+  .toggle button.active { background: var(--accent); color: var(--accent-ink); }
+  .toggle button:not(.active):hover { background: var(--accent-soft); color: var(--ink); }
+
+  /* Blend */
+  .blend-input { width: 52px; text-align: center; font-family: var(--body); font-size: 0.88rem;
+    padding: 6px 2px; border: 1.5px solid var(--line); border-radius: 8px;
+    background: var(--bg); color: var(--accent); min-height: 36px; }
+  .blend-input:focus { outline: none; border-color: var(--accent); }
   .num-field { max-width: 76px; flex: 0 0 76px; }
-  .stepper { display: flex; align-items: center; gap: 0px; border: 1px solid var(--border); border-radius: 4px; overflow:hidden; }
-  .stepper input[type=number] { border: none; border-radius: 0; text-align: center; -moz-appearance: textfield; padding: 8px 2px; }
-  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .stepper button { width: 38px; min-height: 44px; border: none; background: var(--highlight); color: var(--accent); font-size: 1.2em; cursor: pointer; flex-shrink:0; font-family: 'Inter', sans-serif ;}
-  .content { padding: 0 20px; }
-  .white-panel { background: var(--white); border-radius: 8px; padding: 20px; margin-bottom: 12px; }
-  table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 0.9em; }
-  th, td { text-align: left; padding: 4px 0; border: none; }
-  th { font-size: 0.65em; font-weight: 500; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
-  th:last-child, td.amt { text-align: right; }
-  td { border-bottom: 1px solid rgba(0,0,0,0.04); }
-  td.amt { font-weight: 500; font-size: 1.05em; font-variant-numeric: tabular-nums; color: var(--text); text-align: right; }
-  .step { margin-bottom: 4px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04); transition: opacity 0.3s; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  .step:last-child { border-bottom: none; }
-  .step.done { opacity: 0.3; }
-  .step.done .step-title { text-decoration: line-through; }
-  .step-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-  .step-num { font-family: 'DM Serif Display', Georgia, serif; font-size: 1em; color: var(--accent); margin-right: 8px; }
-  .step-title { font-weight: 400; }
-  .step-time { font-size: 0.8em; color: var(--muted); }
-  .step-check { font-size: 0.7em; color: var(--muted); letter-spacing: 0.5px; }
-  .step.done .step-check { color: var(--accent); }
-  .step p { margin: 3px 0; }
-  .tip { background: var(--highlight); padding: 0; margin: 6px 0; border-radius: 4px; font-size: 0.88em; overflow: hidden; }
-  .tip-toggle { display: flex; align-items: center; padding: 6px 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; gap: 5px; font-weight: 400; font-size: 0.8em; color: var(--muted); letter-spacing: 0.3px; }
-  .tip-toggle::before { content: '+'; font-size: 1.1em; color: var(--accent); display: inline-block; }
-  .tip.open .tip-toggle::before { content: '−'; }
-  .tip-hint { color: var(--muted); font-style: italic; }
-  .tip.open .tip-hint { display: none; }
-  .tip-body { padding: 0 10px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; color: var(--text); }
-  .tip.open .tip-body { max-height: 300px; padding: 0 10px 8px; }
-  .shaping-gif { width: 100%; border-radius: 4px; margin: 8px 0 2px; display: block; }
-  .gif-caption { font-size: 0.75em; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 6px; }
-  .temp { font-weight: 500; }
-  .collapsible-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+
+  /* Source pill */
+  .src { font-size: 0.66rem; font-weight: 600; color: var(--accent-soft-ink);
+         background: var(--accent-soft); padding: 2px 8px; border-radius: 10px;
+         cursor: pointer; white-space: nowrap; display: inline-block; }
+
+  /* Advanced toggle */
+  .adv-toggle { cursor: pointer; user-select: none; display: flex; align-items: center;
+    justify-content: space-between; font-size: 0.82rem; font-weight: 600; color: var(--ink);
+    padding: 12px 0 4px; border-top: 1px solid var(--line); margin-top: 14px;
+    -webkit-tap-highlight-color: transparent; }
+  .adv-toggle .chev { color: var(--muted); font-size: 0.75rem;
+                      transition: transform 0.22s var(--ease); display: inline-block; }
+  .adv-toggle.open .chev { transform: rotate(180deg); }
+
+  /* Collapsibles — grid-template-rows (no layout-property animation) */
+  .collapsible-grid { display: grid; grid-template-rows: 0fr;
+                      transition: grid-template-rows 0.25s var(--ease); }
+  .collapsible-grid.open { grid-template-rows: 1fr; }
+  .collapsible-inner { overflow: hidden; }
+
+  /* Schedule collapsible header */
+  .collapsible-header { display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
   .collapsible-header::after { content: '+'; font-size: 1.1em; color: var(--accent); }
   .collapsible-header.open::after { content: '−'; }
-  .collapsible-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-  .collapsible-body.open { max-height: 800px; }
-  .sched-day { font-size: 0.72em; color: var(--muted); font-weight: 400; }
-  .schedule { display: grid; grid-template-columns: auto 1fr; gap: 1px 16px; font-size: 0.9em; padding-top: 8px; }
-  .schedule .time { font-weight: 500; white-space: nowrap; color: var(--accent); }
-  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; font-size: 0.85em; }
-  .compare > div { padding: 10px; border-radius: 4px; border: 1px solid var(--border); }
-  .compare > div:last-child { background: var(--highlight); }
-  .compare h4 { font-size: 0.75em; font-weight: 500; margin-bottom: 4px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* ── Content ─────────────────────────────────────────────────────────── */
+  .content { padding: 0 20px; }
+  .white-panel { background: var(--surface); border-radius: 14px; padding: 20px; margin-bottom: 12px; }
+  h2 { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 1.1rem;
+       margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line);
+       letter-spacing: 0.01em; color: var(--accent); }
+  h3 { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 1.05rem;
+       margin: 16px 0 6px; color: var(--accent); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 4px 0; border: none; }
+  th { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--muted);
+       letter-spacing: 0.08em; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+  th:last-child, td.amt { text-align: right; }
+  td { border-bottom: 1px solid rgba(0,0,0,0.04); }
+  td.amt { font-weight: 600; font-size: 1.05rem; font-variant-numeric: tabular-nums;
+           color: var(--ink); text-align: right; }
+
+  /* Steps */
+  .step { margin-bottom: 4px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04);
+          transition: opacity 0.2s; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .step:last-child { border-bottom: none; }
+  .step.done { opacity: 0.35; }
+  .step.done .step-title { text-decoration: line-through; }
+  .step-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .step-num { font-family: var(--disp), Georgia, serif; font-size: 1rem; color: var(--accent);
+              margin-right: 8px; }
+  .step-title { font-weight: 600; }
+  .step-time { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .step-check { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.05em; }
+  .step.done .step-check { color: var(--accent); }
+  .step p { margin: 3px 0; }
+
+  /* Tips — grid-rows collapse */
+  .tip { background: var(--accent-soft); border-radius: 10px; margin: 6px 0; font-size: 0.88rem; }
+  .tip-toggle { display: flex; align-items: center; padding: 8px 12px; cursor: pointer;
+    -webkit-tap-highlight-color: transparent; user-select: none; gap: 6px;
+    font-weight: 600; font-size: 0.78rem; color: var(--accent-soft-ink); }
+  .tip-toggle::before { content: '+'; font-size: 1.1em; flex-shrink: 0; }
+  .tip.open .tip-toggle::before { content: '−'; }
+  .tip-hint { color: var(--accent-soft-ink); }
+  .tip.open .tip-hint { display: none; }
+  .tip-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.22s var(--ease); }
+  .tip.open .tip-body { grid-template-rows: 1fr; }
+  .tip-body-inner { overflow: hidden; padding: 0 12px; color: var(--ink); }
+  .tip.open .tip-body-inner { padding-bottom: 10px; }
+
+  /* Shaping GIFs */
+  .shaping-gif { width: 100%; border-radius: 8px; margin: 8px 0 2px; display: block; }
+  .gif-caption { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.04em; margin-bottom: 6px; }
+
+  /* Misc */
+  .temp { font-weight: 600; }
+  .sched-day { font-size: 0.72rem; color: var(--muted); }
+  .schedule { display: grid; grid-template-columns: auto 1fr; gap: 1px 16px;
+              font-size: 0.9rem; padding-top: 8px; }
+  .schedule .time { font-weight: 600; white-space: nowrap; color: var(--accent);
+                    font-variant-numeric: tabular-nums; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; font-size: 0.85rem; }
+  .compare > div { padding: 10px; border-radius: 10px; border: 1px solid var(--line); }
+  .compare > div:last-child { background: var(--accent-soft); }
+  .compare h4 { font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; color: var(--accent);
+                text-transform: uppercase; letter-spacing: 0.08em; }
   .compare ul { padding-left: 16px; margin: 0; }
   .compare li { margin-bottom: 1px; }
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 200; justify-content: center; align-items: center; padding: 20px; }
+  .formula-meta { font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    z-index: 200; justify-content: center; align-items: center; padding: 20px; }
   .modal-overlay.open { display: flex; }
-  .modal { background: #fff; border-radius: 8px; padding: 20px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
-  .modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none; font-size: 1.3em; cursor: pointer; color: var(--muted); }
-  .info-btn { background: none; border: 1px solid var(--border); border-radius: 50%; width: 18px; height: 18px; font-size: 0.6em; cursor: pointer; color: var(--accent); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; vertical-align: middle; margin-left: 4px; padding: 0; line-height: 1; }
+  .modal { background: var(--bg); border-radius: 14px; padding: 20px; max-width: 500px;
+           width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
+  .modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none;
+    font-size: 1.3em; cursor: pointer; color: var(--muted); }
+  .info-btn { background: var(--accent-soft); border: none; border-radius: 50%; width: 20px;
+    height: 20px; font-size: 0.6em; cursor: pointer; color: var(--accent-soft-ink);
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    vertical-align: middle; margin-left: 4px; padding: 0; line-height: 1; }
   .method-row { display: flex; gap: 8px; align-items: end; flex: 1; min-width: 0; }
-  .meta { font-size: 0.78em; color: var(--muted); margin-top: 3px; }
-  .formula-meta { font-size: 0.82em; color: var(--muted); letter-spacing: 0.3px; }
-  .group-label { font-size: 0.62em; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin: 12px 0 4px; }
-  .group-label:first-child { margin-top: 0; }
-  .adv-toggle { cursor: pointer; user-select: none; font-size: 0.78em; font-weight: 500; color: var(--accent); letter-spacing: 0.3px; padding: 12px 0 2px; border-top: 1px solid var(--border); margin-top: 14px; -webkit-tap-highlight-color: transparent; }
-  .adv-toggle::before { content: '+ '; }
-  .adv-toggle.open::before { content: '− '; }
-  .src { font-size: 0.82em; font-weight: 400; color: var(--accent); text-transform: none; letter-spacing: 0; cursor: pointer; }
+  .meta { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+
+  /* ── Keyframes ───────────────────────────────────────────────────────── */
+  @keyframes spring   { from { transform: scale(0.86, 0.72); } to { transform: scale(1, 1); } }
+  @keyframes breathe  { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+  @keyframes scoreopen { from { transform: rotate(10deg) scale(0.2); } to { transform: rotate(-18deg) scale(1); } }
+  @keyframes ovenglow { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+  @keyframes steam    { 0% { opacity: 0; transform: translateY(5px); } 30% { opacity: 0.5; } 100% { opacity: 0; transform: translateY(-18px); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    .ear { transform: rotate(-18deg) scale(1); }
+    .halo { opacity: 0.7; }
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────────────── */
   @media (max-width: 600px) {
-    /* .num-field { max-width: 100%; flex: 1; } */
-    .header-row { padding: 24px 16px 0; }
-    .controls { padding: 12px 16px; }
-    .content { padding: 0 16px; }
-    td.amt { font-size: 1.1em; }
+    .head { padding: 20px 16px 14px; }
+    .hero { padding: 20px 16px; gap: 16px; }
+    .loaf-wrap { width: 96px; height: 100px; }
+    .hero-text .risen .pct { font-size: 2.1rem; }
+    .controls { margin: 12px 12px; padding: 14px; }
+    .content { padding: 0 12px; }
+    td.amt { font-size: 1.1rem; }
     .compare { grid-template-columns: 1fr; }
-    .white-panel { padding: 16px; }
+    .white-panel { padding: 14px; }
     .control-row { flex-wrap: wrap; gap: 8px; }
     .control-row .field { min-width: calc(50% - 4px); }
     .control-row .num-field { min-width: 0; flex: 0 0 72px; max-width: 72px; }
     .method-row { flex-wrap: wrap; }
     .method-row .field { min-width: 100%; }
-    .blend-row { flex-wrap: nowrap; }
-    .toggle button { padding: 8px 6px; font-size: 0.78em; letter-spacing: 0; white-space: normal; line-height: 1.2; }
+    .toggle button { padding: 8px 6px; font-size: 0.78rem; white-space: normal; line-height: 1.2; }
   }
 </style>
 </head>
 <body>
-<div class="header-row">
-  <h1>Perth Poolish Baguettes</h1>
-  <p class="subtitle" id="subtitle">Hand-mixed · cold-retarded · temperature-adjusted</p>
-  <p style="color:var(--muted);font-size:0.78em;letter-spacing:1px">by Paul</p>
+
+<!-- ── Terracotta header ─────────────────────────────────────────────────── -->
+<div class="head">
+  <h1>Poolish Baguettes</h1>
+  <div class="formula-line" id="formula-line">4 × 250g · 72% · retard · 18°C</div>
+  <div class="stages">
+    <span class="stage" id="st-poolish">Poolish</span>
+    <span class="stage" id="st-mix">Mix</span>
+    <span class="stage" id="st-bulk">Bulk</span>
+    <span class="stage" id="st-retard">Retard</span>
+    <span class="stage" id="st-shape">Shape</span>
+    <span class="stage" id="st-bake">Bake</span>
+  </div>
 </div>
-<div class="controls white-panel">
-  <!-- ── Essentials ─────────────────────────────────────────── -->
+
+<!-- ── Oven Spring hero ──────────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="loaf-wrap">
+    <div class="halo"></div>
+    <svg class="loaf-svg" viewBox="0 0 138 116" aria-hidden="true">
+      <defs>
+        <linearGradient id="crust" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"   stop-color="#EDC584"/>
+          <stop offset="0.5" stop-color="#D89A4C"/>
+          <stop offset="1"   stop-color="#B26E2C"/>
+        </linearGradient>
+      </defs>
+      <path class="steam" style="--st:4.2s; --sdl:1.6s" d="M70 32 q-5 -8 0 -16"/>
+      <path class="steam" style="--st:5.0s; --sdl:2.3s" d="M84 27 q5 -8 0 -16"/>
+      <path class="steam" style="--st:4.6s; --sdl:3.0s" d="M58 36 q-5 -8 0 -16"/>
+      <g transform="translate(69 66) rotate(-40)">
+        <g class="spring">
+          <g class="breathe">
+            <path fill="url(#crust)" d="M-50 0 C -42 -15, 42 -15, 50 0 C 42 15, -42 15, -50 0 Z"/>
+            <ellipse cx="0" cy="-4" rx="42" ry="4" fill="#F0D49A" opacity="0.45"/>
+            <g transform="translate(-18 -1)"><path class="ear" style="--sd:0.95s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+            <g transform="translate(2 -2.5)"><path class="ear" style="--sd:1.08s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+            <g transform="translate(22 -1)"><path class="ear" style="--sd:1.21s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+          </g>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <div class="hero-text">
+    <div class="k" id="hero-flour">Miller &amp; Baker · Yitpi</div>
+    <div class="risen"><span class="pct" id="hero-hyd">72</span><span>% hydration</span></div>
+    <div class="next" id="hero-next">4 × 250g · cold retard · 18°C</div>
+  </div>
+</div>
+
+<!-- ── Controls ──────────────────────────────────────────────────────────── -->
+<div class="controls">
   <div class="group-label">Batch</div>
   <div class="control-row">
     <div class="field">
       <label>Quantity</label>
-       <div class="stepper">
-        <button onclick="step('count',-1)">-</button>
+      <div class="stepper">
+        <button onclick="step('count',-1)">−</button>
         <input type="number" id="count" value="4" min="1" max="50" onchange="update()">
         <button onclick="step('count', 1)">+</button>
-       </div>
+      </div>
     </div>
     <div class="field">
       <label>Weight each (g)</label>
-        <div class="stepper">
-          <button onclick="step('weight',-1)">-</button>
-          <input type="number" id="weight" value="250" min="150" max="500" onchange="update()">
-          <button onclick="step('weight', 1)">+</button>
-        </div>
+      <div class="stepper">
+        <button onclick="step('weight',-1)">−</button>
+        <input type="number" id="weight" value="250" min="150" max="500" onchange="update()">
+        <button onclick="step('weight', 1)">+</button>
+      </div>
     </div>
   </div>
 
@@ -188,7 +377,7 @@
     <div class="field">
       <label>Hydration % <span class="src" id="src-hydration" onclick="resetOverride('hydration')"></span></label>
       <div class="stepper">
-        <button onclick="stepOverride('hydration',-1,50,100)">-</button>
+        <button onclick="stepOverride('hydration',-1,50,100)">−</button>
         <input type="number" id="hydration" value="72" min="50" max="100" onchange="setOverrideInput('hydration')">
         <button onclick="stepOverride('hydration',1,50,100)">+</button>
       </div>
@@ -196,7 +385,7 @@
     <div class="field">
       <label>Poolish %</label>
       <div class="stepper">
-        <button onclick="step('poolishPct',-1)">-</button>
+        <button onclick="step('poolishPct',-1)">−</button>
         <input type="number" id="poolishPct" value="30" min="20" max="40" onchange="update()">
         <button onclick="step('poolishPct', 1)">+</button>
       </div>
@@ -208,7 +397,7 @@
     <div class="field">
       <label>Room Temp (°C)</label>
       <div class="stepper">
-        <button onclick="step('ambientTemp',-1)">-</button>
+        <button onclick="step('ambientTemp',-1)">−</button>
         <input type="number" id="ambientTemp" value="18" min="10" max="35" onchange="update()">
         <button onclick="step('ambientTemp', 1)">+</button>
       </div>
@@ -223,80 +412,86 @@
   </div>
 
   <!-- ── Advanced · flour tuning ────────────────────────────── -->
-  <div class="adv-toggle" id="advToggle" onclick="toggleAdvanced(this)">Advanced · flour tuning</div>
-  <div class="collapsible-body" id="advBody">
-    <div class="control-row" style="padding-top:12px">
-      <div class="field">
-        <label>Bowl</label>
-        <div class="toggle" id="bowlToggle">
-          <button class="active" data-v="60" onclick="setTemperTau(60)">Metal</button>
-          <button data-v="90" onclick="setTemperTau(90)">Glass</button>
-          <button data-v="111" onclick="setTemperTau(111)">Plastic tub</button>
+  <div class="adv-toggle" id="advToggle" onclick="toggleAdvanced(this)">
+    <span>Advanced · flour tuning</span><span class="chev">▾</span>
+  </div>
+  <div class="collapsible-grid" id="advBody">
+    <div class="collapsible-inner">
+      <div class="control-row" style="padding-top:12px">
+        <div class="field">
+          <label>Bowl</label>
+          <div class="toggle" id="bowlToggle">
+            <button class="active" data-v="60" onclick="setTemperTau(60)">Metal</button>
+            <button data-v="90" onclick="setTemperTau(90)">Glass</button>
+            <button data-v="111" onclick="setTemperTau(111)">Plastic tub</button>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="control-row">
-      <div class="field">
-        <label>Folds <span class="src" id="src-folds" onclick="onFlourChange()"></span></label>
-        <div class="stepper">
-          <button onclick="stepFold(-1)">-</button>
-          <input type="number" id="foldCount" value="4" min="1" max="6" onchange="stepFold(0)">
-          <button onclick="stepFold(1)">+</button>
+      <div class="control-row">
+        <div class="field">
+          <label>Folds <span class="src" id="src-folds" onclick="onFlourChange()"></span></label>
+          <div class="stepper">
+            <button onclick="stepFold(-1)">−</button>
+            <input type="number" id="foldCount" value="4" min="1" max="6" onchange="stepFold(0)">
+            <button onclick="stepFold(1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Fermentolyse (min) <span class="src" id="src-fermentolyse" onclick="resetOverride('fermentolyse')"></span></label>
+          <div class="stepper">
+            <button onclick="stepOverride('fermentolyse',-5,30,90)">−</button>
+            <input type="number" id="fermentolyse" value="45" min="30" max="90" step="5" onchange="setOverrideInput('fermentolyse')">
+            <button onclick="stepOverride('fermentolyse',5,30,90)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Bench-rest floor (min) <span class="src" id="src-detente" onclick="resetOverride('detente')"></span></label>
+          <div class="stepper">
+            <button onclick="stepOverride('detente',-5,15,45)">−</button>
+            <input type="number" id="detente" value="20" min="15" max="45" step="5" onchange="setOverrideInput('detente')">
+            <button onclick="stepOverride('detente',5,15,45)">+</button>
+          </div>
         </div>
       </div>
-      <div class="field">
-        <label>Fermentolyse (min) <span class="src" id="src-fermentolyse" onclick="resetOverride('fermentolyse')"></span></label>
-        <div class="stepper">
-          <button onclick="stepOverride('fermentolyse',-5,30,90)">-</button>
-          <input type="number" id="fermentolyse" value="45" min="30" max="90" step="5" onchange="setOverrideInput('fermentolyse')">
-          <button onclick="stepOverride('fermentolyse',5,30,90)">+</button>
+      <div class="control-row">
+        <div class="field">
+          <label>Development <span class="src" id="src-develop" onclick="resetOverride('develop')"></span></label>
+          <div class="toggle" id="developToggle">
+            <button data-v="gentle" onclick="setDevelop('gentle')">Gentle</button>
+            <button data-v="standard" onclick="setDevelop('standard')">Standard</button>
+            <button data-v="intensive" onclick="setDevelop('intensive')">Intensive</button>
+          </div>
         </div>
-      </div>
-      <div class="field">
-        <label>Bench-rest floor (min) <span class="src" id="src-detente" onclick="resetOverride('detente')"></span></label>
-        <div class="stepper">
-          <button onclick="stepOverride('detente',-5,15,45)">-</button>
-          <input type="number" id="detente" value="20" min="15" max="45" step="5" onchange="setOverrideInput('detente')">
-          <button onclick="stepOverride('detente',5,15,45)">+</button>
-        </div>
-      </div>
-    </div>
-    <div class="control-row">
-      <div class="field">
-        <label>Development <span class="src" id="src-develop" onclick="resetOverride('develop')"></span></label>
-        <div class="toggle" id="developToggle">
-          <button data-v="gentle" onclick="setDevelop('gentle')">Gentle</button>
-          <button data-v="standard" onclick="setDevelop('standard')">Standard</button>
-          <button data-v="intensive" onclick="setDevelop('intensive')">Intensive</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Diastatic malt <span class="src" id="src-malt" onclick="resetOverride('malt')"></span></label>
-        <div class="toggle" id="maltToggle">
-          <button data-v="0" onclick="setMalt(0)">Off</button>
-          <button data-v="0.5" onclick="setMalt(0.5)">0.5%</button>
+        <div class="field">
+          <label>Diastatic malt <span class="src" id="src-malt" onclick="resetOverride('malt')"></span></label>
+          <div class="toggle" id="maltToggle">
+            <button data-v="0" onclick="setMalt(0)">Off</button>
+            <button data-v="0.5" onclick="setMalt(0.5)">0.5%</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 <div class="content" id="recipe"></div>
+
 <script>
 let method = 'retard', temperTau = 60;
-let foldOverride = null; // null = use dominant flour's default fold sequence
-let userOverride = {};   // per-parameter overrides for the eff() cascade (Task 3 wiring)
+let foldOverride = null;
+let userOverride = {};
 const doneSteps = new Set();
 let scheduleOpen = false;
 let poolishStartValue = '21:00';
 const BASSINAGE_PCT = 0.03, SALT_PCT = 0.018;
-const DDT = 24; // Desired Dough Temperature (°C) — Hamelman standard for poolish baguette
+const DDT = 24;
 const YEAST_PCT = 0.0033;
-const POOLISH_YEAST_PCT = 0.002; // base; scaled by yeastMult (room temperature)
-const FRIDGE_TEMP = 3;    // °C — dough core temp out of fridge
-const TEMPER_TARGET = 10; // °C — target core temp before dividing
-const TAU_DIVIDED = 30;   // min — Newton's law τ for divided rounds on bench
-const TAU_SHAPED = 20;    // min — Newton's law τ for shaped baguettes in couche
-const FRICTION = 2;       // °C — heat from hand mixing
+const POOLISH_YEAST_PCT = 0.002;
+const FRIDGE_TEMP = 3;
+const TEMPER_TARGET = 10;
+const TAU_DIVIDED = 30;
+const TAU_SHAPED = 20;
+const FRICTION = 2;
 
 function fmt(absMin) {
   const norm = ((absMin % 1440) + 1440) % 1440;
@@ -313,13 +508,9 @@ function fmtSched(absMin) {
 }
 function setPoolishStart(val) { poolishStartValue = val; update(); }
 
-const POOLISH_OFFSET_HRS = 12; // hours from poolish mix to fermentolyse (overnight)
+const POOLISH_OFFSET_HRS = 12;
 
-// ── Flour-profile architecture ────────────────────────────────────────────
-// Each recipe parameter resolves through a cascade: userOverride ?? flour.rx ?? GLOBAL.
-// - props: descriptive (strength/extensibility/activity/absorption) — drives display, not the recipe.
-// - rx:    prescriptive overrides of the GLOBAL baseline; anything absent inherits.
-// - hydAdj + folds are kept for the current update() logic; Task 3 migrates them into the cascade.
+// ── Flour-profile architecture ─────────────────────────────────────────────
 const GLOBAL = { hydration: 72, fermentolyse: 45, detente: 20, bakeC: 240, develop: 'standard', malt: 0 };
 const CONTINUOUS = ['hydration', 'fermentolyse', 'detente', 'bakeC'];
 
@@ -351,9 +542,6 @@ const flourInfo = {
   }
 };
 
-// Resolve one parameter through the cascade for a given context.
-// ctx = { override, fA, fB, blendA }. Continuous params blend across both flours
-// (each side falling back to GLOBAL); discrete params take the dominant flour by %.
 function eff(key, ctx) {
   if (ctx.override && ctx.override[key] != null) return ctx.override[key];
   const a = flourInfo[ctx.fA].rx[key], b = flourInfo[ctx.fB].rx[key];
@@ -365,7 +553,6 @@ function eff(key, ctx) {
   return dom != null ? dom : GLOBAL[key];
 }
 
-// Where does a parameter's effective value come from? Drives the source pill (Task 3).
 function sourceOf(key, ctx) {
   if (ctx.override && ctx.override[key] != null) return 'custom';
   const a = flourInfo[ctx.fA].rx[key], b = flourInfo[ctx.fB].rx[key];
@@ -380,9 +567,6 @@ function sourceOf(key, ctx) {
 function setMethod(m) {
   method = m;
   document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === m));
-  document.getElementById('subtitle').textContent = m === 'retard'
-    ? 'Hand-mixed · cold-retarded · temperature-adjusted'
-    : 'Hand-mixed · same-day bake · temperature-adjusted';
   update();
 }
 function setTemperTau(v) {
@@ -426,21 +610,20 @@ function loadPrefs() {
     if (p.userOverride && typeof p.userOverride === 'object') userOverride = p.userOverride;
     if (p.ambientTemp != null) document.getElementById('ambientTemp').value = p.ambientTemp;
     if (p.poolishPct != null) document.getElementById('poolishPct').value = p.poolishPct;
-    if (p.temperTau != null) { temperTau = p.temperTau; document.querySelectorAll('#bowlToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === temperTau)); }
+    if (p.temperTau != null) {
+      temperTau = p.temperTau;
+      document.querySelectorAll('#bowlToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === temperTau));
+    }
     if (p.method) {
       method = p.method;
       document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === method));
-      document.getElementById('subtitle').textContent = method === 'retard'
-        ? 'Hand-mixed · cold-retarded · temperature-adjusted'
-        : 'Hand-mixed · same-day bake · temperature-adjusted';
     }
   } catch(e) {}
 }
 function r(v) { return Math.round(v); }
 
 function solveStageDuration(anchor, anchorTemp, tau, T_start, T_amb) {
-  // Solve t = anchor × 2^((anchorTemp − T_mean(t)) / 10) by fixed-point iteration,
-  // where T_mean is the time-averaged dough temp under Newton's law cooling.
+  // Solve t = anchor × 2^((anchorTemp − T_mean(t)) / 10) by fixed-point iteration.
   let t = anchor;
   for (let i = 0; i < 10; i++) {
     const T_mean = (T_start === T_amb)
@@ -452,7 +635,7 @@ function solveStageDuration(anchor, anchorTemp, tau, T_start, T_amb) {
 }
 
 function tip(text, hint) {
-  return `<div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')"><div class="tip-toggle"><span class="tip-hint">${hint || ''}</span></div><div class="tip-body">${text}</div></div>`;
+  return `<div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')"><div class="tip-toggle"><span class="tip-hint">${hint || ''}</span></div><div class="tip-body"><div class="tip-body-inner">${text}</div></div></div>`;
 }
 
 function stepStart(num, title, time, id) {
@@ -491,10 +674,8 @@ function step(id, delta) {
   update();
 }
 
-// Changing flour resets any manual fold override back to that flour's default.
 function onFlourChange() { foldOverride = null; update(); }
 
-// Manual fold-count override (delta 0 = value typed directly into the field).
 function stepFold(delta) {
   const el = document.getElementById('foldCount');
   const v = Math.min(6, Math.max(1, (+el.value) + delta));
@@ -503,14 +684,12 @@ function stepFold(delta) {
   update();
 }
 
-// Adjust a flour's base fold sequence to a target count. Fewer folds → keep the
-// last N (the coil folds, which build the most structure); more → append coil folds.
 function buildFolds(base, n) {
   if (n >= base.length) return base.concat(Array(n - base.length).fill('cf'));
   return base.slice(base.length - n);
 }
 
-// ── Override controls (the cascade's user layer) ──────────────────────────
+// ── Override controls ──────────────────────────────────────────────────────
 function ctxNow() {
   const blendA = +document.getElementById('blend').value;
   return { override: userOverride, fA: document.getElementById('flourA').value,
@@ -531,17 +710,15 @@ function setDevelop(v) { userOverride.develop = v; savePrefs(); update(); }
 function setMalt(v) { userOverride.malt = v; savePrefs(); update(); }
 function toggleAdvanced(el) { el.classList.toggle('open'); document.getElementById('advBody').classList.toggle('open'); }
 
-// Short flour name for the compact source pills.
 function shortFlour(name) {
   return name.replace('Miller & Baker Plain Flour', 'Yitpi').replace('Caputo ', '').replace(' Flour', '');
 }
-// Write a control's provenance pill: custom / from <flour> / blend / (nothing when default).
 function setPill(key) {
   const el = document.getElementById('src-' + key);
   if (!el) return;
-  if (userOverride[key] != null) { el.textContent = '· custom (tap to reset)'; return; }
+  if (userOverride[key] != null) { el.textContent = 'custom · tap to reset'; return; }
   const s = sourceOf(key, ctxNow());
-  el.textContent = s === 'default' ? '' : s.startsWith('blend of ') ? '· blend' : '· ' + shortFlour(s);
+  el.textContent = s === 'default' ? '' : s.startsWith('blend of ') ? 'blend' : shortFlour(s);
 }
 
 function update() {
@@ -554,43 +731,29 @@ function update() {
   const fB = document.getElementById('flourB').value;
   const poolishPct = Math.min(0.40, Math.max(0.20, (+document.getElementById('poolishPct').value) / 100));
 
-  // Resolution context for the flour cascade (eff / sourceOf).
   const ctx = { override: userOverride, fA, fB, blendA };
 
-  // Dominant flour (by blend %) sets the default fold sequence; a manual
-  // override wins when set. Drives fold count everywhere below.
   const domFlour = blendA >= blendB ? fA : fB;
   const baseFolds = flourInfo[domFlour].folds;
   const folds = foldOverride == null ? baseFolds : buildFolds(baseFolds, foldOverride);
   document.getElementById('foldCount').value = folds.length;
 
   const isRetard = method === 'retard';
-
   const tempC = Math.max(10, Math.min(35, +document.getElementById('ambientTemp').value));
   const r5 = v => Math.round(v / 5) * 5;
 
-  // Fold intervals and fermentolyse are FIXED.
-  // Dough leaves the mix at DDT (~24°C) and drifts toward ambient slowly — ambient temp
-  // misreads the early bulk, and the poolish is already fermenting so fermentolyse
-  // can't run long without risking gluten breakdown. Go by visual cues, not the clock.
-  const fermentolyseTime = Math.round(eff('fermentolyse', ctx)); // flour-driven (GLOBAL 45)
-  const foldInterval = 30;        // fixed regardless of room temp
+  const fermentolyseTime = Math.round(eff('fermentolyse', ctx));
+  const foldInterval = 30;
 
-  // Détente: t = 40 × 2^((17 − T_mean) / 10), hard floor 20 min.
-  // Solved iteratively with time-averaged T_mean under Newton's law (τ = TAU_DIVIDED).
-  // Same-day dough is at ambient throughout so no iteration needed.
   const retardDetenteDuration = solveStageDuration(40, 17, TAU_DIVIDED, TEMPER_TARGET, tempC);
-  const detenteFloorV = Math.round(eff('detente', ctx)); // flour-driven bench-rest floor (GLOBAL 20)
+  const detenteFloorV = Math.round(eff('detente', ctx));
   const retardDetenteMins = Math.max(detenteFloorV, Math.round(retardDetenteDuration));
   const samedayDetenteMins = Math.max(detenteFloorV, Math.round(40 * Math.pow(2, (17 - tempC) / 10)));
   const detenteMins = isRetard ? retardDetenteMins : samedayDetenteMins;
 
-  // End-of-détente dough temp (Newton's law, τ = TAU_DIVIDED) — input to proof formula.
   const retardDoughEndTemp = tempC + (TEMPER_TARGET - tempC) * Math.exp(-retardDetenteMins / TAU_DIVIDED);
   const proofDoughTemp = isRetard ? retardDoughEndTemp : tempC;
 
-  // Final proof: t = 50 × 2^((22 − T_mean) / 10). Solved iteratively (τ = TAU_SHAPED).
-  // Floor = formula at ambient — dough can never proof faster than if already at room temp.
   const proofFloor = 50 * Math.pow(2, (22 - tempC) / 10);
   const proofDuration = Math.max(solveStageDuration(50, 22, TAU_SHAPED, proofDoughTemp, tempC), proofFloor);
   const proofMid = r5(proofDuration);
@@ -598,43 +761,40 @@ function update() {
   const proofHigh = r5(proofDuration * 1.15);
   const proofTimeStr = `${proofLow}–${proofHigh} min`;
   const shapeToOvenMin = detenteMins + proofMid;
-  // Poolish yeast scales at half the Q10 rate (sqrt of mult) — partial compensation
-  // so overnight timing stays in a predictable range without fully eliminating time variation
+
   const yeastMult = Math.pow(2, (25 - tempC) / 20);
   const poolishHrsMid = 9 * yeastMult;
   const poolishLow = Math.round(poolishHrsMid * 0.85);
   const poolishHigh = Math.round(poolishHrsMid * 1.15);
   const poolishTime = `${poolishLow}–${poolishHigh} hrs`;
-  // Bulk time: mean dough temp over the reference 3h (Newton's law, same τ as container),
-  // then t = 180 × 2^((23 − T_mean) / 10). Extra time goes as undisturbed rest after CF2.
+
   const bulkMeanTemp = tempC + (DDT - tempC) * (temperTau / 180) * (1 - Math.exp(-180 / temperTau));
   const bulkFormulaMins = 180 * Math.pow(2, (23 - bulkMeanTemp) / 10);
-  const fixedFoldsMins = fermentolyseTime + folds.length * foldInterval; // up to and including the last fold
+  const fixedFoldsMins = fermentolyseTime + folds.length * foldInterval;
   const bulkMins = Math.min(Math.max(Math.round(bulkFormulaMins), fixedFoldsMins), 240);
   const undisturbedRestMins = bulkMins - fixedFoldsMins;
   const bulkTime = `${Math.floor(bulkMins / 60)}h${bulkMins % 60 ? ` ${bulkMins % 60}m` : ''}`;
   const k_bulk = (temperTau / 180) * (1 - Math.exp(-180 / temperTau));
   const bulkTooLongBelow = Math.round((23 - 10 * Math.log2(240 / 180) - DDT * k_bulk) / (1 - k_bulk));
-  // Retard duration: anchored at 15h @ 4°C, scaled by Q10 for FRIDGE_TEMP
+
   const retardHrs = Math.round(15 * Math.pow(2, (4 - FRIDGE_TEMP) / 10));
-  // Water temp: 4-factor DDT formula (room, flour≈room, friction 3°C hand-mix, poolish)
-  // Poolish ferments at room temp and is added at room temp.
   const poolishTempAssumption = tempC;
   const waterTempCalc = Math.round((DDT * 4) - tempC - tempC - FRICTION - poolishTempAssumption);
-  const waterTempDisplay = waterTempCalc <= 2
-    ? `${waterTempCalc}°C (ice water)`
-    : `~${waterTempCalc}°C`;
+  const waterTempDisplay = waterTempCalc <= 2 ? `${waterTempCalc}°C (ice water)` : `~${waterTempCalc}°C`;
+
   const totalDough = count * pieceWeight * 1.06;
-  const baseHyd = eff('hydration', ctx) / 100; // flour target, user-overridable via the Hydration control
+  const baseHyd = eff('hydration', ctx) / 100;
+  const developV = eff('develop', ctx);
+  const maltPct = eff('malt', ctx);
+  const maltGrams = totalFlour => totalFlour * (maltPct / 100);
+
   const poolishYeastPct = POOLISH_YEAST_PCT * yeastMult;
   const finalYeastPct = YEAST_PCT * yeastMult;
   const yeastPct = poolishYeastPct + finalYeastPct;
   const totalFlour = totalDough / (1 + baseHyd + SALT_PCT + yeastPct);
   const totalWater = totalFlour * baseHyd;
   const salt = totalFlour * SALT_PCT;
-  const developV = eff('develop', ctx);
-  const maltPct = eff('malt', ctx);
-  const maltGrams = totalFlour * (maltPct / 100);
+  const maltG = maltGrams(totalFlour);
 
   const poolishFlour = totalFlour * poolishPct;
   const poolishWater = poolishFlour;
@@ -675,7 +835,7 @@ function update() {
   T.warmupEnd = T.fridgeOut + warmupMins;
   T.bake = T.warmupEnd + shapeToOvenMin;
 
-  // Schedule fold rows, generated from the flour-driven sequence.
+  // Schedule fold rows
   let schedSf = 0, schedCf = 0;
   const foldSchedRows = folds.map((type, i) => {
     const label = type === 'sf' ? `Stretch &amp; fold #${++schedSf}` : `Coil fold #${++schedCf}`;
@@ -739,7 +899,7 @@ ${foldSchedRows}
   );
   steps += stepEnd;
 
-  // Bulk-table fold rows, generated from the flour-driven sequence.
+  // Bulk fermentation fold table
   let tblSf = 0, tblCf = 0;
   const foldTableRows = folds.map((type, i) => {
     const isLast = i === folds.length - 1;
@@ -781,16 +941,11 @@ ${foldTableRows}
   if (isRetard) {
     steps += stepStart(n++, 'Cold Retard', `${fmt(T.fridgeIn)} → ${fmtSched(T.fridgeOut)}`, 's5');
     steps += `<p>Cover bowl tightly. Fridge at <span class="temp">${FRIDGE_TEMP}°C</span> for <strong>~${retardHrs}h</strong>. Formula: 15h @ 4°C × 2<sup>((4−${FRIDGE_TEMP})/10)</sup> = ${retardHrs}h @ ${FRIDGE_TEMP}°C. 18–36h is safe if needed.</p>`;
-    steps += tip(
-      'Dough may rise a little in the fridge — normal. If it more than doubles, bulk went too far or fridge is too warm.',
-      'How much rise is normal?'
-    );
+    steps += tip('Dough may rise a little in the fridge — normal. If it more than doubles, bulk went too far or fridge is too warm.', 'How much rise is normal?');
     steps += stepEnd;
-  }
 
-  if (isRetard) {
     steps += stepStart(n++, 'Take out of fridge', `${fmtSched(T.fridgeOut)} · ~${warmupMins} min`, 's5b');
-    steps += tempC < 13 ? `<p style="color:var(--accent);font-weight:500">At ${tempC}°C the warm-up takes a very long time and the formula becomes unreliable. Find a warmer spot — top of the fridge, near the oven, or a proofing box.</p>` : '';
+    steps += tempC < 13 ? `<p style="color:var(--accent);font-weight:600">At ${tempC}°C the warm-up takes a very long time and the formula becomes unreliable. Find a warmer spot — top of the fridge, near the oven, or a proofing box.</p>` : '';
     steps += `<p>Remove the covered bowl. Leave it at room temp (<span class="temp">${tempC}°C</span>) for <strong>~${warmupMins} min</strong>. Stop when the <strong>core</strong> reads <strong>${TEMPER_TARGET}°C, or within 1°C of ambient</strong> — whichever comes first. Then divide and start preshaping immediately; smaller pieces warm up roughly twice as fast.</p>`;
     steps += tip(
       `Probe the core, not the surface — surface reads 2–4°C warm and will make you move too early. Formula: t = τ × ln((T − ${FRIDGE_TEMP}) / (T − ${TEMPER_TARGET})), τ = ${temperTau} (metal τ=60, glass τ=90, tall plastic tub τ=111).`,
@@ -828,7 +983,7 @@ ${foldTableRows}
       <tr><th>Response</th><th style="text-align:right">Reading</th></tr>
       <tr><td>Springs back instantly and fully</td><td class="amt" style="color:var(--muted)">Under</td></tr>
       <tr><td>Springs back fast, faint dent</td><td class="amt" style="color:var(--muted)">Still under</td></tr>
-      <tr><td>Springs back slowly, dent fades but stays visible</td><td class="amt" style="color:var(--accent);font-weight:500">Ready — bake</td></tr>
+      <tr><td>Springs back slowly, dent fades but stays visible</td><td class="amt" style="color:var(--accent);font-weight:600">Ready — bake</td></tr>
       <tr><td>Barely springs back, dent stays</td><td class="amt">Over</td></tr>
     </table>`,
     'The finger test'
@@ -843,10 +998,7 @@ ${foldTableRows}
       <tr><td><span class="temp">240°C</span> dry</td><td>10–13 min</td></tr>
     </table>
     <p>Cool on wire rack <strong>20 min</strong> before cutting.</p>`;
-  steps += tip(
-    'Crust softens as it cools — normal, it crisps back up. For extra crackle, oven off, door ajar, 5 min.',
-    'Getting a crackly crust'
-  );
+  steps += tip('Crust softens as it cools — normal, it crisps back up. For extra crackle, oven off, door ajar, 5 min.', 'Getting a crackly crust');
   steps += stepEnd;
 
   document.getElementById('recipe').innerHTML = `
@@ -871,7 +1023,7 @@ ${foldTableRows}
         <tr><td>Water <span style="color:var(--muted)">(bassinage)</span></td><td class="amt">${r(bassinage)}g</td></tr>
         <tr><td>Fine Salt</td><td class="amt">${salt.toFixed(1)}g</td></tr>
         <tr><td>Instant Dry Yeast</td><td class="amt">${finalYeast.toFixed(1)}g</td></tr>
-        ${maltPct > 0 ? `<tr><td>Diastatic Malt</td><td class="amt">${maltGrams.toFixed(1)}g</td></tr>` : ''}
+        ${maltPct > 0 ? `<tr><td>Diastatic Malt</td><td class="amt">${maltG.toFixed(1)}g</td></tr>` : ''}
       </table>
       <h3>Totals</h3>
       <table>
@@ -882,19 +1034,22 @@ ${foldTableRows}
     </div>
     <div class="white-panel">
       <h2 class="collapsible-header${scheduleOpen ? ' open' : ''}" onclick="toggleCollapsible(this)">Schedule</h2>
-      <div class="collapsible-body${scheduleOpen ? ' open' : ''}">
-        <div style="display:flex;align-items:center;gap:8px;padding-top:10px;padding-bottom:4px">
-          <label style="font-size:0.7em;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;flex-shrink:0">Poolish start</label>
-          <input type="time" value="${poolishStartValue}" onchange="setPoolishStart(this.value)" style="width:auto;min-height:34px;padding:4px 8px;font-size:0.88em;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--text);font-family:inherit">
+      <div class="collapsible-grid${scheduleOpen ? ' open' : ''}">
+        <div class="collapsible-inner">
+          <div style="display:flex;align-items:center;gap:8px;padding-top:10px;padding-bottom:4px">
+            <label style="font-size:0.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;flex-shrink:0">Poolish start</label>
+            <input type="time" value="${poolishStartValue}" onchange="setPoolishStart(this.value)" style="width:auto;min-height:34px;padding:4px 8px;font-size:0.88rem;border:1.5px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);font-family:inherit">
+          </div>
+          <div class="schedule">${scheduleHtml}</div>
         </div>
-        <div class="schedule">${scheduleHtml}</div>
       </div>
     </div>
     <div class="white-panel">
       <h2>Method</h2>
       ${steps}
     </div>`;
-  // Sync derived controls back to their display values and source pills
+
+  // ── Sync derived controls + source pills ───────────────────────────────
   document.getElementById('hydration').value = Math.round(baseHyd * 100);
   document.getElementById('fermentolyse').value = fermentolyseTime;
   document.getElementById('detente').value = detenteFloorV;
@@ -902,11 +1057,25 @@ ${foldTableRows}
   document.querySelectorAll('#maltToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === maltPct));
   setPill('hydration'); setPill('fermentolyse'); setPill('detente'); setPill('develop'); setPill('malt');
   const srcFoldsEl = document.getElementById('src-folds');
-  if (srcFoldsEl) srcFoldsEl.textContent = foldOverride != null ? '· custom (tap to reset)' : '· ' + shortFlour(flourInfo[domFlour].name);
+  if (srcFoldsEl) srcFoldsEl.textContent = foldOverride != null ? 'custom · tap to reset' : shortFlour(flourInfo[domFlour].name);
+
+  // ── Hero + formula line ────────────────────────────────────────────────
+  const hydPct = Math.round(baseHyd * 100);
+  document.getElementById('formula-line').textContent =
+    `${count} × ${pieceWeight}g · ${hydPct}% · ${isRetard ? 'retard' : 'same day'} · ${tempC}°C`;
+  document.getElementById('hero-flour').textContent =
+    fA === fB ? shortFlour(flourInfo[fA].name) : shortFlour(flourInfo[fA].name) + ' blend';
+  document.getElementById('hero-hyd').textContent = hydPct;
+  document.getElementById('hero-next').innerHTML =
+    `<b>${count} × ${pieceWeight}g</b> · ${isRetard ? 'cold retard' : 'same day'} · ${tempC}°C`;
+
+  // Stage strip: show 'now' on the first stage for retard; hide Retard pill when same-day
+  document.getElementById('st-retard').style.display = isRetard ? '' : 'none';
 }
 loadPrefs();
 update();
 </script>
+
 <div class="modal-overlay" id="compareModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal">
     <button class="modal-close" onclick="document.getElementById('compareModal').classList.remove('open')">×</button>
