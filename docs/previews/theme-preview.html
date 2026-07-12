@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baguette App — Direction Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #201e1c; color: #e8e4de; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+
+  .page-head { max-width: 900px; margin: 0 auto; padding: 40px 20px 8px; }
+  .page-head h1 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 1.9rem; letter-spacing: -0.02em; }
+  .page-head p { color: #a8a29a; margin-top: 8px; max-width: 60ch; font-size: 0.95rem; }
+  .page-head .hint { margin-top: 14px; font-size: 0.82rem; color: #8a8177; }
+
+  .themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 8px; max-width: 1200px; margin: 24px auto 60px; padding: 0 12px; align-items: start; }
+  .theme { padding: 24px 16px 32px; border-radius: 14px; }
+  .theme-head { max-width: 380px; margin: 0 auto 18px; }
+  .theme-head .tname { font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 500; color: #f3efe8; }
+  .theme-head .tvibe { font-size: 0.84rem; color: #a8a29a; margin-top: 2px; }
+  .swatches { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+  .swatch { display: flex; flex-direction: column; gap: 4px; align-items: center; font-size: 0.6rem; color: #8a8177; font-family: 'JetBrains Mono', monospace; }
+  .swatch i { width: 34px; height: 34px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.1); }
+
+  /* ------- Phone frame = the app surface ------- */
+  .phone { max-width: 380px; margin: 0 auto; border-radius: 22px; overflow: hidden; background: var(--bg); color: var(--ink); box-shadow: 0 18px 50px rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.06); }
+  .app { padding: 22px 18px 26px; }
+
+  .app-head { margin-bottom: 20px; }
+  .app-head h2 { font-family: var(--display); font-weight: 500; font-size: 1.5rem; letter-spacing: -0.02em; line-height: 1.1; text-wrap: balance; }
+  .app-head .sub { font-size: 0.78rem; color: var(--muted); margin-top: 5px; letter-spacing: 0.01em; }
+
+  .group { margin-bottom: 18px; }
+  .group-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field > label { display: block; font-size: 0.82rem; font-weight: 500; color: var(--ink); margin-bottom: 7px; }
+  .field-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+  .field-top label { font-size: 0.82rem; font-weight: 500; }
+  .val { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 1.15rem; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .val .unit { font-size: 0.72rem; color: var(--muted); margin-left: 1px; }
+
+  .source { display: inline-flex; align-items: center; gap: 6px; font-size: 0.68rem; color: var(--accent-soft-ink); background: var(--accent-soft); padding: 2px 8px; border-radius: 20px; margin-bottom: 10px; }
+  .source .reset { background: none; border: none; color: var(--accent-soft-ink); opacity: 0.7; font-size: 0.68rem; cursor: pointer; text-decoration: underline; padding: 0; font-family: inherit; }
+
+  /* select */
+  .select { display: flex; justify-content: space-between; align-items: center; height: 46px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 0.9rem; font-weight: 500; }
+  .select .caret { color: var(--muted); }
+
+  /* slider */
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  .track { position: relative; flex: 1; height: 6px; border-radius: 6px; background: var(--line); }
+  .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--accent); }
+  .knob { position: absolute; top: 50%; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); transform: translate(-50%, -50%); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+  .pm { width: 40px; height: 40px; flex-shrink: 0; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; color: var(--ink); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .pm:active { background: var(--accent-soft); }
+
+  /* stepper */
+  .stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+  .stepper .pm { border: none; border-radius: 0; }
+  .stepval { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 600; padding: 0 16px; min-width: 58px; text-align: center; }
+
+  /* toggle */
+  .toggle { display: inline-flex; padding: 3px; gap: 3px; background: var(--surface); border: 1px solid var(--line); border-radius: 11px; width: 100%; }
+  .toggle.three .seg { flex: 1; }
+  .seg { flex: 1; border: none; background: transparent; color: var(--muted); font-family: inherit; font-size: 0.8rem; font-weight: 500; padding: 9px 10px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+  .seg.active { background: var(--accent); color: var(--accent-ink); }
+
+  /* disclosure */
+  .disclosure { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 13px 0; border: none; border-top: 1px solid var(--line); background: none; color: var(--ink); font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+  .disclosure .chev { color: var(--muted); transition: transform 0.2s; }
+  .disclosure.open .chev { transform: rotate(180deg); }
+  .adv-body { padding: 6px 0 4px; }
+  .adv-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 14px; }
+
+  /* switch */
+  .row-between { display: flex; justify-content: space-between; align-items: center; }
+  .switch { width: 44px; height: 26px; border-radius: 20px; background: var(--line); position: relative; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
+  .switch .dot { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: left 0.2s; }
+  .switch.on { background: var(--accent); }
+  .switch.on .dot { left: 21px; }
+
+  /* tip */
+  .tip { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 18px 0; background: var(--surface); }
+  .tip-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 11px 13px; background: none; border: none; color: var(--ink); font-family: inherit; font-size: 0.8rem; font-weight: 500; cursor: pointer; text-align: left; }
+  .tip-head .i { width: 18px; height: 18px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-soft-ink); font-size: 0.66rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-style: normal; }
+  .tip-body { padding: 0 13px; max-height: 0; overflow: hidden; transition: max-height 0.25s, padding 0.25s; font-size: 0.8rem; color: var(--muted); }
+  .tip.open .tip-body { max-height: 200px; padding: 0 13px 12px; }
+
+  /* readout */
+  .readout { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 0.74rem; color: var(--muted); }
+  .readout b { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; margin-left: 4px; }
+
+  /* ============ THEMES ============ */
+  .theme-instrument { --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1917; --muted:#5F5C56; --line:#E7E3DA; --accent:#C2410C; --accent-ink:#FFFFFF; --accent-soft:#FBEEE6; --accent-soft-ink:#9A3412; --display:'Fraunces'; }
+
+  .theme-dark { --bg:#1A1512; --surface:#241C17; --ink:#F5EDE4; --muted:#B3A395; --line:#3A2E26; --accent:#E8A23D; --accent-ink:#1A1512; --accent-soft:rgba(232,162,61,0.15); --accent-soft-ink:#F0B65C; --display:'Fraunces'; }
+  .theme-dark .knob, .theme-dark .pm, .theme-dark .select, .theme-dark .toggle, .theme-dark .stepper, .theme-dark .switch .dot { box-shadow: none; }
+
+  .theme-boulangerie { --bg:#FFFFFF; --surface:#FBF7F4; --ink:#1C1B1A; --muted:#6E5A54; --line:#EADFD8; --accent:#9E3B2E; --accent-ink:#F7ECE4; --accent-soft:#F6E7E1; --accent-soft-ink:#8A3226; --display:'Fraunces'; }
+  .theme-boulangerie .app-head { background: var(--accent); color: var(--accent-ink); margin: -22px -18px 20px; padding: 26px 18px 22px; }
+  .theme-boulangerie .app-head .sub { color: var(--accent-ink); opacity: 0.8; }
+  .theme-boulangerie .app-head h2 { font-weight: 600; font-size: 1.7rem; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>Three directions for the redesign</h1>
+    <p>Same redesigned control panel, rendered in each visual lane with real colours, type, and the two-tier layout. Scroll through, then tell me which one to build — or which pieces to mix (e.g. "Instrument palette, Boulangerie header").</p>
+    <p class="hint">↓ Best viewed by narrowing your window, or open on your phone. Toggles, tooltips, and the Advanced panel are clickable.</p>
+  </div>
+
+  <div class="themes">
+    <div class="theme theme-instrument">
+      <div class="theme-head">
+        <div class="tname">1 · Baker's Instrument</div>
+        <div class="tvibe">Restrained + 1 accent · light · a precise lab-notebook for bread</div>
+        <div class="swatches">
+          <span class="swatch"><i style="background:#FAFAF7"></i>paper</span>
+          <span class="swatch"><i style="background:#1A1917"></i>ink</span>
+          <span class="swatch"><i style="background:#C2410C"></i>crust</span>
+          <span class="swatch"><i style="background:#FBEEE6"></i>soft</span>
+        </div>
+      </div>
+      <div class="phone"><div class="slot"></div></div>
+    </div>
+
+    <div class="theme theme-dark">
+      <div class="theme-head">
+        <div class="tname">2 · Dark Bakehouse</div>
+        <div class="tvibe">Committed dark · warm · evening mixing, moody, focused</div>
+        <div class="swatches">
+          <span class="swatch"><i style="background:#1A1512"></i>espresso</span>
+          <span class="swatch"><i style="background:#241C17"></i>surface</span>
+          <span class="swatch"><i style="background:#F5EDE4"></i>ink</span>
+          <span class="swatch"><i style="background:#E8A23D"></i>ember</span>
+        </div>
+      </div>
+      <div class="phone"><div class="slot"></div></div>
+    </div>
+
+    <div class="theme theme-boulangerie">
+      <div class="theme-head">
+        <div class="tname">3 · Modern Boulangerie</div>
+        <div class="tvibe">Committed colour · light · confident, brand-forward blocks</div>
+        <div class="swatches">
+          <span class="swatch"><i style="background:#FFFFFF"></i>white</span>
+          <span class="swatch"><i style="background:#9E3B2E"></i>terracotta</span>
+          <span class="swatch"><i style="background:#1C1B1A"></i>ink</span>
+          <span class="swatch"><i style="background:#F6E7E1"></i>soft</span>
+        </div>
+      </div>
+      <div class="phone"><div class="slot"></div></div>
+    </div>
+  </div>
+
+  <template id="tpl">
+    <div class="app">
+      <div class="app-head">
+        <h2>Perth Poolish Baguettes</h2>
+        <div class="sub">Poolish · temperature-scaled · flour-aware</div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Essentials</div>
+
+        <div class="field">
+          <label>Flour</label>
+          <div class="select"><span>Miller &amp; Baker Plain Flour</span><span class="caret">▾</span></div>
+        </div>
+
+        <div class="field">
+          <div class="field-top"><label>Hydration</label><span class="val">72<span class="unit">%</span></span></div>
+          <div class="source">auto · from Yitpi <button class="reset">reset</button></div>
+          <div class="slider-row">
+            <button class="pm">−</button>
+            <div class="track"><div class="fill" style="width:62%"></div><div class="knob" style="left:62%"></div></div>
+            <button class="pm">+</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-top"><label>Room temp</label><span class="val">18<span class="unit">°C</span></span></div>
+          <div class="stepper"><button class="pm">−</button><span class="stepval">18</span><button class="pm">+</button></div>
+        </div>
+
+        <div class="field">
+          <label>Method</label>
+          <div class="toggle"><button class="seg active">Cold Retard</button><button class="seg">Same Day</button></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <button class="disclosure open"><span>Advanced · flour tuning</span><span class="chev">▾</span></button>
+        <div class="adv-body">
+          <div class="adv-hint">Defaults come from your flour. Override any of them; reset returns to the flour's value.</div>
+
+          <div class="field">
+            <div class="field-top"><label>Fermentolyse</label><span class="val">60<span class="unit">m</span></span></div>
+            <div class="source">auto · from Yitpi</div>
+          </div>
+
+          <div class="field">
+            <div class="field-top"><label>Folds</label><span class="val">2</span></div>
+            <div class="source">auto · from Yitpi · 2 coil</div>
+          </div>
+
+          <div class="field">
+            <label>Development</label>
+            <div class="toggle three"><button class="seg active">Gentle</button><button class="seg">Standard</button><button class="seg">Intensive</button></div>
+          </div>
+
+          <div class="field row-between" style="margin-top:16px">
+            <div><label style="margin:0">Diastatic malt</label><div style="font-size:0.7rem;color:var(--muted)">off · add 0.5% for stripped 00 flours</div></div>
+            <div class="switch"><span class="dot"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <button class="tip-head"><span class="i">i</span> Why is hydration 72%?</button>
+        <div class="tip-body">Yitpi is thirsty — the extra water softens its tight gluten so it stretches into baguettes without snapping back. Refined 00 flours release water easily, so they drop toward 65%.</div>
+      </div>
+
+      <div class="readout">
+        <span>Water <b>8°C</b></span><span>DDT <b>24°C</b></span><span>Bulk <b>3h 10m</b></span><span>Proof <b>55m</b></span>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    const tpl = document.getElementById('tpl');
+    document.querySelectorAll('.slot').forEach(slot => slot.appendChild(tpl.content.cloneNode(true)));
+
+    document.addEventListener('click', e => {
+      const seg = e.target.closest('.seg');
+      if (seg) { seg.parentElement.querySelectorAll('.seg').forEach(s => s.classList.remove('active')); seg.classList.add('active'); return; }
+      const disc = e.target.closest('.disclosure');
+      if (disc) { disc.classList.toggle('open'); const body = disc.nextElementSibling; body.style.display = disc.classList.contains('open') ? '' : 'none'; return; }
+      const tip = e.target.closest('.tip-head');
+      if (tip) { tip.parentElement.classList.toggle('open'); return; }
+      const sw = e.target.closest('.switch');
+      if (sw) { sw.classList.toggle('on'); return; }
+    });
+  </script>
+</body>
+</html>
