@@ -33,7 +33,7 @@
   .bar-loaf { width: 44px; height: 28px; flex-shrink: 0; }
   .bar-steam { fill: none; stroke: rgba(247,236,228,0.85); stroke-width: 1.6; stroke-linecap: round;
                opacity: 0; animation: steam var(--st,4s) ease-out var(--sdl,0.8s) infinite; }
-  @media (max-width: 419px) { .bar-loaf { display: none; } }
+  @media (max-width: 359px) { .bar-loaf { display: none; } }
   .stage { flex: 1; font-size: 0.68rem; font-weight: 600; padding: 10px 4px;
            border-radius: 20px; white-space: nowrap; text-align: center; border: 1px solid rgba(247,236,228,0.35);
            color: var(--accent-ink); opacity: 0.45; cursor: pointer;
@@ -417,7 +417,7 @@
         <button onclick="stepOverride('hydration',1,50,100)" aria-label="Increase hydration">+</button>
       </div>
     </div>
-    <div class="field" style="flex:0 0 auto;width:108px">
+    <div class="field" style="flex:0 0 108px;min-width:0;width:108px">
       <label for="poolishPct">Poolish %</label>
       <div class="stepper">
         <button onclick="step('poolishPct',-1)" aria-label="Decrease poolish percentage">−</button>
