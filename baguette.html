@@ -188,11 +188,20 @@
         <button onclick="step('poolishPct', 1)">+</button>
       </div>
     </div>
+    <div class="field">
+      <label>Folds</label>
+      <div class="stepper">
+        <button onclick="stepFold(-1)">-</button>
+        <input type="number" id="foldCount" value="4" min="1" max="6" onchange="stepFold(0)">
+        <button onclick="stepFold(1)">+</button>
+      </div>
+    </div>
   </div>
   <div class="control-row">
     <div class="field">
       <label>Flour A</label>
-      <select id="flourA" onchange="update()">
+      <select id="flourA" onchange="onFlourChange()">
+        <option value="mb">Miller &amp; Baker Plain Flour</option>
         <option value="pizzeria">Caputo Pizzeria Blue (12.5%)</option>
         <option value="nuvola">Caputo Nuvola (13%)</option>
         <option value="doppia">Caputo 00 AP (11.5%)</option>
@@ -209,7 +218,8 @@
   <div class="control-row">
     <div class="field">
       <label>Flour B</label>
-      <select id="flourB" onchange="update()">
+      <select id="flourB" onchange="onFlourChange()">
+        <option value="mb">Miller &amp; Baker Plain Flour</option>
         <option value="pizzeria">Caputo Pizzeria Blue (12.5%)</option>
         <option value="nuvola">Caputo Nuvola (13%)</option>
         <option value="doppia">Caputo 00 AP (11.5%)</option>
@@ -230,6 +240,7 @@
 <div class="content" id="recipe"></div>
 <script>
 let season = 'summer', method = 'retard', temperTau = 60;
+let foldOverride = null; // null = use dominant flour's default fold sequence
 const doneSteps = new Set();
 let scheduleOpen = false;
 let poolishStartValue = '21:00';
@@ -271,13 +282,17 @@ const S = {
   }
 };
 
+// folds: default fold sequence for this flour ('sf' = stretch & fold, 'cf' = coil fold).
+// Strong/elastic flours need fewer folds (structure is already there); weak/extensible
+// flours need more folds to build a backbone. Dominant flour in the blend wins.
 const flourInfo = {
-  pizzeria: { name: 'Caputo Pizzeria Blue', hydAdj: 0 },
-  nuvola: { name: 'Caputo Nuvola', hydAdj: +2 },
-  doppia: { name: 'Caputo 00 AP', hydAdj: -2 },
-  bread: { name: 'Strong Bread Flour', hydAdj: 0 },
-  wholemeal: { name: 'Wholemeal Wheat', hydAdj: +3 },
-  spelt: { name: 'White Spelt', hydAdj: -3 }
+  mb: { name: 'Miller & Baker Plain Flour', hydAdj: +5, folds: ['cf','cf'] },
+  pizzeria: { name: 'Caputo Pizzeria Blue', hydAdj: 0, folds: ['sf','sf','cf','cf'] },
+  nuvola: { name: 'Caputo Nuvola', hydAdj: +2, folds: ['sf','cf','cf'] },
+  doppia: { name: 'Caputo 00 AP', hydAdj: -2, folds: ['sf','sf','cf','cf'] },
+  bread: { name: 'Strong Bread Flour', hydAdj: 0, folds: ['sf','cf','cf'] },
+  wholemeal: { name: 'Wholemeal Wheat', hydAdj: +3, folds: ['sf','cf','cf'] },
+  spelt: { name: 'White Spelt', hydAdj: -3, folds: ['sf','cf'] }
 };
 
 function setSeason(s) {
@@ -302,7 +317,7 @@ function setTemperTau(v) {
 function savePrefs() {
   try {
     localStorage.setItem('baguette_prefs', JSON.stringify({
-      season, method, temperTau, poolishStartValue,
+      season, method, temperTau, poolishStartValue, foldOverride,
       count: document.getElementById('count').value,
       weight: document.getElementById('weight').value,
       hydration: document.getElementById('hydration').value,
@@ -330,6 +345,7 @@ function loadPrefs() {
       document.getElementById('blend').value = p.pctA;
     }
     if (p.poolishStartValue) poolishStartValue = p.poolishStartValue;
+    if (p.foldOverride != null) foldOverride = p.foldOverride;
     if (p.ambientTemp != null) document.getElementById('ambientTemp').value = p.ambientTemp;
     if (p.poolishPct != null) document.getElementById('poolishPct').value = p.poolishPct;
     if (p.season) { season = p.season; document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === season)); }
@@ -398,6 +414,25 @@ function step(id, delta) {
   update();
 }
 
+// Changing flour resets any manual fold override back to that flour's default.
+function onFlourChange() { foldOverride = null; update(); }
+
+// Manual fold-count override (delta 0 = value typed directly into the field).
+function stepFold(delta) {
+  const el = document.getElementById('foldCount');
+  const v = Math.min(6, Math.max(1, (+el.value) + delta));
+  el.value = v;
+  foldOverride = v;
+  update();
+}
+
+// Adjust a flour's base fold sequence to a target count. Fewer folds → keep the
+// last N (the coil folds, which build the most structure); more → append coil folds.
+function buildFolds(base, n) {
+  if (n >= base.length) return base.concat(Array(n - base.length).fill('cf'));
+  return base.slice(base.length - n);
+}
+
 function update() {
   savePrefs();
   const count = Math.max(1, +document.getElementById('count').value);
@@ -408,6 +443,13 @@ function update() {
   const fB = document.getElementById('flourB').value;
   const userHyd = +document.getElementById('hydration').value;
   const poolishPct = Math.min(0.40, Math.max(0.20, (+document.getElementById('poolishPct').value) / 100));
+
+  // Dominant flour (by blend %) sets the default fold sequence; a manual
+  // override wins when set. Drives fold count everywhere below.
+  const domFlour = blendA >= blendB ? fA : fB;
+  const baseFolds = flourInfo[domFlour].folds;
+  const folds = foldOverride == null ? baseFolds : buildFolds(baseFolds, foldOverride);
+  document.getElementById('foldCount').value = folds.length;
 
   const s = S[season];
   const isRetard = method === 'retard';
@@ -421,7 +463,6 @@ function update() {
   // can't run long without risking gluten breakdown. Go by visual cues, not the clock.
   const fermentolyseTime = 45;   // fixed; cap 60 min hard
   const foldInterval = 30;        // fixed regardless of room temp
-  const coilInterval = 30;        // fixed regardless of room temp
 
   // Détente: t = 40 × 2^((17 − T_mean) / 10), hard floor 20 min.
   // Solved iteratively with time-averaged T_mean under Newton's law (τ = TAU_DIVIDED).
@@ -455,7 +496,7 @@ function update() {
   // then t = 180 × 2^((23 − T_mean) / 10). Extra time goes as undisturbed rest after CF2.
   const bulkMeanTemp = tempC + (DDT - tempC) * (temperTau / 180) * (1 - Math.exp(-180 / temperTau));
   const bulkFormulaMins = 180 * Math.pow(2, (23 - bulkMeanTemp) / 10);
-  const fixedFoldsMins = fermentolyseTime + 3 * foldInterval + coilInterval; // up to and including CF2
+  const fixedFoldsMins = fermentolyseTime + folds.length * foldInterval; // up to and including the last fold
   const bulkMins = Math.min(Math.max(Math.round(bulkFormulaMins), fixedFoldsMins), 240);
   const undisturbedRestMins = bulkMins - fixedFoldsMins;
   const bulkTime = `${Math.floor(bulkMins / 60)}h${bulkMins % 60 ? ` ${bulkMins % 60}m` : ''}`;
@@ -504,11 +545,11 @@ function update() {
   T.poolish = poolishMins;
   T.mix = poolishMins + s.poolishOffsetHrs * 60;
   T.fermentolyseEnd = T.mix + fermentolyseTime;
-  T.sf1 = T.fermentolyseEnd + foldInt;
-  T.sf2 = T.sf1 + foldInt;
-  T.cf1 = T.sf2 + foldInt;
-  T.cf2 = T.cf1 + coilInterval;
-  T.bulkEnd = T.cf2 + undisturbedRestMins;
+  const foldTimes = [];
+  let foldCursor = T.fermentolyseEnd;
+  folds.forEach(() => { foldCursor += foldInt; foldTimes.push(foldCursor); });
+  const lastFoldTime = foldTimes.length ? foldTimes[foldTimes.length - 1] : T.fermentolyseEnd;
+  T.bulkEnd = lastFoldTime + undisturbedRestMins;
   T.fridgeIn = T.bulkEnd;
   T.sdPreshape = T.bulkEnd;
   T.sdShape = T.sdPreshape + samedayDetenteMins;
@@ -519,16 +560,21 @@ function update() {
   T.warmupEnd = T.fridgeOut + warmupMins;
   T.bake = T.warmupEnd + shapeToOvenMin;
 
+  // Schedule fold rows, generated from the flour-driven sequence.
+  let schedSf = 0, schedCf = 0;
+  const foldSchedRows = folds.map((type, i) => {
+    const label = type === 'sf' ? `Stretch &amp; fold #${++schedSf}` : `Coil fold #${++schedCf}`;
+    const tail = i === folds.length - 1 ? ' → rest' : '';
+    return `      <span class="time">${fmtSched(foldTimes[i])}</span><span>${label}${tail}</span>`;
+  }).join('\n');
+
   let scheduleHtml;
   if (isRetard) {
     scheduleHtml = `
       <span class="time">${fmtSched(T.poolish)}</span><span>Mix poolish → room temp overnight</span>
       <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${poolishTime})</span>
       <span class="time">${fmtSched(T.fermentolyseEnd)}</span><span>Add salt + bassinage + yeast</span>
-      <span class="time">${fmtSched(T.sf1)}</span><span>Stretch &amp; fold #1</span>
-      <span class="time">${fmtSched(T.sf2)}</span><span>Stretch &amp; fold #2</span>
-      <span class="time">${fmtSched(T.cf1)}</span><span>Coil fold #1</span>
-      <span class="time">${fmtSched(T.cf2)}</span><span>Coil fold #2 → rest</span>
+${foldSchedRows}
       <span class="time">${fmtSched(T.fridgeIn)}</span><span>Fridge @ ${FRIDGE_TEMP}°C (~${retardHrs}h)</span>
       <span class="time">${fmtSched(T.fridgeOut)}</span><span>Take out of fridge → warm-up ~${warmupMins} min</span>
       <span class="time">${fmtSched(T.warmupEnd)}</span><span>Preshape → shape → proof</span>
@@ -538,10 +584,7 @@ function update() {
       <span class="time">${fmtSched(T.poolish)}</span><span>Mix poolish → room temp overnight</span>
       <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${poolishTime})</span>
       <span class="time">${fmtSched(T.fermentolyseEnd)}</span><span>Add salt + bassinage + yeast</span>
-      <span class="time">${fmtSched(T.sf1)}</span><span>Stretch &amp; fold #1</span>
-      <span class="time">${fmtSched(T.sf2)}</span><span>Stretch &amp; fold #2</span>
-      <span class="time">${fmtSched(T.cf1)}</span><span>Coil fold #1</span>
-      <span class="time">${fmtSched(T.cf2)}</span><span>Coil fold #2 → rest</span>
+${foldSchedRows}
       <span class="time">${fmtSched(T.sdPreshape)}</span><span>Preshape → bench rest ${samedayDetenteMins} min</span>
       <span class="time">${fmtSched(T.sdShape)}</span><span>Final shape → proof ${proofTime}</span>
       <span class="time">${fmtSched(T.sdBake)}</span><span>Score → bake → done by ${fmt(T.sdDone)}</span>`;
@@ -581,13 +624,25 @@ function update() {
   );
   steps += stepEnd;
 
+  // Bulk-table fold rows, generated from the flour-driven sequence.
+  let tblSf = 0, tblCf = 0;
+  const foldTableRows = folds.map((type, i) => {
+    const isLast = i === folds.length - 1;
+    let label, desc;
+    if (type === 'sf') {
+      label = `Stretch &amp; fold #${++tblSf}`;
+      desc = tblSf === 1 ? 'fold all 4 sides over' : 'dough should feel tighter';
+    } else {
+      label = `Coil fold #${++tblCf}`;
+      desc = isLast ? 'smooth and pillowy' : 'lift from middle, let ends fold under';
+    }
+    return `      <tr><td>${fmt(foldTimes[i])}</td><td><strong>${label}</strong> — ${desc}</td></tr>`;
+  }).join('\n');
+
   steps += stepStart(n++, 'Bulk Fermentation', bulkTime, 's4');
-  steps += `<p>Folds are structural — keep 30-minute intervals exactly as scheduled. The formula-derived extra time goes as undisturbed rest <strong>after CF2</strong>.</p>
+  steps += `<p>Folds are structural — keep 30-minute intervals exactly as scheduled. Fold count is set by your flour (<strong>${flourInfo[domFlour].name}</strong>${foldOverride != null ? ', manually overridden' : ''}); the formula-derived extra time goes as undisturbed rest <strong>after the last fold</strong>.</p>
     <table>
-      <tr><td>${fmt(T.sf1)}</td><td><strong>Stretch &amp; fold #1</strong> — 4 sides</td></tr>
-      <tr><td>${fmt(T.sf2)}</td><td><strong>Stretch &amp; fold #2</strong> — dough should feel tighter</td></tr>
-      <tr><td>${fmt(T.cf1)}</td><td><strong>Coil fold #1</strong> — lift from middle, let ends fold under</td></tr>
-      <tr><td>${fmt(T.cf2)}</td><td><strong>Coil fold #2</strong> — smooth and pillowy</td></tr>
+${foldTableRows}
       ${isRetard
         ? (undisturbedRestMins > 0
           ? `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong> — ${undisturbedRestMins} min rest for a total of ${bulkTime} bulk</td></tr>`
