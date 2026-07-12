@@ -221,12 +221,21 @@ Reuse a single vocabulary across the whole app (product-register consistency):
 
 ## Tooltips ("why this default")
 
-Every control and derived value gets an info affordance (reuse `.tip` collapsible +
-`info-btn`), each answering "why is this the default?". At minimum:
-hydration (thirsty vs refined flour), fermentolyse (gluten relaxation), folds (flour
-strength), development style, diastatic malt, DDT 24°C (Hamelman), water temp (DDT
-formula), bowl τ (cooling model), poolish %, salt 1.8%, retard duration, bench-rest
-floor, proof window. Copy is concrete and specific, not generic.
+Every control and derived value gets an info affordance, each answering "why is this
+the default?". At minimum: hydration (thirsty vs refined flour), fermentolyse (gluten
+relaxation), folds (flour strength), development style, diastatic malt, DDT 24°C
+(Hamelman), water temp (DDT formula), bowl τ (cooling model), poolish %, salt 1.8%,
+retard duration, bench-rest floor, proof window. Copy is concrete and specific, not
+generic.
+
+**Disclosure pattern (decided post-build, supersedes "reuse `.tip` + info-btn
+everywhere"):** two context-appropriate patterns, not one.
+- **Controls** (config area) use an **ⓘ info-btn that opens a shared modal**
+  (`#infoModal`; copy lives in the `INFO` map keyed by control). A modal suits focused
+  "read, then close and adjust" config reading and never shifts the control layout.
+- **Recipe steps** keep **`.tip` inline collapsibles** (the `tip()` helper). Mid-bake
+  you want the tip visible alongside the step without a modal covering it.
+This split was confirmed by an `/impeccable critique` and on-phone testing.
 
 ## Data / prefs schema changes
 

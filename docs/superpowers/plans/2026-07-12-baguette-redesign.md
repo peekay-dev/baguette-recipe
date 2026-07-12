@@ -12,25 +12,49 @@ visual system — leaving `baguette.html` untouched and deployed for comparison.
 discrete params take the dominant flour. All UI reads effective values and shows their
 source. Single self-contained HTML file, vanilla JS, no build step.
 
-**Tech Stack:** HTML + CSS + vanilla JS (single file). Fonts: Bricolage Grotesque +
-Hanken Grotesk (Google Fonts). Tests: Node ≥18 with a DOM stub (no framework).
+**Tech Stack:** HTML + CSS + vanilla JS (single file). Fonts: Hedvig Letters Serif
+(display) + Figtree (body/UI/numerals), Google Fonts. Tests: Node ≥18 with a DOM stub
+(no framework).
 
-## Progress (resume here)
+## Progress — ALL TASKS COMPLETE ✅ (merged to `main`)
+
+The redesign is **done and merged to `main`**. `baguette-v2.html` ships the full
+Oven-Spring visual system with two-tier controls, the flour cascade, tooltips, and
+several rounds of post-plan polish. `baguette.html` remains untouched for comparison;
+promotion to primary is still deferred to the user (Task 6 Step 3).
 
 - ✅ **Task 0** — fork `baguette-v2.html` + trim flour list to 5. (commit `aeafe2e`)
 - ✅ **Task 1** — `{props,rx}` + `GLOBAL` + `eff()`/`sourceOf()` + `userOverride` + `test/logic.test.js`. (commit `aeafe2e`)
 - ✅ **Task 2** — season removed, temperature-driven, legacy-prefs tolerant. (commit `729a60d`)
-- 🔶 **Task 3 — IN PROGRESS** (committed as WIP). Done so far: two-tier controls markup (Batch/Dough/Environment/Method + Advanced panel with Bowl/Folds/Fermentolyse/Bench-rest/Development/Malt); handlers `stepOverride`/`setOverrideInput`/`resetOverride`/`setDevelop`/`setMalt`/`toggleAdvanced`; pill helpers `setPill`/`shortFlour`; CSS for `.group-label`/`.adv-toggle`/`.src`; `update()` now resolves **hydration/fermentolyse/detente via `eff()`**. **REMAINING:**
-  1. In `update()` after `const salt = …`: add `const developV = eff('develop', ctx); const maltPct = eff('malt', ctx); const maltGrams = totalFlour * (maltPct/100);`
-  2. At the **end** of `update()`: set `#hydration`.value = `Math.round(baseHyd*100)`, `#fermentolyse`.value = `fermentolyseTime`, `#detente`.value = `detenteFloorV`; toggle `#developToggle`/`#maltToggle` active buttons by `developV`/`maltPct`; call `setPill('hydration'|'fermentolyse'|'detente'|'develop'|'malt')`; set `#src-folds` pill (`foldOverride!=null ? 'custom' : shortFlour(flourInfo[domFlour].name)`).
-  3. Add diastatic-malt row to the **Final Dough** table when `maltPct>0`.
-  4. Add development guidance line to the **Bulk Fermentation** step (gentle → coil-only; intensive → slap-and-fold to shiny).
-  5. Verify Advanced opens and all controls persist; `node test/logic.test.js` green.
-- ⬜ **Task 4** — Oven-Spring visual system (Hedvig Letters + Figtree, terracotta tokens, hero SVG, stage strip, status hero + bulk-progress estimate, motion). Source: `docs/previews/boulangerie-overdrive.html`. This is where the Inter/DM-Serif `overused-font` findings clear.
-- ⬜ **Task 5** — "why this default" tooltips.
-- ⬜ **Task 6** — polish + `/impeccable audit` (+ critique/polish sonnet sub-agents).
+- ✅ **Task 3** — two-tier controls (Batch/Dough/Environment/Method + Advanced panel), override handlers, source pills, persistence. (WIP `9345ce2`, completed after)
+- ✅ **Task 4** — Oven-Spring visual system: Hedvig Letters Serif + Figtree, terracotta tokens, hero SVG (spring / opening scores / glow / steam), sticky stage strip, `grid-rows` motion + reduced-motion fallbacks.
+- ✅ **Task 5** — "why this default" tooltips throughout (see disclosure-pattern note below).
+- ✅ **Task 6** — polish + `/impeccable critique` (dual sonnet sub-agents). Score 29/40 "Good".
 
-Guardrail: run `node test/logic.test.js` after each change — it evals the `<script>` and runs `update()` under a DOM stub, so it catches crashes even though it can't verify visuals.
+### Post-plan iterations (on `main`, after the tasks above)
+
+Ongoing UI refinement driven by on-phone testing and an impeccable critique:
+
+- **Disclosure pattern split (decided):** controls use an **ⓘ info-btn → shared modal**
+  (`#infoModal`, content in the `INFO` map); recipe steps keep **`.tip` collapsibles**
+  (the `tip()` helper). Rationale: a modal suits focused config reading; an inline
+  collapsible suits mid-bake reading without covering the step. This supersedes the
+  spec's "reuse `.tip` + info-btn everywhere" line.
+- **Hero moved into the terracotta header:** the Oven-Spring baguette now lives inside
+  `.head`, immediately right of the flour/hydration/batch stats, stretched to their
+  combined height; steam recoloured cream + halo warm-golden to read on terracotta.
+  The standalone cream `.hero` section and the redundant `formula-line` subheader are gone.
+- **Big → mini baguette handoff:** the mini loaf in the sticky bar starts hidden and
+  reveals with a scale-in when `.head` scrolls out of view (IntersectionObserver).
+- **Stage-strip scrollspy:** replaced the enter-only IntersectionObserver (which missed
+  short sections like "mix") with a deterministic rAF scrollspy — the current stage is
+  the last observed step whose top has passed the ~120px line, correct in both scroll
+  directions and on manual scroll.
+- **Other polish:** blend slider label, inline Bulk-ferment visual cue, "You made
+  baguettes." closing beat, `knead_slap_fold.gif` in the intensive path, poke-test gif,
+  advanced-times desktop alignment, poolish-field sizing, many touch-target fixes.
+
+Guardrail: run `node test/logic.test.js` after each change — it evals the `<script>` and runs `update()` under a DOM stub, so it catches crashes even though it can't verify visuals. Visual checks use headless Edge screenshots (`msedge --headless --screenshot`).
 
 ## Global Constraints
 

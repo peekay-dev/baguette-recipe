@@ -651,20 +651,39 @@ function setupHeroObserver() {
   window._heroObs.observe(hero);
 }
 
+// Scrollspy: on each scroll, the current stage is the last observed step whose
+// top has passed under the sticky bar. Deterministic in both directions and for
+// manual scrolling — unlike enter-only IntersectionObserver, which missed short
+// sections (notably "mix") when they never crossed the trigger band.
+let _stageEls = [];
+let _spyTick = false;
+function computeStage() {
+  _spyTick = false;
+  if (!_stageEls.length) return;
+  const line = 120; // px below viewport top (clears the sticky stage bar)
+  let active = null;
+  for (const { stage, el } of _stageEls) {
+    if (el.getBoundingClientRect().top - line <= 0) active = stage; else break;
+  }
+  if (active !== currentStage) { currentStage = active; updateStageStrip(); }
+}
+function onScrollSpy() {
+  if (_spyTick) return;
+  _spyTick = true;
+  requestAnimationFrame(computeStage);
+}
 function setupStageObserver() {
-  if (typeof IntersectionObserver === 'undefined') return;
-  if (window._sObs) window._sObs.disconnect();
-  window._sObs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (!e.isIntersecting) return;
-      const stage = Object.keys(STAGE_STEP).find(k => STAGE_STEP[k] === e.target.dataset.step);
-      if (stage) { currentStage = stage; updateStageStrip(); }
-    });
-  }, { rootMargin: '-5% 0px -55% 0px', threshold: 0 });
-  Object.entries(STAGE_STEP).forEach(([, id]) => {
-    const el = document.querySelector('[data-step="' + id + '"]');
-    if (el) window._sObs.observe(el);
-  });
+  if (typeof window === 'undefined' || typeof window.addEventListener !== 'function'
+      || typeof document.querySelector !== 'function') return;
+  _stageEls = Object.entries(STAGE_STEP)
+    .map(([stage, id]) => ({ stage, el: document.querySelector('[data-step="' + id + '"]') }))
+    .filter(x => x.el);
+  if (!window._scrollSpyBound) {
+    window.addEventListener('scroll', onScrollSpy, { passive: true });
+    window.addEventListener('resize', onScrollSpy, { passive: true });
+    window._scrollSpyBound = true;
+  }
+  computeStage();
 }
 function setMethod(m) {
   method = m;
