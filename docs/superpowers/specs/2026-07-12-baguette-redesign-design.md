@@ -290,3 +290,25 @@ a personal single-file app. So:
 
 None blocking. Defaults asserted: continuous params blend / discrete params take
 dominant flour; single-file preserved; Advanced collapsed by default.
+
+## Locked visual direction (confirmed 2026-07-12)
+
+Confirmed by side-by-side preview review. **Source of truth:
+`docs/previews/boulangerie-overdrive.html`.**
+
+- **Palette:** Modern Boulangerie terracotta (`#9E3B2E`) on white, cream (`#F7ECE4`)
+  on the colour blocks. Tokens as in the Visual direction section.
+- **Fonts:** **Hedvig Letters Serif** (display) + **Figtree** (body, UI, and numerals
+  via `tabular-nums`). Replaces the earlier Bricolage/Hanken pairing. Both Google Fonts.
+- **Hero — "Oven Spring":** a side-on baguette on a steep angle that springs (rises
+  from its base), the three grigne scores bloom open in sequence, with a warm oven
+  glow and rising steam. All CSS/SVG, 60fps, `prefers-reduced-motion` fallback shows
+  the sprung loaf with scores open, static. Treated as **fixed signature hero art**
+  (the goal), with live status beside it.
+- **Kept elevations:** status hero ("Now · <stage>", "<n>% risen", "Next …"), the
+  6-step **stage strip** (Poolish → Bake, current lit), and the Flour-primary →
+  numeric-cluster → method **hierarchy**.
+- **Build-time data note:** the "% risen" figure needs a **bulk-progress estimate**
+  (elapsed vs. computed bulk time); the "Next …" line reuses existing schedule timings.
+- Motion follows impeccable `animate.md` (150–250ms, ease-out, no layout-property
+  animation); honour reduced-motion throughout.
