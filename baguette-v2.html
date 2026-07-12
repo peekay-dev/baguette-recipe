@@ -96,6 +96,12 @@
   .method-row { display: flex; gap: 8px; align-items: end; flex: 1; min-width: 0; }
   .meta { font-size: 0.78em; color: var(--muted); margin-top: 3px; }
   .formula-meta { font-size: 0.82em; color: var(--muted); letter-spacing: 0.3px; }
+  .group-label { font-size: 0.62em; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin: 12px 0 4px; }
+  .group-label:first-child { margin-top: 0; }
+  .adv-toggle { cursor: pointer; user-select: none; font-size: 0.78em; font-weight: 500; color: var(--accent); letter-spacing: 0.3px; padding: 12px 0 2px; border-top: 1px solid var(--border); margin-top: 14px; -webkit-tap-highlight-color: transparent; }
+  .adv-toggle::before { content: '+ '; }
+  .adv-toggle.open::before { content: '− '; }
+  .src { font-size: 0.82em; font-weight: 400; color: var(--accent); text-transform: none; letter-spacing: 0; cursor: pointer; }
   @media (max-width: 600px) {
     /* .num-field { max-width: 100%; flex: 1; } */
     .header-row { padding: 24px 16px 0; }
@@ -121,31 +127,14 @@
   <p style="color:var(--muted);font-size:0.78em;letter-spacing:1px">by Paul</p>
 </div>
 <div class="controls white-panel">
-  <div class="control-row">
-    <div class="method-row">
-      <div class="field">
-        <label>Method <button class="info-btn" onclick="event.stopPropagation();document.getElementById('compareModal').classList.add('open')" title="Compare methods">?</button></label>
-        <div class="toggle" id="methodToggle">
-          <button class="active" data-v="retard" onclick="setMethod('retard')">Cold Retard</button>
-          <button data-v="sameday" onclick="setMethod('sameday')">Same Day</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Bowl</label>
-        <div class="toggle" id="bowlToggle">
-          <button class="active" data-v="60" onclick="setTemperTau(60)">Metal</button>
-          <button data-v="90" onclick="setTemperTau(90)">Glass</button>
-          <button data-v="111" onclick="setTemperTau(111)">Plastic tub</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- ── Essentials ─────────────────────────────────────────── -->
+  <div class="group-label">Batch</div>
   <div class="control-row">
     <div class="field">
       <label>Quantity</label>
        <div class="stepper">
         <button onclick="step('count',-1)">-</button>
-        <input type="number" id="count" value="4", min="1", max="50" onchange="update()">
+        <input type="number" id="count" value="4" min="1" max="50" onchange="update()">
         <button onclick="step('count', 1)">+</button>
        </div>
     </div>
@@ -153,43 +142,13 @@
       <label>Weight each (g)</label>
         <div class="stepper">
           <button onclick="step('weight',-1)">-</button>
-          <input type="number" id="weight" value="250", min="150", max="500", onchange="update()">
+          <input type="number" id="weight" value="250" min="150" max="500" onchange="update()">
           <button onclick="step('weight', 1)">+</button>
         </div>
     </div>
-    <div class="field">
-      <label>Hydration %</label>
-      <div class="stepper">
-        <button onclick="step('hydration',-1)">-</button>
-        <input type="number" id="hydration" value="70", min="50", max="100", onchange="update()">
-        <button onclick="step('hydration', 1)">+</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Room Temp (°C)</label>
-      <div class="stepper">
-        <button onclick="step('ambientTemp',-1)">-</button>
-        <input type="number" id="ambientTemp" value="18" min="10" max="35" onchange="update()">
-        <button onclick="step('ambientTemp', 1)">+</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Poolish %</label>
-      <div class="stepper">
-        <button onclick="step('poolishPct',-1)">-</button>
-        <input type="number" id="poolishPct" value="30", min="20", max="40", onchange="update()">
-        <button onclick="step('poolishPct', 1)">+</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Folds</label>
-      <div class="stepper">
-        <button onclick="stepFold(-1)">-</button>
-        <input type="number" id="foldCount" value="4" min="1" max="6" onchange="stepFold(0)">
-        <button onclick="stepFold(1)">+</button>
-      </div>
-    </div>
   </div>
+
+  <div class="group-label">Dough</div>
   <div class="control-row">
     <div class="field">
       <label>Flour A</label>
@@ -224,6 +183,101 @@
   </div>
   <div class="control-row">
     <input type="range" id="blend" min="0" max="100" value="85" oninput="syncBlend('slider')" style="width:100%">
+  </div>
+  <div class="control-row">
+    <div class="field">
+      <label>Hydration % <span class="src" id="src-hydration" onclick="resetOverride('hydration')"></span></label>
+      <div class="stepper">
+        <button onclick="stepOverride('hydration',-1,50,100)">-</button>
+        <input type="number" id="hydration" value="72" min="50" max="100" onchange="setOverrideInput('hydration')">
+        <button onclick="stepOverride('hydration',1,50,100)">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Poolish %</label>
+      <div class="stepper">
+        <button onclick="step('poolishPct',-1)">-</button>
+        <input type="number" id="poolishPct" value="30" min="20" max="40" onchange="update()">
+        <button onclick="step('poolishPct', 1)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="group-label">Environment</div>
+  <div class="control-row">
+    <div class="field">
+      <label>Room Temp (°C)</label>
+      <div class="stepper">
+        <button onclick="step('ambientTemp',-1)">-</button>
+        <input type="number" id="ambientTemp" value="18" min="10" max="35" onchange="update()">
+        <button onclick="step('ambientTemp', 1)">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Method <button class="info-btn" onclick="event.stopPropagation();document.getElementById('compareModal').classList.add('open')" title="Compare methods">?</button></label>
+      <div class="toggle" id="methodToggle">
+        <button class="active" data-v="retard" onclick="setMethod('retard')">Cold Retard</button>
+        <button data-v="sameday" onclick="setMethod('sameday')">Same Day</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Advanced · flour tuning ────────────────────────────── -->
+  <div class="adv-toggle" id="advToggle" onclick="toggleAdvanced(this)">Advanced · flour tuning</div>
+  <div class="collapsible-body" id="advBody">
+    <div class="control-row" style="padding-top:12px">
+      <div class="field">
+        <label>Bowl</label>
+        <div class="toggle" id="bowlToggle">
+          <button class="active" data-v="60" onclick="setTemperTau(60)">Metal</button>
+          <button data-v="90" onclick="setTemperTau(90)">Glass</button>
+          <button data-v="111" onclick="setTemperTau(111)">Plastic tub</button>
+        </div>
+      </div>
+    </div>
+    <div class="control-row">
+      <div class="field">
+        <label>Folds <span class="src" id="src-folds" onclick="onFlourChange()"></span></label>
+        <div class="stepper">
+          <button onclick="stepFold(-1)">-</button>
+          <input type="number" id="foldCount" value="4" min="1" max="6" onchange="stepFold(0)">
+          <button onclick="stepFold(1)">+</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Fermentolyse (min) <span class="src" id="src-fermentolyse" onclick="resetOverride('fermentolyse')"></span></label>
+        <div class="stepper">
+          <button onclick="stepOverride('fermentolyse',-5,30,90)">-</button>
+          <input type="number" id="fermentolyse" value="45" min="30" max="90" step="5" onchange="setOverrideInput('fermentolyse')">
+          <button onclick="stepOverride('fermentolyse',5,30,90)">+</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Bench-rest floor (min) <span class="src" id="src-detente" onclick="resetOverride('detente')"></span></label>
+        <div class="stepper">
+          <button onclick="stepOverride('detente',-5,15,45)">-</button>
+          <input type="number" id="detente" value="20" min="15" max="45" step="5" onchange="setOverrideInput('detente')">
+          <button onclick="stepOverride('detente',5,15,45)">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="control-row">
+      <div class="field">
+        <label>Development <span class="src" id="src-develop" onclick="resetOverride('develop')"></span></label>
+        <div class="toggle" id="developToggle">
+          <button data-v="gentle" onclick="setDevelop('gentle')">Gentle</button>
+          <button data-v="standard" onclick="setDevelop('standard')">Standard</button>
+          <button data-v="intensive" onclick="setDevelop('intensive')">Intensive</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Diastatic malt <span class="src" id="src-malt" onclick="resetOverride('malt')"></span></label>
+        <div class="toggle" id="maltToggle">
+          <button data-v="0" onclick="setMalt(0)">Off</button>
+          <button data-v="0.5" onclick="setMalt(0.5)">0.5%</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <div class="content" id="recipe"></div>
@@ -456,6 +510,40 @@ function buildFolds(base, n) {
   return base.slice(base.length - n);
 }
 
+// ── Override controls (the cascade's user layer) ──────────────────────────
+function ctxNow() {
+  const blendA = +document.getElementById('blend').value;
+  return { override: userOverride, fA: document.getElementById('flourA').value,
+           fB: document.getElementById('flourB').value, blendA };
+}
+function stepOverride(key, delta, min, max) {
+  const base = userOverride[key] != null ? userOverride[key] : Math.round(eff(key, ctxNow()));
+  userOverride[key] = Math.min(max, Math.max(min, base + delta));
+  savePrefs(); update();
+}
+function setOverrideInput(key) {
+  const v = +document.getElementById(key).value;
+  if (!isNaN(v)) userOverride[key] = v;
+  savePrefs(); update();
+}
+function resetOverride(key) { delete userOverride[key]; savePrefs(); update(); }
+function setDevelop(v) { userOverride.develop = v; savePrefs(); update(); }
+function setMalt(v) { userOverride.malt = v; savePrefs(); update(); }
+function toggleAdvanced(el) { el.classList.toggle('open'); document.getElementById('advBody').classList.toggle('open'); }
+
+// Short flour name for the compact source pills.
+function shortFlour(name) {
+  return name.replace('Miller & Baker Plain Flour', 'Yitpi').replace('Caputo ', '').replace(' Flour', '');
+}
+// Write a control's provenance pill: custom / from <flour> / blend / (nothing when default).
+function setPill(key) {
+  const el = document.getElementById('src-' + key);
+  if (!el) return;
+  if (userOverride[key] != null) { el.textContent = '· custom (tap to reset)'; return; }
+  const s = sourceOf(key, ctxNow());
+  el.textContent = s === 'default' ? '' : s.startsWith('blend of ') ? '· blend' : '· ' + shortFlour(s);
+}
+
 function update() {
   savePrefs();
   const count = Math.max(1, +document.getElementById('count').value);
@@ -464,8 +552,10 @@ function update() {
   const blendB = 100 - blendA;
   const fA = document.getElementById('flourA').value;
   const fB = document.getElementById('flourB').value;
-  const userHyd = +document.getElementById('hydration').value;
   const poolishPct = Math.min(0.40, Math.max(0.20, (+document.getElementById('poolishPct').value) / 100));
+
+  // Resolution context for the flour cascade (eff / sourceOf).
+  const ctx = { override: userOverride, fA, fB, blendA };
 
   // Dominant flour (by blend %) sets the default fold sequence; a manual
   // override wins when set. Drives fold count everywhere below.
@@ -483,15 +573,16 @@ function update() {
   // Dough leaves the mix at DDT (~24°C) and drifts toward ambient slowly — ambient temp
   // misreads the early bulk, and the poolish is already fermenting so fermentolyse
   // can't run long without risking gluten breakdown. Go by visual cues, not the clock.
-  const fermentolyseTime = 45;   // fixed; cap 60 min hard
+  const fermentolyseTime = Math.round(eff('fermentolyse', ctx)); // flour-driven (GLOBAL 45)
   const foldInterval = 30;        // fixed regardless of room temp
 
   // Détente: t = 40 × 2^((17 − T_mean) / 10), hard floor 20 min.
   // Solved iteratively with time-averaged T_mean under Newton's law (τ = TAU_DIVIDED).
   // Same-day dough is at ambient throughout so no iteration needed.
   const retardDetenteDuration = solveStageDuration(40, 17, TAU_DIVIDED, TEMPER_TARGET, tempC);
-  const retardDetenteMins = Math.max(20, Math.round(retardDetenteDuration));
-  const samedayDetenteMins = Math.max(20, Math.round(40 * Math.pow(2, (17 - tempC) / 10)));
+  const detenteFloorV = Math.round(eff('detente', ctx)); // flour-driven bench-rest floor (GLOBAL 20)
+  const retardDetenteMins = Math.max(detenteFloorV, Math.round(retardDetenteDuration));
+  const samedayDetenteMins = Math.max(detenteFloorV, Math.round(40 * Math.pow(2, (17 - tempC) / 10)));
   const detenteMins = isRetard ? retardDetenteMins : samedayDetenteMins;
 
   // End-of-détente dough temp (Newton's law, τ = TAU_DIVIDED) — input to proof formula.
@@ -534,8 +625,7 @@ function update() {
     ? `${waterTempCalc}°C (ice water)`
     : `~${waterTempCalc}°C`;
   const totalDough = count * pieceWeight * 1.06;
-  const hydAdj = (flourInfo[fA].hydAdj * blendA + flourInfo[fB].hydAdj * blendB) / 100;
-  const baseHyd = (userHyd + hydAdj) / 100;
+  const baseHyd = eff('hydration', ctx) / 100; // flour target, user-overridable via the Hydration control
   const poolishYeastPct = POOLISH_YEAST_PCT * yeastMult;
   const finalYeastPct = YEAST_PCT * yeastMult;
   const yeastPct = poolishYeastPct + finalYeastPct;

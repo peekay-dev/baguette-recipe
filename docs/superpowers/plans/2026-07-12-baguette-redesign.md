@@ -15,6 +15,23 @@ source. Single self-contained HTML file, vanilla JS, no build step.
 **Tech Stack:** HTML + CSS + vanilla JS (single file). Fonts: Bricolage Grotesque +
 Hanken Grotesk (Google Fonts). Tests: Node ≥18 with a DOM stub (no framework).
 
+## Progress (resume here)
+
+- ✅ **Task 0** — fork `baguette-v2.html` + trim flour list to 5. (commit `aeafe2e`)
+- ✅ **Task 1** — `{props,rx}` + `GLOBAL` + `eff()`/`sourceOf()` + `userOverride` + `test/logic.test.js`. (commit `aeafe2e`)
+- ✅ **Task 2** — season removed, temperature-driven, legacy-prefs tolerant. (commit `729a60d`)
+- 🔶 **Task 3 — IN PROGRESS** (committed as WIP). Done so far: two-tier controls markup (Batch/Dough/Environment/Method + Advanced panel with Bowl/Folds/Fermentolyse/Bench-rest/Development/Malt); handlers `stepOverride`/`setOverrideInput`/`resetOverride`/`setDevelop`/`setMalt`/`toggleAdvanced`; pill helpers `setPill`/`shortFlour`; CSS for `.group-label`/`.adv-toggle`/`.src`; `update()` now resolves **hydration/fermentolyse/detente via `eff()`**. **REMAINING:**
+  1. In `update()` after `const salt = …`: add `const developV = eff('develop', ctx); const maltPct = eff('malt', ctx); const maltGrams = totalFlour * (maltPct/100);`
+  2. At the **end** of `update()`: set `#hydration`.value = `Math.round(baseHyd*100)`, `#fermentolyse`.value = `fermentolyseTime`, `#detente`.value = `detenteFloorV`; toggle `#developToggle`/`#maltToggle` active buttons by `developV`/`maltPct`; call `setPill('hydration'|'fermentolyse'|'detente'|'develop'|'malt')`; set `#src-folds` pill (`foldOverride!=null ? 'custom' : shortFlour(flourInfo[domFlour].name)`).
+  3. Add diastatic-malt row to the **Final Dough** table when `maltPct>0`.
+  4. Add development guidance line to the **Bulk Fermentation** step (gentle → coil-only; intensive → slap-and-fold to shiny).
+  5. Verify Advanced opens and all controls persist; `node test/logic.test.js` green.
+- ⬜ **Task 4** — Oven-Spring visual system (Hedvig Letters + Figtree, terracotta tokens, hero SVG, stage strip, status hero + bulk-progress estimate, motion). Source: `docs/previews/boulangerie-overdrive.html`. This is where the Inter/DM-Serif `overused-font` findings clear.
+- ⬜ **Task 5** — "why this default" tooltips.
+- ⬜ **Task 6** — polish + `/impeccable audit` (+ critique/polish sonnet sub-agents).
+
+Guardrail: run `node test/logic.test.js` after each change — it evals the `<script>` and runs `update()` under a DOM stub, so it catches crashes even though it can't verify visuals.
+
 ## Global Constraints
 
 - Everything ships in one file `baguette-v2.html`; **do not modify `baguette.html`**.
