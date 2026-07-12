@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perth Baguettes v2 — Poolish Method</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #f5f0ea; --white: #fff; --accent: #8b7355; --text: #3a3530; --muted: #9a9185; --border: #ddd5ca; --highlight: rgba(139,115,85,0.06); --done: #ccc5bb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); max-width: 680px; margin: 0 auto; padding: 0 0 60px; line-height: 1.65; font-size: 15px; }
+  h1 { font-family: 'DM Serif Display', Georgia, serif; font-size: 2.2em; font-weight: 400; letter-spacing: -0.5px; margin-bottom: 0; }
+  h2 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.1em; font-weight: 400; margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); letter-spacing: 0.3px; color: var(--accent); }
+  h3 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.05em; font-weight: 400; margin: 16px 0 6px; color: var(--accent); letter-spacing: 0.3px; }
+  .subtitle { color: var(--muted); margin-bottom: 20px; font-size: 0.88em; letter-spacing: 2px; text-transform: uppercase; font-weight: 400; }
+  .header-row { padding: 32px 20px 0; }
+  .controls { padding: 0; margin: 0 20px 12px; }
+  .control-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 10px; }
+  .control-row:last-child { margin-bottom: 0; }
+  .field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+  .field label { font-size: 0.7em; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  select, input[type=number], input[type=time] { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 16px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: transparent; width: 100%; height: 44px; line-height: 1.2; color: var(--text); }
+  input[type=number], input[type=time] { -webkit-appearance: none; appearance: none; }
+  select:focus, input:focus { outline: none; border-color: var(--accent); }
+  /* Force number input spinners to show on mobile — stepper only */
+  .stepper input[type=number]::-webkit-inner-spin-button,
+  .stepper input[type=number]::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 44px;
+  }
+  /* Hide spinners on plain % fields so they match select height */
+  .num-field input[type=number] { -moz-appearance: textfield; }
+  .num-field input[type=number]::-webkit-inner-spin-button,
+  .num-field input[type=number]::-webkit-outer-spin-button { display: none; }
+  .toggle { display: flex; gap: 0; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+  .toggle button { flex: 1; padding: 8px 14px; border: none; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.85em; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.2s; min-height: 44px; letter-spacing: 0.3px; white-space: nowrap; -webkit-appearance: none; }
+  .toggle button.active { background: var(--accent); color: var(--bg); }
+  .blend-row { display: flex; gap: 6px; align-items: center; }
+  .blend-input { width: 52px; text-align: center; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.88em; padding: 6px 2px; border: 1px solid var(--border); border-radius: 4px; background: transparent; color: var(--accent); min-height: 36px; }
+  .blend-input:focus { outline: none; border-color: var(--accent); }
+  input[type=range] { flex: 1; accent-color: var(--accent); min-height: 44px; }
+  .num-field { max-width: 76px; flex: 0 0 76px; }
+  .stepper { display: flex; align-items: center; gap: 0px; border: 1px solid var(--border); border-radius: 4px; overflow:hidden; }
+  .stepper input[type=number] { border: none; border-radius: 0; text-align: center; -moz-appearance: textfield; padding: 8px 2px; }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper button { width: 38px; min-height: 44px; border: none; background: var(--highlight); color: var(--accent); font-size: 1.2em; cursor: pointer; flex-shrink:0; font-family: 'Inter', sans-serif ;}
+  .content { padding: 0 20px; }
+  .white-panel { background: var(--white); border-radius: 8px; padding: 20px; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 0.9em; }
+  th, td { text-align: left; padding: 4px 0; border: none; }
+  th { font-size: 0.65em; font-weight: 500; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  th:last-child, td.amt { text-align: right; }
+  td { border-bottom: 1px solid rgba(0,0,0,0.04); }
+  td.amt { font-weight: 500; font-size: 1.05em; font-variant-numeric: tabular-nums; color: var(--text); text-align: right; }
+  .step { margin-bottom: 4px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04); transition: opacity 0.3s; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .step:last-child { border-bottom: none; }
+  .step.done { opacity: 0.3; }
+  .step.done .step-title { text-decoration: line-through; }
+  .step-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .step-num { font-family: 'DM Serif Display', Georgia, serif; font-size: 1em; color: var(--accent); margin-right: 8px; }
+  .step-title { font-weight: 400; }
+  .step-time { font-size: 0.8em; color: var(--muted); }
+  .step-check { font-size: 0.7em; color: var(--muted); letter-spacing: 0.5px; }
+  .step.done .step-check { color: var(--accent); }
+  .step p { margin: 3px 0; }
+  .tip { background: var(--highlight); padding: 0; margin: 6px 0; border-radius: 4px; font-size: 0.88em; overflow: hidden; }
+  .tip-toggle { display: flex; align-items: center; padding: 6px 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; gap: 5px; font-weight: 400; font-size: 0.8em; color: var(--muted); letter-spacing: 0.3px; }
+  .tip-toggle::before { content: '+'; font-size: 1.1em; color: var(--accent); display: inline-block; }
+  .tip.open .tip-toggle::before { content: '−'; }
+  .tip-hint { color: var(--muted); font-style: italic; }
+  .tip.open .tip-hint { display: none; }
+  .tip-body { padding: 0 10px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; color: var(--text); }
+  .tip.open .tip-body { max-height: 300px; padding: 0 10px 8px; }
+  .shaping-gif { width: 100%; border-radius: 4px; margin: 8px 0 2px; display: block; }
+  .gif-caption { font-size: 0.75em; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 6px; }
+  .temp { font-weight: 500; }
+  .collapsible-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+  .collapsible-header::after { content: '+'; font-size: 1.1em; color: var(--accent); }
+  .collapsible-header.open::after { content: '−'; }
+  .collapsible-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .collapsible-body.open { max-height: 800px; }
+  .sched-day { font-size: 0.72em; color: var(--muted); font-weight: 400; }
+  .schedule { display: grid; grid-template-columns: auto 1fr; gap: 1px 16px; font-size: 0.9em; padding-top: 8px; }
+  .schedule .time { font-weight: 500; white-space: nowrap; color: var(--accent); }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; font-size: 0.85em; }
+  .compare > div { padding: 10px; border-radius: 4px; border: 1px solid var(--border); }
+  .compare > div:last-child { background: var(--highlight); }
+  .compare h4 { font-size: 0.75em; font-weight: 500; margin-bottom: 4px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.8px; }
+  .compare ul { padding-left: 16px; margin: 0; }
+  .compare li { margin-bottom: 1px; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 200; justify-content: center; align-items: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 8px; padding: 20px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
+  .modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none; font-size: 1.3em; cursor: pointer; color: var(--muted); }
+  .info-btn { background: none; border: 1px solid var(--border); border-radius: 50%; width: 18px; height: 18px; font-size: 0.6em; cursor: pointer; color: var(--accent); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; vertical-align: middle; margin-left: 4px; padding: 0; line-height: 1; }
+  .method-row { display: flex; gap: 8px; align-items: end; flex: 1; min-width: 0; }
+  .meta { font-size: 0.78em; color: var(--muted); margin-top: 3px; }
+  .formula-meta { font-size: 0.82em; color: var(--muted); letter-spacing: 0.3px; }
+  @media (max-width: 600px) {
+    /* .num-field { max-width: 100%; flex: 1; } */
+    .header-row { padding: 24px 16px 0; }
+    .controls { padding: 12px 16px; }
+    .content { padding: 0 16px; }
+    td.amt { font-size: 1.1em; }
+    .compare { grid-template-columns: 1fr; }
+    .white-panel { padding: 16px; }
+    .control-row { flex-wrap: wrap; gap: 8px; }
+    .control-row .field { min-width: calc(50% - 4px); }
+    .control-row .num-field { min-width: 0; flex: 0 0 72px; max-width: 72px; }
+    .method-row { flex-wrap: wrap; }
+    .method-row .field { min-width: 100%; }
+    .blend-row { flex-wrap: nowrap; }
+    .toggle button { padding: 8px 6px; font-size: 0.78em; letter-spacing: 0; white-space: normal; line-height: 1.2; }
+  }
+</style>
+</head>
+<body>
+<div class="header-row">
+  <h1>Perth Poolish Baguettes</h1>
+  <p class="subtitle" id="subtitle">Hand-mixed · cold-retarded · season-adjusted</p>
+  <p style="color:var(--muted);font-size:0.78em;letter-spacing:1px">by Paul</p>
+</div>
+<div class="controls white-panel">
+  <div class="control-row">
+    <div class="field">
+      <label>Season</label>
+      <div class="toggle" id="seasonToggle">
+        <button class="active" data-v="summer" onclick="setSeason('summer')">Summer</button>
+        <button data-v="winter" onclick="setSeason('winter')">Winter</button>
+      </div>
+    </div>
+    <div class="method-row">
+      <div class="field">
+        <label>Method <button class="info-btn" onclick="event.stopPropagation();document.getElementById('compareModal').classList.add('open')" title="Compare methods">?</button></label>
+        <div class="toggle" id="methodToggle">
+          <button class="active" data-v="retard" onclick="setMethod('retard')">Cold Retard</button>
+          <button data-v="sameday" onclick="setMethod('sameday')">Same Day</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Bowl</label>
+        <div class="toggle" id="bowlToggle">
+          <button class="active" data-v="60" onclick="setTemperTau(60)">Metal</button>
+          <button data-v="90" onclick="setTemperTau(90)">Glass</button>
+          <button data-v="111" onclick="setTemperTau(111)">Plastic tub</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="control-row">
+    <div class="field">
+      <label>Quantity</label>
+       <div class="stepper">
+        <button onclick="step('count',-1)">-</button>
+        <input type="number" id="count" value="4", min="1", max="50" onchange="update()">
+        <button onclick="step('count', 1)">+</button>
+       </div>
+    </div>
+    <div class="field">
+      <label>Weight each (g)</label>
+        <div class="stepper">
+          <button onclick="step('weight',-1)">-</button>
+          <input type="number" id="weight" value="250", min="150", max="500", onchange="update()">
+          <button onclick="step('weight', 1)">+</button>
+        </div>
+    </div>
+    <div class="field">
+      <label>Hydration %</label>
+      <div class="stepper">
+        <button onclick="step('hydration',-1)">-</button>
+        <input type="number" id="hydration" value="70", min="50", max="100", onchange="update()">
+        <button onclick="step('hydration', 1)">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Room Temp (°C)</label>
+      <div class="stepper">
+        <button onclick="step('ambientTemp',-1)">-</button>
+        <input type="number" id="ambientTemp" value="18" min="10" max="35" onchange="update()">
+        <button onclick="step('ambientTemp', 1)">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Poolish %</label>
+      <div class="stepper">
+        <button onclick="step('poolishPct',-1)">-</button>
+        <input type="number" id="poolishPct" value="30", min="20", max="40", onchange="update()">
+        <button onclick="step('poolishPct', 1)">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Folds</label>
+      <div class="stepper">
+        <button onclick="stepFold(-1)">-</button>
+        <input type="number" id="foldCount" value="4" min="1" max="6" onchange="stepFold(0)">
+        <button onclick="stepFold(1)">+</button>
+      </div>
+    </div>
+  </div>
+  <div class="control-row">
+    <div class="field">
+      <label>Flour A</label>
+      <select id="flourA" onchange="onFlourChange()">
+        <option value="mb">Miller &amp; Baker Plain Flour</option>
+        <option value="pizzeria">Caputo Pizzeria Blue (12.5%)</option>
+        <option value="nuvola">Caputo Nuvola (13%)</option>
+        <option value="bread">Strong Bread (12–13%)</option>
+        <option value="wholemeal">Wholemeal Wheat</option>
+      </select>
+    </div>
+    <div class="field num-field">
+      <label>%</label>
+      <input type="number" id="pctA" value="85" min="0" max="100" onchange="syncBlend('a')" style="text-align:center">
+    </div>
+  </div>
+  <div class="control-row">
+    <div class="field">
+      <label>Flour B</label>
+      <select id="flourB" onchange="onFlourChange()">
+        <option value="mb">Miller &amp; Baker Plain Flour</option>
+        <option value="pizzeria">Caputo Pizzeria Blue (12.5%)</option>
+        <option value="nuvola">Caputo Nuvola (13%)</option>
+        <option value="bread">Strong Bread (12–13%)</option>
+        <option value="wholemeal" selected>Wholemeal Wheat</option>
+      </select>
+    </div>
+    <div class="field num-field">
+      <label>%</label>
+      <input type="number" id="pctB" value="15" min="0" max="100" onchange="syncBlend('b')" style="text-align:center">
+    </div>
+  </div>
+  <div class="control-row">
+    <input type="range" id="blend" min="0" max="100" value="85" oninput="syncBlend('slider')" style="width:100%">
+  </div>
+</div>
+<div class="content" id="recipe"></div>
+<script>
+let season = 'summer', method = 'retard', temperTau = 60;
+let foldOverride = null; // null = use dominant flour's default fold sequence
+let userOverride = {};   // per-parameter overrides for the eff() cascade (Task 3 wiring)
+const doneSteps = new Set();
+let scheduleOpen = false;
+let poolishStartValue = '21:00';
+const BASSINAGE_PCT = 0.03, SALT_PCT = 0.018;
+const DDT = 24; // Desired Dough Temperature (°C) — Hamelman standard for poolish baguette
+const YEAST_PCT = 0.0033;
+const POOLISH_YEAST_PCT = 0.002; // base (summer); multiplied by season
+const FRIDGE_TEMP = 3;    // °C — dough core temp out of fridge
+const TEMPER_TARGET = 10; // °C — target core temp before dividing
+const TAU_DIVIDED = 30;   // min — Newton's law τ for divided rounds on bench
+const TAU_SHAPED = 20;    // min — Newton's law τ for shaped baguettes in couche
+const FRICTION = 2;       // °C — heat from hand mixing
+
+function fmt(absMin) {
+  const norm = ((absMin % 1440) + 1440) % 1440;
+  const h = Math.floor(norm / 60), m = norm % 60;
+  const ap = h >= 12 ? 'PM' : 'AM';
+  return `${h % 12 || 12}:${m.toString().padStart(2, '0')} ${ap}`;
+}
+function fmtSched(absMin) {
+  const t = fmt(absMin);
+  const day = Math.floor(absMin / 1440);
+  if (day === 0) return t;
+  if (day === 1) return `${t} <span class="sched-day">+1d</span>`;
+  return `${t} <span class="sched-day">+${day}d</span>`;
+}
+function setPoolishStart(val) { poolishStartValue = val; update(); }
+
+const S = {
+  summer: {
+    fridgeNote: 'Dough warms fast — get it into the fridge promptly after bulk.',
+    samedayNote: 'In summer heat, watch the proof carefully — it can run away from you.',
+    poolishOffsetHrs: 12
+  },
+  winter: {
+    fridgeNote: 'Cold dough takes longer to wake up — give extra proof time after shaping.',
+    samedayNote: 'Winter dough is sluggish — don\'t rush the proof. It may need the full time.',
+    poolishOffsetHrs: 12
+  }
+};
+
+// ── Flour-profile architecture ────────────────────────────────────────────
+// Each recipe parameter resolves through a cascade: userOverride ?? flour.rx ?? GLOBAL.
+// - props: descriptive (strength/extensibility/activity/absorption) — drives display, not the recipe.
+// - rx:    prescriptive overrides of the GLOBAL baseline; anything absent inherits.
+// - hydAdj + folds are kept for the current update() logic; Task 3 migrates them into the cascade.
+const GLOBAL = { hydration: 72, fermentolyse: 45, detente: 20, bakeC: 240, develop: 'standard', malt: 0 };
+const CONTINUOUS = ['hydration', 'fermentolyse', 'detente', 'bakeC'];
+
+const flourInfo = {
+  mb: {
+    name: 'Miller & Baker Plain Flour', hydAdj: +5, folds: ['cf','cf'],
+    props: { strength: 5, extensibility: 2, activity: 5, absorption: 5 },
+    rx: { hydration: 75, fermentolyse: 60, develop: 'gentle', detente: 28, bakeC: 245, malt: 0 }
+  },
+  pizzeria: {
+    name: 'Caputo Pizzeria Blue', hydAdj: 0, folds: ['sf','sf','cf','cf'],
+    props: { strength: 2, extensibility: 5, activity: 1, absorption: 2 },
+    rx: { hydration: 65, develop: 'intensive', malt: 0.5 }
+  },
+  nuvola: {
+    name: 'Caputo Nuvola', hydAdj: +2, folds: ['sf','cf','cf'],
+    props: { strength: 3, extensibility: 4, activity: 2, absorption: 3 },
+    rx: {}
+  },
+  bread: {
+    name: 'Strong Bread Flour', hydAdj: 0, folds: ['sf','cf','cf'],
+    props: { strength: 4, extensibility: 3, activity: 3, absorption: 3 },
+    rx: {}
+  },
+  wholemeal: {
+    name: 'Wholemeal Wheat', hydAdj: +3, folds: ['sf','cf','cf'],
+    props: { strength: 3, extensibility: 2, activity: 4, absorption: 5 },
+    rx: { hydration: 76 }
+  }
+};
+
+// Resolve one parameter through the cascade for a given context.
+// ctx = { override, fA, fB, blendA }. Continuous params blend across both flours
+// (each side falling back to GLOBAL); discrete params take the dominant flour by %.
+function eff(key, ctx) {
+  if (ctx.override && ctx.override[key] != null) return ctx.override[key];
+  const a = flourInfo[ctx.fA].rx[key], b = flourInfo[ctx.fB].rx[key];
+  if (CONTINUOUS.includes(key)) {
+    const va = a != null ? a : GLOBAL[key], vb = b != null ? b : GLOBAL[key];
+    return (va * ctx.blendA + vb * (100 - ctx.blendA)) / 100;
+  }
+  const dom = ctx.blendA >= (100 - ctx.blendA) ? a : b;
+  return dom != null ? dom : GLOBAL[key];
+}
+
+// Where does a parameter's effective value come from? Drives the source pill (Task 3).
+function sourceOf(key, ctx) {
+  if (ctx.override && ctx.override[key] != null) return 'custom';
+  const a = flourInfo[ctx.fA].rx[key], b = flourInfo[ctx.fB].rx[key];
+  if (a == null && b == null) return 'default';
+  if (ctx.fA === ctx.fB || ctx.blendA === 100) return flourInfo[ctx.fA].name;
+  if (ctx.blendA === 0) return flourInfo[ctx.fB].name;
+  return CONTINUOUS.includes(key)
+    ? `blend of ${flourInfo[ctx.fA].name} + ${flourInfo[ctx.fB].name}`
+    : flourInfo[ctx.blendA >= 50 ? ctx.fA : ctx.fB].name;
+}
+
+function setSeason(s) {
+  season = s;
+  document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === s));
+  update();
+}
+function setMethod(m) {
+  method = m;
+  document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === m));
+  document.getElementById('subtitle').textContent = m === 'retard'
+    ? 'Hand-mixed · cold-retarded · season-adjusted'
+    : 'Hand-mixed · same-day bake · season-adjusted';
+  update();
+}
+function setTemperTau(v) {
+  temperTau = v;
+  document.querySelectorAll('#bowlToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === v));
+  update();
+}
+
+function savePrefs() {
+  try {
+    localStorage.setItem('baguette_prefs', JSON.stringify({
+      season, method, temperTau, poolishStartValue, foldOverride, userOverride,
+      count: document.getElementById('count').value,
+      weight: document.getElementById('weight').value,
+      hydration: document.getElementById('hydration').value,
+      flourA: document.getElementById('flourA').value,
+      flourB: document.getElementById('flourB').value,
+      pctA: document.getElementById('pctA').value,
+      ambientTemp: document.getElementById('ambientTemp').value,
+      poolishPct: document.getElementById('poolishPct').value
+    }));
+  } catch(e) {}
+}
+
+function loadPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem('baguette_prefs') || 'null');
+    if (!p) return;
+    if (p.count)   document.getElementById('count').value = p.count;
+    if (p.weight)  document.getElementById('weight').value = p.weight;
+    if (p.hydration) document.getElementById('hydration').value = p.hydration;
+    if (p.flourA)  document.getElementById('flourA').value = p.flourA;
+    if (p.flourB)  document.getElementById('flourB').value = p.flourB;
+    if (p.pctA != null) {
+      document.getElementById('pctA').value = p.pctA;
+      document.getElementById('pctB').value = 100 - p.pctA;
+      document.getElementById('blend').value = p.pctA;
+    }
+    if (p.poolishStartValue) poolishStartValue = p.poolishStartValue;
+    if (p.foldOverride != null) foldOverride = p.foldOverride;
+    if (p.userOverride && typeof p.userOverride === 'object') userOverride = p.userOverride;
+    if (p.ambientTemp != null) document.getElementById('ambientTemp').value = p.ambientTemp;
+    if (p.poolishPct != null) document.getElementById('poolishPct').value = p.poolishPct;
+    if (p.season) { season = p.season; document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === season)); }
+    if (p.temperTau != null) { temperTau = p.temperTau; document.querySelectorAll('#bowlToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === temperTau)); }
+    if (p.method) {
+      method = p.method;
+      document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === method));
+      document.getElementById('subtitle').textContent = method === 'retard'
+        ? 'Hand-mixed · cold-retarded · season-adjusted'
+        : 'Hand-mixed · same-day bake · season-adjusted';
+    }
+  } catch(e) {}
+}
+function r(v) { return Math.round(v); }
+
+function solveStageDuration(anchor, anchorTemp, tau, T_start, T_amb) {
+  // Solve t = anchor × 2^((anchorTemp − T_mean(t)) / 10) by fixed-point iteration,
+  // where T_mean is the time-averaged dough temp under Newton's law cooling.
+  let t = anchor;
+  for (let i = 0; i < 10; i++) {
+    const T_mean = (T_start === T_amb)
+      ? T_amb
+      : T_amb + (T_start - T_amb) * (tau / t) * (1 - Math.exp(-t / tau));
+    t = anchor * Math.pow(2, (anchorTemp - T_mean) / 10);
+  }
+  return t;
+}
+
+function tip(text, hint) {
+  return `<div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')"><div class="tip-toggle"><span class="tip-hint">${hint || ''}</span></div><div class="tip-body">${text}</div></div>`;
+}
+
+function stepStart(num, title, time, id) {
+  const done = doneSteps.has(id) ? ' done' : '';
+  const check = doneSteps.has(id) ? '✓ done' : 'tap to mark done';
+  return `<div class="step${done}" data-step="${id}" onclick="toggleStep('${id}', this)"><div class="step-header"><span><span class="step-num">${num}.</span><span class="step-title">${title}</span></span><span class="step-time">${time}</span></div><div class="step-check">${check}</div>`;
+}
+const stepEnd = '</div>';
+
+function toggleStep(id, el) {
+  if (doneSteps.has(id)) doneSteps.delete(id); else doneSteps.add(id);
+  el.classList.toggle('done');
+  el.querySelector('.step-check').textContent = doneSteps.has(id) ? '✓ done' : 'tap to mark done';
+}
+
+function syncBlend(src) {
+  const slider = document.getElementById('blend');
+  const inputA = document.getElementById('pctA');
+  const inputB = document.getElementById('pctB');
+  if (src === 'slider') { inputA.value = slider.value; inputB.value = 100 - slider.value; }
+  else if (src === 'a') { const v = Math.min(100, Math.max(0, +inputA.value)); inputA.value = v; inputB.value = 100 - v; slider.value = v; }
+  else { const v = Math.min(100, Math.max(0, +inputB.value)); inputB.value = v; inputA.value = 100 - v; slider.value = 100 - v; }
+  update();
+}
+
+function toggleCollapsible(el) {
+  scheduleOpen = !scheduleOpen;
+  el.classList.toggle('open');
+  el.nextElementSibling.classList.toggle('open');
+}
+
+function step(id, delta) {
+  const el = document.getElementById(id);
+  const v = Math.min(+el.max, Math.max(+el.min, +el.value + delta));
+  el.value = v;
+  update();
+}
+
+// Changing flour resets any manual fold override back to that flour's default.
+function onFlourChange() { foldOverride = null; update(); }
+
+// Manual fold-count override (delta 0 = value typed directly into the field).
+function stepFold(delta) {
+  const el = document.getElementById('foldCount');
+  const v = Math.min(6, Math.max(1, (+el.value) + delta));
+  el.value = v;
+  foldOverride = v;
+  update();
+}
+
+// Adjust a flour's base fold sequence to a target count. Fewer folds → keep the
+// last N (the coil folds, which build the most structure); more → append coil folds.
+function buildFolds(base, n) {
+  if (n >= base.length) return base.concat(Array(n - base.length).fill('cf'));
+  return base.slice(base.length - n);
+}
+
+function update() {
+  savePrefs();
+  const count = Math.max(1, +document.getElementById('count').value);
+  const pieceWeight = +document.getElementById('weight').value;
+  const blendA = +document.getElementById('blend').value;
+  const blendB = 100 - blendA;
+  const fA = document.getElementById('flourA').value;
+  const fB = document.getElementById('flourB').value;
+  const userHyd = +document.getElementById('hydration').value;
+  const poolishPct = Math.min(0.40, Math.max(0.20, (+document.getElementById('poolishPct').value) / 100));
+
+  // Dominant flour (by blend %) sets the default fold sequence; a manual
+  // override wins when set. Drives fold count everywhere below.
+  const domFlour = blendA >= blendB ? fA : fB;
+  const baseFolds = flourInfo[domFlour].folds;
+  const folds = foldOverride == null ? baseFolds : buildFolds(baseFolds, foldOverride);
+  document.getElementById('foldCount').value = folds.length;
+
+  const s = S[season];
+  const isRetard = method === 'retard';
+
+  const tempC = Math.max(10, Math.min(35, +document.getElementById('ambientTemp').value));
+  const r5 = v => Math.round(v / 5) * 5;
+
+  // Fold intervals and fermentolyse are FIXED.
+  // Dough leaves the mix at DDT (~24°C) and drifts toward ambient slowly — ambient temp
+  // misreads the early bulk, and the poolish is already fermenting so fermentolyse
+  // can't run long without risking gluten breakdown. Go by visual cues, not the clock.
+  const fermentolyseTime = 45;   // fixed; cap 60 min hard
+  const foldInterval = 30;        // fixed regardless of room temp
+
+  // Détente: t = 40 × 2^((17 − T_mean) / 10), hard floor 20 min.
+  // Solved iteratively with time-averaged T_mean under Newton's law (τ = TAU_DIVIDED).
+  // Same-day dough is at ambient throughout so no iteration needed.
+  const retardDetenteDuration = solveStageDuration(40, 17, TAU_DIVIDED, TEMPER_TARGET, tempC);
+  const retardDetenteMins = Math.max(20, Math.round(retardDetenteDuration));
+  const samedayDetenteMins = Math.max(20, Math.round(40 * Math.pow(2, (17 - tempC) / 10)));
+  const detenteMins = isRetard ? retardDetenteMins : samedayDetenteMins;
+
+  // End-of-détente dough temp (Newton's law, τ = TAU_DIVIDED) — input to proof formula.
+  const retardDoughEndTemp = tempC + (TEMPER_TARGET - tempC) * Math.exp(-retardDetenteMins / TAU_DIVIDED);
+  const proofDoughTemp = isRetard ? retardDoughEndTemp : tempC;
+
+  // Final proof: t = 50 × 2^((22 − T_mean) / 10). Solved iteratively (τ = TAU_SHAPED).
+  // Floor = formula at ambient — dough can never proof faster than if already at room temp.
+  const proofFloor = 50 * Math.pow(2, (22 - tempC) / 10);
+  const proofDuration = Math.max(solveStageDuration(50, 22, TAU_SHAPED, proofDoughTemp, tempC), proofFloor);
+  const proofMid = r5(proofDuration);
+  const proofLow = r5(Math.max(proofDuration * 0.85, proofFloor));
+  const proofHigh = r5(proofDuration * 1.15);
+  const proofTimeStr = `${proofLow}–${proofHigh} min`;
+  const shapeToOvenMin = detenteMins + proofMid;
+  // Poolish yeast scales at half the Q10 rate (sqrt of mult) — partial compensation
+  // so overnight timing stays in a predictable range without fully eliminating time variation
+  const yeastMult = Math.pow(2, (25 - tempC) / 20);
+  const poolishHrsMid = 9 * yeastMult;
+  const poolishLow = Math.round(poolishHrsMid * 0.85);
+  const poolishHigh = Math.round(poolishHrsMid * 1.15);
+  const poolishTime = `${poolishLow}–${poolishHigh} hrs`;
+  // Bulk time: mean dough temp over the reference 3h (Newton's law, same τ as container),
+  // then t = 180 × 2^((23 − T_mean) / 10). Extra time goes as undisturbed rest after CF2.
+  const bulkMeanTemp = tempC + (DDT - tempC) * (temperTau / 180) * (1 - Math.exp(-180 / temperTau));
+  const bulkFormulaMins = 180 * Math.pow(2, (23 - bulkMeanTemp) / 10);
+  const fixedFoldsMins = fermentolyseTime + folds.length * foldInterval; // up to and including the last fold
+  const bulkMins = Math.min(Math.max(Math.round(bulkFormulaMins), fixedFoldsMins), 240);
+  const undisturbedRestMins = bulkMins - fixedFoldsMins;
+  const bulkTime = `${Math.floor(bulkMins / 60)}h${bulkMins % 60 ? ` ${bulkMins % 60}m` : ''}`;
+  const k_bulk = (temperTau / 180) * (1 - Math.exp(-180 / temperTau));
+  const bulkTooLongBelow = Math.round((23 - 10 * Math.log2(240 / 180) - DDT * k_bulk) / (1 - k_bulk));
+  // Retard duration: anchored at 15h @ 4°C, scaled by Q10 for FRIDGE_TEMP
+  const retardHrs = Math.round(15 * Math.pow(2, (4 - FRIDGE_TEMP) / 10));
+  // Water temp: 4-factor DDT formula (room, flour≈room, friction 3°C hand-mix, poolish)
+  // Poolish ferments at room temp and is added at room temp regardless of season.
+  const poolishTempAssumption = tempC;
+  const waterTempCalc = Math.round((DDT * 4) - tempC - tempC - FRICTION - poolishTempAssumption);
+  const waterTempDisplay = waterTempCalc <= 2
+    ? `${waterTempCalc}°C (ice water)`
+    : `~${waterTempCalc}°C`;
+  const totalDough = count * pieceWeight * 1.06;
+  const hydAdj = (flourInfo[fA].hydAdj * blendA + flourInfo[fB].hydAdj * blendB) / 100;
+  const baseHyd = (userHyd + hydAdj) / 100;
+  const poolishYeastPct = POOLISH_YEAST_PCT * yeastMult;
+  const finalYeastPct = YEAST_PCT * yeastMult;
+  const yeastPct = poolishYeastPct + finalYeastPct;
+  const totalFlour = totalDough / (1 + baseHyd + SALT_PCT + yeastPct);
+  const totalWater = totalFlour * baseHyd;
+  const salt = totalFlour * SALT_PCT;
+
+  const poolishFlour = totalFlour * poolishPct;
+  const poolishWater = poolishFlour;
+  const poolishYeast = totalFlour * poolishYeastPct;
+  const finalFlour = totalFlour - poolishFlour;
+  const finalFlourA = finalFlour * (blendA / 100);
+  const finalFlourB = finalFlour * (blendB / 100);
+  const poolishFlourA = poolishFlour * (blendA / 100);
+  const poolishFlourB = poolishFlour * (blendB / 100);
+  const bassinage = totalFlour * BASSINAGE_PCT;
+  const fermentolyseWater = totalWater - poolishWater - bassinage;
+  const fermentolyseHyd = ((fermentolyseWater / finalFlour) * 100).toFixed(0);
+  const finalYeast = totalFlour * finalYeastPct;
+  const fAName = flourInfo[fA].name;
+  const fBName = flourInfo[fB].name;
+  const proofTime = proofTimeStr;
+  const growthTarget = isRetard ? '50–60%' : '70–80%';
+
+  const [ph, pmins] = poolishStartValue.split(':').map(Number);
+  const poolishMins = ph * 60 + pmins;
+  const foldInt = foldInterval;
+  const T = {};
+  T.poolish = poolishMins;
+  T.mix = poolishMins + s.poolishOffsetHrs * 60;
+  T.fermentolyseEnd = T.mix + fermentolyseTime;
+  const foldTimes = [];
+  let foldCursor = T.fermentolyseEnd;
+  folds.forEach(() => { foldCursor += foldInt; foldTimes.push(foldCursor); });
+  const lastFoldTime = foldTimes.length ? foldTimes[foldTimes.length - 1] : T.fermentolyseEnd;
+  T.bulkEnd = lastFoldTime + undisturbedRestMins;
+  T.fridgeIn = T.bulkEnd;
+  T.sdPreshape = T.bulkEnd;
+  T.sdShape = T.sdPreshape + samedayDetenteMins;
+  T.sdBake = T.sdShape + proofMid;
+  T.sdDone = T.sdBake + 30;
+  T.fridgeOut = T.fridgeIn + retardHrs * 60;
+  const warmupMins = (isRetard && tempC > TEMPER_TARGET) ? Math.round(temperTau * Math.log((tempC - FRIDGE_TEMP) / (tempC - TEMPER_TARGET))) : 0;
+  T.warmupEnd = T.fridgeOut + warmupMins;
+  T.bake = T.warmupEnd + shapeToOvenMin;
+
+  // Schedule fold rows, generated from the flour-driven sequence.
+  let schedSf = 0, schedCf = 0;
+  const foldSchedRows = folds.map((type, i) => {
+    const label = type === 'sf' ? `Stretch &amp; fold #${++schedSf}` : `Coil fold #${++schedCf}`;
+    const tail = i === folds.length - 1 ? ' → rest' : '';
+    return `      <span class="time">${fmtSched(foldTimes[i])}</span><span>${label}${tail}</span>`;
+  }).join('\n');
+
+  let scheduleHtml;
+  if (isRetard) {
+    scheduleHtml = `
+      <span class="time">${fmtSched(T.poolish)}</span><span>Mix poolish → room temp overnight</span>
+      <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${poolishTime})</span>
+      <span class="time">${fmtSched(T.fermentolyseEnd)}</span><span>Add salt + bassinage + yeast</span>
+${foldSchedRows}
+      <span class="time">${fmtSched(T.fridgeIn)}</span><span>Fridge @ ${FRIDGE_TEMP}°C (~${retardHrs}h)</span>
+      <span class="time">${fmtSched(T.fridgeOut)}</span><span>Take out of fridge → warm-up ~${warmupMins} min</span>
+      <span class="time">${fmtSched(T.warmupEnd)}</span><span>Preshape → shape → proof</span>
+      <span class="time">${fmtSched(T.bake)}</span><span>Score → bake</span>`;
+  } else {
+    scheduleHtml = `
+      <span class="time">${fmtSched(T.poolish)}</span><span>Mix poolish → room temp overnight</span>
+      <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${poolishTime})</span>
+      <span class="time">${fmtSched(T.fermentolyseEnd)}</span><span>Add salt + bassinage + yeast</span>
+${foldSchedRows}
+      <span class="time">${fmtSched(T.sdPreshape)}</span><span>Preshape → bench rest ${samedayDetenteMins} min</span>
+      <span class="time">${fmtSched(T.sdShape)}</span><span>Final shape → proof ${proofTime}</span>
+      <span class="time">${fmtSched(T.sdBake)}</span><span>Score → bake → done by ${fmt(T.sdDone)}</span>`;
+  }
+
+  let steps = '', n = 1;
+
+  steps += stepStart(n++, 'Poolish', `${fmt(T.poolish)} · ${poolishTime}`, 's1');
+  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover and leave at room temp (${tempC}°C) for ${poolishTime}. ${season === 'summer' && tempC >= 25 ? 'If your kitchen is very warm, check early — it can peak before the upper end.' : ''}</p>`;
+  steps += tip(
+    `Ready when: bubbly, slightly domed, yeasty-sweet smell. At ${tempC}°C expect${tempC <= 18 ? ' the upper end of the range or longer' : tempC >= 28 ? ' the lower end — check early' : ' somewhere in the middle'}. Collapsed and boozy = overripe but still usable.`,
+    'How to tell when it\'s ready'
+  );
+  steps += stepEnd;
+
+  steps += stepStart(n++, 'Fermentolyse', `${fmt(T.mix)} · ${fermentolyseTime} min rest`, 's2');
+  steps += `<p>Add fermentolyse water to a large bowl, then the poolish, then the remaining flour (<strong>hold back the ${r(bassinage)}g bassinage</strong>). Mix by hand — pinch and fold until no dry flour remains. Cover, rest <strong>${fermentolyseTime} minutes</strong>.</p>`;
+  steps += `<p class="meta">Fermentolyse hydration: ${fermentolyseHyd}% · Use water at <span class="temp">${waterTempDisplay}</span> → DDT ${DDT}°C</p>`;
+  steps += tip(
+    `To hit DDT ${DDT}°C, your inputs must total ${DDT * 4}.<br><br>
+    <strong>1. Add up:</strong> flour + room + poolish = ${tempC} + ${tempC} + ${Math.round(poolishTempAssumption)} = <strong>${tempC * 2 + Math.round(poolishTempAssumption)}°C</strong><br>
+    <strong>2. Water temp:</strong> ${DDT * 4} − ${tempC * 2 + Math.round(poolishTempAssumption)} − ${FRICTION}°C friction = <strong>${waterTempCalc}°C</strong><br><br>
+    <em>Winter: don't use water above 40°C — it stresses the yeast. Use warm water and proof bulk in the oven with just the light on instead.</em>`,
+    'DDT formula'
+  );
+  steps += tip(
+    'Why fermentolyse? The poolish yeast is already in the mix, getting a head start on fermentation during the rest. Builds flavour and structure simultaneously.',
+    'Why fermentolyse over autolyse?'
+  );
+  steps += stepEnd;
+
+  steps += stepStart(n++, 'Salt, Yeast & Bassinage', fmt(T.fermentolyseEnd), 's3');
+  steps += `<p>Sprinkle salt and remaining yeast over dough. Pour <strong>${r(bassinage)}g bassinage</strong> on top. Pinch and fold 3–4 min until absorbed and cohesive. Cover and rest <strong>${foldInt} min</strong> before your first fold.</p>`;
+  steps += tip(
+    'Dough will feel like it\'s falling apart when you add the water. Keep pinching — it comes together in 2–3 min. Wet your hands.',
+    'Dough falling apart? That\'s normal'
+  );
+  steps += stepEnd;
+
+  // Bulk-table fold rows, generated from the flour-driven sequence.
+  let tblSf = 0, tblCf = 0;
+  const foldTableRows = folds.map((type, i) => {
+    const isLast = i === folds.length - 1;
+    let label, desc;
+    if (type === 'sf') {
+      label = `Stretch &amp; fold #${++tblSf}`;
+      desc = tblSf === 1 ? 'fold all 4 sides over' : 'dough should feel tighter';
+    } else {
+      label = `Coil fold #${++tblCf}`;
+      desc = isLast ? 'smooth and pillowy' : 'lift from middle, let ends fold under';
+    }
+    return `      <tr><td>${fmt(foldTimes[i])}</td><td><strong>${label}</strong> — ${desc}</td></tr>`;
+  }).join('\n');
+
+  steps += stepStart(n++, 'Bulk Fermentation', bulkTime, 's4');
+  steps += `<p>Folds are structural — keep 30-minute intervals exactly as scheduled. Fold count is set by your flour (<strong>${flourInfo[domFlour].name}</strong>${foldOverride != null ? ', manually overridden' : ''}); the formula-derived extra time goes as undisturbed rest <strong>after the last fold</strong>.</p>
+    <table>
+${foldTableRows}
+      ${isRetard
+        ? (undisturbedRestMins > 0
+          ? `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong> — ${undisturbedRestMins} min rest for a total of ${bulkTime} bulk</td></tr>`
+          : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong></td></tr>`)
+        : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Divide &amp; preshape</strong></td></tr>`
+      }
+    </table>
+    <p>${isRetard ? '' : `Rest undisturbed until dough has grown <strong>${growthTarget} from the start of bulk</strong>. It should be airy, jiggly, and show bubbles on the sides.`}</p>`;
+  steps += tip(
+    `Visual cue overrides the clock: into the fridge at <strong>30–50% expanded</strong> — domed, jiggly, bubbles visible at the edges, nowhere near doubled.<br><br>Cap at 4 hours. Below ~${bulkTooLongBelow}°C ambient the formula wants longer — use a proofing chamber set to 22–24°C.`,
+    'Visual cue & cap'
+  );
+  steps += stepEnd;
+
+  if (isRetard) {
+    steps += stepStart(n++, 'Cold Retard', `${fmt(T.fridgeIn)} → ${fmtSched(T.fridgeOut)}`, 's5');
+    steps += `<p>Cover bowl tightly. Fridge at <span class="temp">${FRIDGE_TEMP}°C</span> for <strong>~${retardHrs}h</strong>. Formula: 15h @ 4°C × 2<sup>((4−${FRIDGE_TEMP})/10)</sup> = ${retardHrs}h @ ${FRIDGE_TEMP}°C. 18–36h is safe if needed.</p>`;
+    steps += tip(
+      'Dough may rise a little in the fridge — normal. If it more than doubles, bulk went too far or fridge is too warm.',
+      'How much rise is normal?'
+    );
+    steps += stepEnd;
+  }
+
+  if (isRetard) {
+    steps += stepStart(n++, 'Take out of fridge', `${fmtSched(T.fridgeOut)} · ~${warmupMins} min`, 's5b');
+    steps += tempC < 13 ? `<p style="color:var(--accent);font-weight:500">At ${tempC}°C the warm-up takes a very long time and the formula becomes unreliable. Find a warmer spot — top of the fridge, near the oven, or a proofing box.</p>` : '';
+    steps += `<p>Remove the covered bowl. Leave it at room temp (<span class="temp">${tempC}°C</span>) for <strong>~${warmupMins} min</strong>. Stop when the <strong>core</strong> reads <strong>${TEMPER_TARGET}°C, or within 1°C of ambient</strong> — whichever comes first. Then divide and start preshaping immediately; smaller pieces warm up roughly twice as fast.</p>`;
+    steps += tip(
+      `Probe the core, not the surface — surface reads 2–4°C warm and will make you move too early. Formula: t = τ × ln((T − ${FRIDGE_TEMP}) / (T − ${TEMPER_TARGET})), τ = ${temperTau} (metal τ=60, glass τ=90, tall plastic tub τ=111).`,
+      'Probe placement matters'
+    );
+    steps += stepEnd;
+  }
+
+  steps += stepStart(n++, 'Preshape', isRetard ? fmtSched(T.warmupEnd) : fmt(T.sdPreshape), 's6');
+  steps += `<p>Flour bench. Tip dough out gently. Divide into <strong>${count} × ~${r(totalDough / count)}g</strong>. Preshape into loose rounds, flip seam-down, drag with bench scraper for tension. Cover, bench rest <strong>${detenteMins} min</strong>${detenteMins === 20 ? ' <span style="color:var(--muted);font-size:0.85em">(floor — gluten needs real time)</span>' : ''}.</p>`;
+  steps += tip(
+    isRetard
+      ? 'At ~10°C the dough is firm but not brittle — it should hold its shape without springing back aggressively. Work cleanly and quickly; don\'t let it sit uncovered on the bench.'
+      : 'Room-temp dough is slacker and stickier. Use more bench flour and work quickly.',
+    isRetard ? 'Working with cold dough' : 'Handling sticky dough'
+  );
+  steps += tip(
+    `If timing by probe: read the core at the start and end of bench rest, average the two — that's the temperature for the formula.${detenteMins === 20 ? ' (Formula wanted less — 20 min floor applies.)' : ''}`,
+    'Using a thermometer for détente'
+  );
+  steps += stepEnd;
+
+  steps += stepStart(n++, 'Final Shape', '', 's7');
+  steps += `<img src="images/1_pat_down_alt.gif" alt="Pat down" class="shaping-gif"><p class="gif-caption">1. Pat down to remove large air bubbles, keeping a rectangular shape</p>`;
+  steps += `<img src="images/2_fold_and_seal_before_flip.gif" alt="Fold and seal" class="shaping-gif"><p class="gif-caption">2. Fold from the top and seal</p>`;
+  steps += `<img src="images/4_fold_and_roll_seal_after_flip.gif" alt="Flip, fold and roll to seal" class="shaping-gif"><p class="gif-caption">3. Flip, fold again and roll to seal, building volume</p>`;
+  steps += `<img src="images/5_motorbike_fold_alt.gif" alt="Motorbike fold" class="shaping-gif"><p class="gif-caption">4. Final tuck and crease (motorbike fold)</p>`;
+  steps += `<img src="images/6_roll_seal_even_alt.gif" alt="Roll to seal" class="shaping-gif"><p class="gif-caption">5. Roll gently to seal the seam and even out the thickness</p>`;
+  steps += stepEnd;
+
+  steps += stepStart(n++, 'Final Proof', proofTime, 's8');
+  steps += `<p>Cover couche. Proof at room temp <strong>${proofTime}</strong> — start checking at <strong>${Math.round(proofDuration * 0.8)} min</strong>. Preheat oven to <span class="temp">240°C</span> with baking stone and steam tray.</p>`;
+  steps += tip(
+    `<table>
+      <tr><th>Response</th><th style="text-align:right">Reading</th></tr>
+      <tr><td>Springs back instantly and fully</td><td class="amt" style="color:var(--muted)">Under</td></tr>
+      <tr><td>Springs back fast, faint dent</td><td class="amt" style="color:var(--muted)">Still under</td></tr>
+      <tr><td>Springs back slowly, dent fades but stays visible</td><td class="amt" style="color:var(--accent);font-weight:500">Ready — bake</td></tr>
+      <tr><td>Barely springs back, dent stays</td><td class="amt">Over</td></tr>
+    </table>`,
+    'The finger test'
+  );
+  steps += stepEnd;
+
+  steps += stepStart(n++, 'Score & Bake', '22–25 min', 's9');
+  steps += `<p>Score 3–5 overlapping cuts at shallow angle. Load onto stone, pour ~1 cup boiling water into steam tray, close door fast.</p>
+    <table>
+      <tr><td><span class="temp">240°C</span> + steam</td><td>12 min</td></tr>
+      <tr><td>Remove steam, vent</td><td>—</td></tr>
+      <tr><td><span class="temp">240°C</span> dry</td><td>10–13 min</td></tr>
+    </table>
+    <p>Cool on wire rack <strong>20 min</strong> before cutting.</p>`;
+  steps += tip(
+    'Crust softens as it cools — normal, it crisps back up. For extra crackle, oven off, door ajar, 5 min.',
+    'Getting a crackly crust'
+  );
+  steps += stepEnd;
+
+  document.getElementById('recipe').innerHTML = `
+    <div class="white-panel">
+      <h2>Formula — ${count} × ${pieceWeight}g</h2>
+      <p class="formula-meta"><strong>${season === 'summer' ? 'Summer' : 'Winter'}</strong> · <strong>${isRetard ? 'Cold Retard' : 'Same Day'}</strong> · Room Temp <span class="temp">${tempC}°C</span> · DDT <span class="temp">${DDT}°C</span> · Water <span class="temp">${waterTempDisplay}</span> · Hydration <strong>${(baseHyd*100).toFixed(0)}%</strong></p>
+      <h3>Poolish (${(poolishPct*100).toFixed(0)}% of flour)</h3>
+      <table>
+        <tr><th>Ingredient</th><th>Amount</th></tr>
+        ${blendA > 0 ? `<tr><td>${fAName}</td><td class="amt">${r(poolishFlourA)}g</td></tr>` : ''}
+        ${blendB > 0 ? `<tr><td>${fBName}</td><td class="amt">${r(poolishFlourB)}g</td></tr>` : ''}
+        <tr><td>Water <span style="color:var(--muted)">(room temp)</span></td><td class="amt">${r(poolishWater)}g</td></tr>
+        <tr><td>Instant Dry Yeast</td><td class="amt">${poolishYeast.toFixed(1)}g</td></tr>
+      </table>
+      <h3>Final Dough</h3>
+      <table>
+        <tr><th>Ingredient</th><th>Amount</th></tr>
+        <tr><td>All poolish</td><td class="amt">${r(poolishFlour + poolishWater)}g</td></tr>
+        ${blendA > 0 ? `<tr><td>${fAName}</td><td class="amt">${r(finalFlourA)}g</td></tr>` : ''}
+        ${blendB > 0 ? `<tr><td>${fBName}</td><td class="amt">${r(finalFlourB)}g</td></tr>` : ''}
+        <tr><td>Water <span style="color:var(--muted)">(fermentolyse @ ${fermentolyseHyd}%)</span></td><td class="amt">${r(fermentolyseWater)}g</td></tr>
+        <tr><td>Water <span style="color:var(--muted)">(bassinage)</span></td><td class="amt">${r(bassinage)}g</td></tr>
+        <tr><td>Fine Salt</td><td class="amt">${salt.toFixed(1)}g</td></tr>
+        <tr><td>Instant Dry Yeast</td><td class="amt">${finalYeast.toFixed(1)}g</td></tr>
+      </table>
+      <h3>Totals</h3>
+      <table>
+        <tr><td>Total flour</td><td class="amt">${r(totalFlour)}g</td></tr>
+        <tr><td>Total water</td><td class="amt">${r(totalWater)}g</td></tr>
+        <tr><td>Total dough</td><td class="amt">~${r(totalDough)}g</td></tr>
+      </table>
+    </div>
+    <div class="white-panel">
+      <h2 class="collapsible-header${scheduleOpen ? ' open' : ''}" onclick="toggleCollapsible(this)">Schedule</h2>
+      <div class="collapsible-body${scheduleOpen ? ' open' : ''}">
+        <div style="display:flex;align-items:center;gap:8px;padding-top:10px;padding-bottom:4px">
+          <label style="font-size:0.7em;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;flex-shrink:0">Poolish start</label>
+          <input type="time" value="${poolishStartValue}" onchange="setPoolishStart(this.value)" style="width:auto;min-height:34px;padding:4px 8px;font-size:0.88em;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--text);font-family:inherit">
+        </div>
+        <div class="schedule">${scheduleHtml}</div>
+      </div>
+    </div>
+    <div class="white-panel">
+      <h2>Method</h2>
+      ${steps}
+    </div>`;
+}
+loadPrefs();
+update();
+</script>
+<div class="modal-overlay" id="compareModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('compareModal').classList.remove('open')">×</button>
+    <h2 style="margin-top:0">Cold Retard vs Same Day</h2>
+    <div class="compare">
+      <div>
+        <h4>Cold Retard</h4>
+        <ul>
+          <li>More complex, nutty flavour</li>
+          <li>Better crust blistering &amp; browning</li>
+          <li>More open, irregular crumb</li>
+          <li>Cold dough = easier to shape</li>
+          <li>Takes 2 days total</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Same Day</h4>
+        <ul>
+          <li>Good baguettes, milder wheaty flavour</li>
+          <li>Decent crust, less blistering</li>
+          <li>Tighter, more even crumb</li>
+          <li>Warm dough = stickier to shape</li>
+          <li>Done in ~5–6 hrs after poolish</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
