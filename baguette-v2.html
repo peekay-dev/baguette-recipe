@@ -21,16 +21,22 @@
          padding: 0 0 60px; -webkit-font-smoothing: antialiased; }
 
   /* ── Header ─────────────────────────────────────────────────────────── */
-  .head { background: var(--accent); color: var(--accent-ink); padding: 24px 20px 16px; }
+  .head { background: var(--accent); color: var(--accent-ink); padding: 24px 20px 14px; }
   .head h1 { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 2rem;
              line-height: 1.05; letter-spacing: -0.01em; }
   .head .formula-line { font-size: 0.82rem; opacity: 0.88; margin-top: 5px;
                         font-variant-numeric: tabular-nums; }
-  .stages { display: flex; gap: 6px; margin-top: 14px; overflow-x: auto; scrollbar-width: none; }
+  .stages-bar { background: var(--accent); padding: 0 20px 12px;
+                position: sticky; top: 0; z-index: 100; }
+  .stages { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
   .stages::-webkit-scrollbar { display: none; }
   .stage { flex: 0 0 auto; font-size: 0.68rem; font-weight: 600; padding: 5px 11px;
            border-radius: 20px; white-space: nowrap; border: 1px solid rgba(247,236,228,0.35);
-           color: var(--accent-ink); opacity: 0.45; }
+           color: var(--accent-ink); opacity: 0.45; cursor: pointer;
+           -webkit-tap-highlight-color: transparent;
+           transition: opacity 0.2s, background 0.2s, color 0.2s; }
+  .stage:hover { opacity: 0.7; }
+  .stage.done { opacity: 0.65; }
   .stage.now { background: var(--accent-ink); color: var(--accent); opacity: 1;
                border-color: var(--accent-ink); }
 
@@ -169,6 +175,7 @@
 
   /* Steps */
   .step { margin-bottom: 4px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04);
+          scroll-margin-top: 48px;
           transition: opacity 0.2s; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .step:last-child { border-bottom: none; }
   .step.done { opacity: 0.35; }
@@ -263,6 +270,7 @@
     .method-row { flex-wrap: wrap; }
     .method-row .field { min-width: 100%; }
     .toggle button { padding: 8px 6px; font-size: 0.78rem; white-space: normal; line-height: 1.2; }
+    .control-row.stack { flex-direction: column; }
   }
 </style>
 </head>
@@ -272,13 +280,15 @@
 <div class="head">
   <h1>Poolish Baguettes</h1>
   <div class="formula-line" id="formula-line">4 × 250g · 72% · retard · 18°C</div>
+</div>
+<div class="stages-bar">
   <div class="stages">
-    <span class="stage" id="st-poolish">Poolish</span>
-    <span class="stage" id="st-mix">Mix</span>
-    <span class="stage" id="st-bulk">Bulk</span>
-    <span class="stage" id="st-retard">Retard</span>
-    <span class="stage" id="st-shape">Shape</span>
-    <span class="stage" id="st-bake">Bake</span>
+    <span class="stage" id="st-poolish" onclick="tapStage('poolish')">Poolish</span>
+    <span class="stage" id="st-mix" onclick="tapStage('mix')">Mix</span>
+    <span class="stage" id="st-bulk" onclick="tapStage('bulk')">Bulk</span>
+    <span class="stage" id="st-retard" onclick="tapStage('retard')">Retard</span>
+    <span class="stage" id="st-shape" onclick="tapStage('shape')">Shape</span>
+    <span class="stage" id="st-bake" onclick="tapStage('bake')">Bake</span>
   </div>
 </div>
 
@@ -383,10 +393,6 @@
         <input type="number" id="hydration" value="72" min="50" max="100" onchange="setOverrideInput('hydration')">
         <button onclick="stepOverride('hydration',1,50,100)" aria-label="Increase hydration">+</button>
       </div>
-      <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
-        <div class="tip-toggle"><span class="tip-hint">Why this hydration?</span></div>
-        <div class="tip-body"><div class="tip-body-inner">Set by your dominant flour via the cascade (flour rx → GLOBAL 72%). Miller &amp; Baker (Yitpi) targets 75% (coarse stoneground T80, high bran absorption). Caputo Pizzeria targets 65% (refined 00-type, low absorption). Blending prorates between the two. Wetter dough → more open crumb, harder to shape. Drier → tighter crumb, easier handling.</div></div>
-      </div>
     </div>
     <div class="field">
       <label for="poolishPct">Poolish %</label>
@@ -395,11 +401,15 @@
         <input type="number" id="poolishPct" value="30" min="20" max="40" onchange="update()">
         <button onclick="step('poolishPct', 1)" aria-label="Increase poolish percentage">+</button>
       </div>
-      <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
-        <div class="tip-toggle"><span class="tip-hint">Why 30%?</span></div>
-        <div class="tip-body"><div class="tip-body-inner">30% pre-fermented flour balances flavour complexity against structure. Below 20%: too little poolish acid to develop character. Above 40%: excess acid degrades gluten. 30% is Hamelman's baguette baseline: a one-day poolish at room temp delivers complex flavour without weakening the final dough.</div></div>
-      </div>
     </div>
+  </div>
+  <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
+    <div class="tip-toggle"><span class="tip-hint">Why this hydration?</span></div>
+    <div class="tip-body"><div class="tip-body-inner">Miller &amp; Baker absorbs more water (75%), Caputo Pizzeria less (65%), most others sit at 72%. Your blend lands in between. Wetter dough → more open crumb, harder to shape. Drier → easier to handle, tighter crumb.</div></div>
+  </div>
+  <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
+    <div class="tip-toggle"><span class="tip-hint">Why 30% poolish?</span></div>
+    <div class="tip-body"><div class="tip-body-inner">30% pre-fermented flour balances flavour complexity against structure. Below 20%: too little poolish acid to develop character. Above 40%: excess acid degrades gluten. 30% is Hamelman's baguette baseline: a one-day poolish at room temp delivers complex flavour without weakening the final dough.</div></div>
   </div>
 
   <div class="group-label">Environment</div>
@@ -435,11 +445,11 @@
             <button data-v="90" onclick="setTemperTau(90)">Glass</button>
             <button data-v="111" onclick="setTemperTau(111)">Plastic tub</button>
           </div>
-          <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
-            <div class="tip-toggle"><span class="tip-hint">What is τ (tau)?</span></div>
-            <div class="tip-body"><div class="tip-body-inner">τ is the Newton's-law cooling time constant for your container, measuring how fast the dough core reaches ambient temperature. Lower τ = faster. Formula for warm-up time: t = τ × ln((T<sub>amb</sub> − T<sub>fridge</sub>) / (T<sub>amb</sub> − T<sub>target</sub>)). Metal bowl (τ=60) conducts heat quickly; glass (τ=90) slower; a tall plastic tub (τ=111) slowest due to insulating walls and poor surface-to-volume ratio.</div></div>
-          </div>
         </div>
+      </div>
+      <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
+        <div class="tip-toggle"><span class="tip-hint">What is τ (tau)?</span></div>
+        <div class="tip-body"><div class="tip-body-inner">τ is the Newton's-law cooling time constant for your container, measuring how fast the dough core reaches ambient temperature. Lower τ = faster. Formula for warm-up time: t = τ × ln((T<sub>amb</sub> − T<sub>fridge</sub>) / (T<sub>amb</sub> − T<sub>target</sub>)). Metal bowl (τ=60) conducts heat quickly; glass (τ=90) slower; a tall plastic tub (τ=111) slowest due to insulating walls and poor surface-to-volume ratio.</div></div>
       </div>
       <div class="control-row">
         <div class="field">
@@ -449,10 +459,6 @@
             <input type="number" id="foldCount" value="4" min="1" max="6" onchange="stepFold(0)">
             <button onclick="stepFold(1)">+</button>
           </div>
-          <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
-            <div class="tip-toggle"><span class="tip-hint">Why does fold count vary?</span></div>
-            <div class="tip-body"><div class="tip-body-inner">Set by your dominant flour's gluten character. Strong, elastic flours (Miller &amp; Baker) need only 2 coil folds, as the tight network builds quickly and over-folding makes it too stiff. Extensible flours (Caputo Pizzeria) need 4 folds (2 stretch-and-fold + 2 coil) to develop structure progressively. Fewer folds → the coil folds from the tail of the sequence are kept (highest structural value).</div></div>
-          </div>
         </div>
         <div class="field">
           <label for="fermentolyse">Fermentolyse (min) <span class="src" id="src-fermentolyse" onclick="resetOverride('fermentolyse')"></span></label>
@@ -460,10 +466,6 @@
             <button onclick="stepOverride('fermentolyse',-5,30,90)">−</button>
             <input type="number" id="fermentolyse" value="45" min="30" max="90" step="5" onchange="setOverrideInput('fermentolyse')">
             <button onclick="stepOverride('fermentolyse',5,30,90)">+</button>
-          </div>
-          <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
-            <div class="tip-toggle"><span class="tip-hint">Why this rest time?</span></div>
-            <div class="tip-body"><div class="tip-body-inner">Fermentolyse lets the gluten hydrate and relax before salt and bassinage are added, cutting mixing time by ~60%. GLOBAL baseline is 45 min. Miller &amp; Baker targets 60 min: stoneground bran absorbs water slowly and the tight network needs longer to relax. Visual cue: dough shaggy at the start, a smooth window panel forming by the end.</div></div>
           </div>
         </div>
         <div class="field">
@@ -473,23 +475,27 @@
             <input type="number" id="detente" value="20" min="15" max="45" step="5" onchange="setOverrideInput('detente')">
             <button onclick="stepOverride('detente',5,15,45)">+</button>
           </div>
-          <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
-            <div class="tip-toggle"><span class="tip-hint">Why 20 min minimum?</span></div>
-            <div class="tip-body"><div class="tip-body-inner">Gluten relaxation is time-limited, not just temperature-limited. Below ~20 min the network won't fully release regardless of temperature, and final shaping will tear the dough. The formula (t = 40 × 2^((17−T)/10)) gives longer rests at colder temps but is always floored here. Miller &amp; Baker's tight network benefits from 28+ min; that's why its flour profile sets the floor higher.</div></div>
-          </div>
         </div>
       </div>
-      <div class="control-row">
+      <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
+        <div class="tip-toggle"><span class="tip-hint">Why does fold count vary?</span></div>
+        <div class="tip-body"><div class="tip-body-inner">Set by your dominant flour's gluten character. Strong, elastic flours (Miller &amp; Baker) need only 2 coil folds, as the tight network builds quickly and over-folding makes it too stiff. Extensible flours (Caputo Pizzeria) need 4 folds (2 stretch-and-fold + 2 coil) to develop structure progressively. Fewer folds → the coil folds from the tail of the sequence are kept (highest structural value).</div></div>
+      </div>
+      <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
+        <div class="tip-toggle"><span class="tip-hint">Why this fermentolyse time?</span></div>
+        <div class="tip-body"><div class="tip-body-inner">Fermentolyse lets the gluten hydrate and relax before salt and bassinage are added, cutting mixing time by ~60%. GLOBAL baseline is 45 min. Miller &amp; Baker targets 60 min: stoneground bran absorbs water slowly and the tight network needs longer to relax. Visual cue: dough shaggy at the start, a smooth window panel forming by the end.</div></div>
+      </div>
+      <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
+        <div class="tip-toggle"><span class="tip-hint">Why 20 min minimum bench-rest?</span></div>
+        <div class="tip-body"><div class="tip-body-inner">Gluten relaxation is time-limited, not just temperature-limited. Below ~20 min the network won't fully release regardless of temperature, and final shaping will tear the dough. The formula (t = 40 × 2^((17−T)/10)) gives longer rests at colder temps but is always floored here. Miller &amp; Baker's tight network benefits from 28+ min; that's why its flour profile sets the floor higher.</div></div>
+      </div>
+      <div class="control-row stack">
         <div class="field">
           <label>Development <span class="src" id="src-develop" onclick="resetOverride('develop')"></span></label>
           <div class="toggle" id="developToggle">
             <button data-v="gentle" onclick="setDevelop('gentle')">Gentle</button>
             <button data-v="standard" onclick="setDevelop('standard')">Standard</button>
             <button data-v="intensive" onclick="setDevelop('intensive')">Intensive</button>
-          </div>
-          <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
-            <div class="tip-toggle"><span class="tip-hint">Gentle / Standard / Intensive</span></div>
-            <div class="tip-body"><div class="tip-body-inner"><strong>Gentle:</strong> coil folds only, no aggressive handling. Best for strong elastic flours (Miller &amp; Baker) that build structure easily and tear if over-worked.<br><br><strong>Standard:</strong> the scheduled stretch-and-fold + coil-fold sequence. Suits most flour blends.<br><br><strong>Intensive:</strong> begin with ~100 slap-and-folds before the first scheduled fold, until the dough is smooth and shiny. For extensible, lower-protein Italian flours (Caputo Pizzeria) that need mechanical development to form a network.</div></div>
           </div>
         </div>
         <div class="field">
@@ -498,11 +504,15 @@
             <button data-v="0" onclick="setMalt(0)">Off</button>
             <button data-v="0.5" onclick="setMalt(0.5)">0.5%</button>
           </div>
-          <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
-            <div class="tip-toggle"><span class="tip-hint">Why diastatic malt?</span></div>
-            <div class="tip-body"><div class="tip-body-inner">Diastatic malt adds active α-amylase enzymes that break starch into fermentable sugars. At 0.5% it boosts crust browning (more reducing sugars for the Maillard reaction) and feeds gas production in the final proof. Caputo Pizzeria has very low natural enzyme activity, so malt compensates. Don't exceed 0.5% of flour: over-enzymed dough becomes sticky and slack and won't hold its shape.</div></div>
-          </div>
         </div>
+      </div>
+      <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
+        <div class="tip-toggle"><span class="tip-hint">Gentle / Standard / Intensive</span></div>
+        <div class="tip-body"><div class="tip-body-inner"><strong>Gentle:</strong> coil folds only, no aggressive handling. Best for strong elastic flours (Miller &amp; Baker) that build structure easily and tear if over-worked.<br><br><strong>Standard:</strong> the scheduled stretch-and-fold + coil-fold sequence. Suits most flour blends.<br><br><strong>Intensive:</strong> begin with ~100 slap-and-folds before the first scheduled fold, until the dough is smooth and shiny. For extensible, lower-protein Italian flours (Caputo Pizzeria) that need mechanical development to form a network.</div></div>
+      </div>
+      <div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}">
+        <div class="tip-toggle"><span class="tip-hint">Why diastatic malt?</span></div>
+        <div class="tip-body"><div class="tip-body-inner">Diastatic malt adds active α-amylase enzymes that break starch into fermentable sugars. At 0.5% it boosts crust browning (more reducing sugars for the Maillard reaction) and feeds gas production in the final proof. Caputo Pizzeria has very low natural enzyme activity, so malt compensates. Don't exceed 0.5% of flour: over-enzymed dough becomes sticky and slack and won't hold its shape.</div></div>
       </div>
     </div>
   </div>
@@ -516,6 +526,9 @@ let foldOverride = null;
 let userOverride = {};
 const doneSteps = new Set();
 let scheduleOpen = false;
+let currentStage = null;
+const STAGES = ['poolish', 'mix', 'bulk', 'retard', 'shape', 'bake'];
+const STAGE_STEP = { poolish: 's1', mix: 's2', bulk: 's4', retard: 's5', shape: 's6', bake: 's8' };
 let poolishStartValue = '21:00';
 const BASSINAGE_PCT = 0.03, SALT_PCT = 0.018;
 const DDT = 24;
@@ -598,6 +611,21 @@ function sourceOf(key, ctx) {
     : flourInfo[ctx.blendA >= 50 ? ctx.fA : ctx.fB].name;
 }
 
+function tapStage(name) {
+  currentStage = name;
+  updateStageStrip();
+  const el = document.getElementById(STAGE_STEP[name]);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function updateStageStrip() {
+  const idx = currentStage ? STAGES.indexOf(currentStage) : -1;
+  STAGES.forEach((s, i) => {
+    const el = document.getElementById('st-' + s);
+    if (!el) return;
+    el.classList.toggle('done', i < idx);
+    el.classList.toggle('now', i === idx);
+  });
+}
 function setMethod(m) {
   method = m;
   document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === m));
@@ -1108,8 +1136,9 @@ ${foldTableRows}
   document.getElementById('hero-next').innerHTML =
     `<b>${count} × ${pieceWeight}g</b> · ${isRetard ? 'cold retard' : 'same day'} · ${tempC}°C`;
 
-  // Stage strip: show 'now' on the first stage for retard; hide Retard pill when same-day
+  // Stage strip: hide Retard pill in same-day mode; re-apply done/now state after rebuild
   document.getElementById('st-retard').style.display = isRetard ? '' : 'none';
+  updateStageStrip();
 }
 loadPrefs();
 update();
