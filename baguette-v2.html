@@ -632,6 +632,9 @@ function update() {
   const totalFlour = totalDough / (1 + baseHyd + SALT_PCT + yeastPct);
   const totalWater = totalFlour * baseHyd;
   const salt = totalFlour * SALT_PCT;
+  const developV = eff('develop', ctx);
+  const maltPct = eff('malt', ctx);
+  const maltGrams = totalFlour * (maltPct / 100);
 
   const poolishFlour = totalFlour * poolishPct;
   const poolishWater = poolishFlour;
@@ -751,8 +754,14 @@ ${foldSchedRows}
     return `      <tr><td>${fmt(foldTimes[i])}</td><td><strong>${label}</strong> — ${desc}</td></tr>`;
   }).join('\n');
 
+  const devNote = developV === 'intensive'
+    ? `<p class="meta" style="margin-top:6px">Development: begin with ~100 slap-and-folds before the first scheduled fold — work until the dough is smooth and shiny.</p>`
+    : developV === 'gentle'
+    ? `<p class="meta" style="margin-top:6px">Development: use coil folds only — no aggressive handling.</p>`
+    : '';
+
   steps += stepStart(n++, 'Bulk Fermentation', bulkTime, 's4');
-  steps += `<p>Folds are structural — keep 30-minute intervals exactly as scheduled. Fold count is set by your flour (<strong>${flourInfo[domFlour].name}</strong>${foldOverride != null ? ', manually overridden' : ''}); the formula-derived extra time goes as undisturbed rest <strong>after the last fold</strong>.</p>
+  steps += `<p>Folds are structural — keep 30-minute intervals exactly as scheduled. Fold count is set by your flour (<strong>${flourInfo[domFlour].name}</strong>${foldOverride != null ? ', manually overridden' : ''}); the formula-derived extra time goes as undisturbed rest <strong>after the last fold</strong>.</p>${devNote}
     <table>
 ${foldTableRows}
       ${isRetard
@@ -862,6 +871,7 @@ ${foldTableRows}
         <tr><td>Water <span style="color:var(--muted)">(bassinage)</span></td><td class="amt">${r(bassinage)}g</td></tr>
         <tr><td>Fine Salt</td><td class="amt">${salt.toFixed(1)}g</td></tr>
         <tr><td>Instant Dry Yeast</td><td class="amt">${finalYeast.toFixed(1)}g</td></tr>
+        ${maltPct > 0 ? `<tr><td>Diastatic Malt</td><td class="amt">${maltGrams.toFixed(1)}g</td></tr>` : ''}
       </table>
       <h3>Totals</h3>
       <table>
@@ -884,6 +894,15 @@ ${foldTableRows}
       <h2>Method</h2>
       ${steps}
     </div>`;
+  // Sync derived controls back to their display values and source pills
+  document.getElementById('hydration').value = Math.round(baseHyd * 100);
+  document.getElementById('fermentolyse').value = fermentolyseTime;
+  document.getElementById('detente').value = detenteFloorV;
+  document.querySelectorAll('#developToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === developV));
+  document.querySelectorAll('#maltToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === maltPct));
+  setPill('hydration'); setPill('fermentolyse'); setPill('detente'); setPill('develop'); setPill('malt');
+  const srcFoldsEl = document.getElementById('src-folds');
+  if (srcFoldsEl) srcFoldsEl.textContent = foldOverride != null ? '· custom (tap to reset)' : '· ' + shortFlour(flourInfo[domFlour].name);
 }
 loadPrefs();
 update();
