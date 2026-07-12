@@ -271,6 +271,7 @@
     .white-panel { padding: 14px; }
     .control-row { flex-wrap: wrap; gap: 8px; }
     .control-row .field { min-width: calc(50% - 4px); }
+    .control-row.adv-times .field:not(:first-child) { min-width: 100%; }
     .control-row .num-field { min-width: 0; flex: 0 0 72px; max-width: 72px; }
     .method-row { flex-wrap: wrap; }
     .method-row .field { min-width: 100%; }
@@ -475,7 +476,7 @@
         <div class="tip-toggle"><span class="tip-hint">What is τ (tau)?</span></div>
         <div class="tip-body"><div class="tip-body-inner">τ is the Newton's-law cooling time constant for your container, measuring how fast the dough core reaches ambient temperature. Lower τ = faster. Formula for warm-up time: t = τ × ln((T<sub>amb</sub> − T<sub>fridge</sub>) / (T<sub>amb</sub> − T<sub>target</sub>)). Metal bowl (τ=60) conducts heat quickly; glass (τ=90) slower; a tall plastic tub (τ=111) slowest due to insulating walls and poor surface-to-volume ratio.</div></div>
       </div>
-      <div class="control-row">
+      <div class="control-row adv-times">
         <div class="field">
           <label for="foldCount">Folds <span class="src" id="src-folds" onclick="onFlourChange()"></span></label>
           <div class="stepper">
