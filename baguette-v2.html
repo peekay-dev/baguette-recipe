@@ -31,7 +31,7 @@
                 border-radius: 0 0 16px 16px; }
   .stages { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
   .stages::-webkit-scrollbar { display: none; }
-  .stage { flex: 0 0 auto; font-size: 0.68rem; font-weight: 600; padding: 5px 11px;
+  .stage { flex: 0 0 auto; font-size: 0.68rem; font-weight: 600; padding: 10px 11px;
            border-radius: 20px; white-space: nowrap; border: 1px solid rgba(247,236,228,0.35);
            color: var(--accent-ink); opacity: 0.45; cursor: pointer;
            -webkit-tap-highlight-color: transparent;
@@ -73,8 +73,7 @@
 
   /* ── Controls ────────────────────────────────────────────────────────── */
   .controls { padding: 16px; margin: 16px 20px; background: var(--surface); border-radius: 14px; }
-  .group-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
-                 letter-spacing: 0.1em; color: var(--muted); margin: 14px 0 6px; }
+  .group-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); margin: 14px 0 6px; }
   .group-label:first-child { margin-top: 0; }
   .control-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 10px; }
   .control-row:last-child { margin-bottom: 0; }
@@ -131,7 +130,7 @@
 
   /* Source pill */
   .src { font-size: 0.66rem; font-weight: 600; color: var(--accent-soft-ink);
-         background: var(--accent-soft); padding: 2px 8px; border-radius: 10px;
+         background: var(--accent-soft); padding: 6px 10px; border-radius: 10px;
          cursor: pointer; white-space: nowrap; display: inline-block; }
 
   /* Advanced toggle */
@@ -194,11 +193,10 @@
   .tip { background: var(--accent-soft); border-radius: 10px; margin: 6px 0; font-size: 0.88rem; }
   .tip-toggle { display: flex; align-items: center; padding: 8px 12px; cursor: pointer;
     -webkit-tap-highlight-color: transparent; user-select: none; gap: 6px;
-    font-weight: 600; font-size: 0.78rem; color: var(--accent-soft-ink); }
+    font-weight: 600; font-size: 0.78rem; color: var(--accent-soft-ink); min-height: 44px; }
   .tip-toggle::before { content: '+'; font-size: 1.1em; flex-shrink: 0; }
   .tip.open .tip-toggle::before { content: '−'; }
-  .tip-hint { color: var(--accent-soft-ink); }
-  .tip.open .tip-hint { display: none; }
+  .tip-hint { color: var(--accent-soft-ink); font-size: 0.75em; font-weight: 400; opacity: 0.7; }
   .tip-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.22s var(--ease); }
   .tip.open .tip-body { grid-template-rows: 1fr; }
   .tip-body-inner { overflow: hidden; padding: 0 12px; color: var(--ink); }
@@ -234,8 +232,8 @@
            width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
   .modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none;
     font-size: 1.3em; cursor: pointer; color: var(--muted); }
-  .info-btn { background: var(--accent-soft); border: none; border-radius: 50%; width: 20px;
-    height: 20px; font-size: 0.6em; cursor: pointer; color: var(--accent-soft-ink);
+  .info-btn { background: var(--accent-soft); border: none; border-radius: 50%; width: 32px;
+    height: 32px; font-size: 0.7em; cursor: pointer; color: var(--accent-soft-ink);
     display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
     vertical-align: middle; margin-left: 4px; padding: 0; line-height: 1; }
   .method-row { display: flex; gap: 8px; align-items: end; flex: 1; min-width: 0; }
@@ -440,7 +438,7 @@
     <div class="collapsible-inner">
       <div class="control-row" style="padding-top:12px">
         <div class="field">
-          <label>Bowl</label>
+          <label>Bowl <span style="font-size:0.72em;font-weight:400;color:var(--muted);margin-left:4px">τ water cooling</span></label>
           <div class="toggle" id="bowlToggle">
             <button class="active" data-v="60" onclick="setTemperTau(60)">Metal</button>
             <button data-v="90" onclick="setTemperTau(90)">Glass</button>
@@ -462,7 +460,7 @@
           </div>
         </div>
         <div class="field">
-          <label for="fermentolyse">Fermentolyse (min) <span class="src" id="src-fermentolyse" onclick="resetOverride('fermentolyse')"></span></label>
+          <label for="fermentolyse">Pre-mix rest (min) <span class="src" id="src-fermentolyse" onclick="resetOverride('fermentolyse')"></span></label>
           <div class="stepper">
             <button onclick="stepOverride('fermentolyse',-5,30,90)">−</button>
             <input type="number" id="fermentolyse" value="45" min="30" max="90" step="5" onchange="setOverrideInput('fermentolyse')">
@@ -470,7 +468,7 @@
           </div>
         </div>
         <div class="field">
-          <label for="detente">Bench-rest floor (min) <span class="src" id="src-detente" onclick="resetOverride('detente')"></span></label>
+          <label for="detente">Minimum bench rest (min) <span class="src" id="src-detente" onclick="resetOverride('detente')"></span></label>
           <div class="stepper">
             <button onclick="stepOverride('detente',-5,15,45)">−</button>
             <input type="number" id="detente" value="20" min="15" max="45" step="5" onchange="setOverrideInput('detente')">
@@ -796,7 +794,9 @@ function setPill(key) {
   if (!el) return;
   if (userOverride[key] != null) { el.textContent = 'custom · tap to reset'; return; }
   const s = sourceOf(key, ctxNow());
-  el.textContent = s === 'default' ? '' : s.startsWith('blend of ') ? 'blend' : shortFlour(s);
+  const label = s === 'default' ? '' : s.startsWith('blend of ') ? 'blend' : shortFlour(s);
+  el.textContent = label;
+  el.style.display = label ? '' : 'none';
 }
 
 function update() {
