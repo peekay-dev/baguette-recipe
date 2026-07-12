@@ -81,6 +81,7 @@
   .control-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; margin-bottom: 10px; }
   .control-row:last-child { margin-bottom: 0; }
   .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+  .field.pill-active { min-width: 100%; }
   .field label { font-size: 0.68rem; font-weight: 600; color: var(--muted);
                  text-transform: uppercase; letter-spacing: 0.08em;
                  display: flex; align-items: center; gap: 4px; flex-wrap: wrap; min-height: 22px; }
@@ -817,7 +818,13 @@ function shortFlour(name) {
 function setPill(key) {
   const el = document.getElementById('src-' + key);
   if (!el) return;
-  if (userOverride[key] != null) { el.style.display = ''; el.textContent = 'custom · tap to reset'; return; }
+  const field = el.closest && el.closest('.field');
+  if (userOverride[key] != null) {
+    el.style.display = ''; el.textContent = 'custom · tap to reset';
+    if (field) field.classList.add('pill-active');
+    return;
+  }
+  if (field) field.classList.remove('pill-active');
   const s = sourceOf(key, ctxNow());
   const label = s === 'default' ? '' : s.startsWith('blend of ') ? 'blend' : shortFlour(s);
   el.textContent = label;
