@@ -29,7 +29,9 @@
   .stages-bar { background: var(--accent); padding: 10px 0 12px;
                 position: sticky; top: 0; z-index: 100;
                 border-radius: 0 0 16px 16px; }
-  .stages { display: flex; gap: 4px; padding: 0 16px; }
+  .stages { display: flex; gap: 4px; padding: 0 16px; align-items: center; }
+  .bar-loaf { width: 26px; height: 13px; flex-shrink: 0; opacity: 0.88; }
+  @media (max-width: 419px) { .bar-loaf { display: none; } }
   .stage { flex: 1; font-size: 0.68rem; font-weight: 600; padding: 10px 4px;
            border-radius: 20px; white-space: nowrap; text-align: center; border: 1px solid rgba(247,236,228,0.35);
            color: var(--accent-ink); opacity: 0.45; cursor: pointer;
@@ -283,6 +285,20 @@
 </div>
 <div class="stages-bar">
   <div class="stages">
+    <svg class="bar-loaf" viewBox="0 0 36 16" aria-hidden="true">
+      <defs>
+        <linearGradient id="minicrust" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#EDC584"/>
+          <stop offset="0.6" stop-color="#D89A4C"/>
+          <stop offset="1" stop-color="#B26E2C"/>
+        </linearGradient>
+      </defs>
+      <g transform="translate(18 9) rotate(-22)">
+        <path fill="url(#minicrust)" d="M-15 0 C-12 -4.5,12 -4.5,15 0 C12 4.5,-12 4.5,-15 0 Z"/>
+        <line x1="-7" y1="-2.5" x2="-1" y2="-4" stroke="#A9702F" stroke-width="0.9" stroke-linecap="round"/>
+        <line x1="1" y1="-2.5" x2="7" y2="-4" stroke="#A9702F" stroke-width="0.9" stroke-linecap="round"/>
+      </g>
+    </svg>
     <span class="stage" id="st-poolish" onclick="tapStage('poolish')">Poolish</span>
     <span class="stage" id="st-mix" onclick="tapStage('mix')">Mix</span>
     <span class="stage" id="st-bulk" onclick="tapStage('bulk')">Bulk</span>
@@ -396,7 +412,7 @@
         <button onclick="stepOverride('hydration',1,50,100)" aria-label="Increase hydration">+</button>
       </div>
     </div>
-    <div class="field num-field">
+    <div class="field" style="max-width:120px">
       <label for="poolishPct">Poolish %</label>
       <div class="stepper">
         <button onclick="step('poolishPct',-1)" aria-label="Decrease poolish percentage">−</button>
