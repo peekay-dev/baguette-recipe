@@ -44,9 +44,20 @@
   .stage.now { background: var(--accent-ink); color: var(--accent); opacity: 1;
                border-color: var(--accent-ink); }
 
-  /* ── Oven Spring hero ────────────────────────────────────────────────── */
-  .hero { display: flex; align-items: center; gap: 24px; padding: 28px 20px;
-          background: radial-gradient(120% 90% at 30% 20%, #FBF0E2, #FFFFFF 70%);
+  /* ── Head stats (hero text now lives in terracotta header) ──────────── */
+  .head-stats { margin-top: 14px; }
+  .head-k { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em;
+            text-transform: uppercase; color: rgba(247,236,228,0.65); }
+  .head-risen { font-family: var(--disp), Georgia, serif; font-weight: 400;
+                font-size: 1.05rem; color: var(--accent-ink); margin-top: 4px; line-height: 1.15; }
+  .head-risen .pct { font-size: 2.6rem; display: block; letter-spacing: -0.02em;
+                     line-height: 1; font-variant-numeric: tabular-nums; }
+  .head-next { margin-top: 8px; font-size: 0.85rem; color: rgba(247,236,228,0.72); }
+  .head-next b { font-weight: 700; color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+
+  /* ── Oven Spring hero (SVG only, centered) ───────────────────────────── */
+  .hero { display: flex; justify-content: center; padding: 20px 20px 0;
+          background: radial-gradient(100% 100% at 50% 0%, #FBF0E2, #FFFFFF 65%);
           border-bottom: 1px solid var(--line); }
   .loaf-wrap { flex: 0 0 auto; position: relative; width: 116px; height: 122px;
                display: grid; place-items: center; }
@@ -64,15 +75,10 @@
   .steam   { transform-box: fill-box; transform-origin: 50% 50%;
              fill: none; stroke: #8898A8; stroke-width: 3; stroke-linecap: round;
              opacity: 0; animation: steam var(--st, 4s) ease-out var(--sdl, 1.4s) infinite; }
-  .hero-text { flex: 1; min-width: 0; }
-  .hero-text .k { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em;
-                  text-transform: uppercase; color: var(--accent); }
-  .hero-text .risen { font-family: var(--disp), Georgia, serif; font-weight: 400;
-                      font-size: 1.05rem; color: var(--ink); margin-top: 4px; line-height: 1.15; }
-  .hero-text .risen .pct { font-size: 2.6rem; display: block; letter-spacing: -0.02em;
-                            line-height: 1; font-variant-numeric: tabular-nums; }
-  .hero-text .next { margin-top: 12px; font-size: 0.85rem; color: var(--muted); }
-  .hero-text .next b { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  /* Mini loaf handoff pulse */
+  @keyframes loafpulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+  .bar-loaf-pulse { animation: loafpulse 0.5s var(--ease) both; }
 
   /* ── Controls ────────────────────────────────────────────────────────── */
   .controls { padding: 16px; margin: 16px 20px; background: var(--surface); border-radius: 14px; }
@@ -257,10 +263,10 @@
 
   /* ── Responsive ──────────────────────────────────────────────────────── */
   @media (max-width: 600px) {
-    .head { padding: 20px 16px 14px; }
-    .hero { padding: 20px 16px; gap: 16px; }
+    .head { padding: 20px 16px 16px; }
+    .head-risen .pct { font-size: 2.1rem; }
+    .hero { padding: 16px 16px 0; }
     .loaf-wrap { width: 96px; height: 100px; }
-    .hero-text .risen .pct { font-size: 2.1rem; }
     .controls { margin: 12px 12px; padding: 14px; }
     .content { padding: 0 12px; }
     td.amt { font-size: 1.1rem; }
@@ -283,6 +289,11 @@
 <div class="head">
   <h1>Poolish Baguettes</h1>
   <div class="formula-line" id="formula-line">4 × 250g · 72% · retard · 18°C</div>
+  <div class="head-stats">
+    <div class="head-k" id="hero-flour">Miller &amp; Baker · Yitpi</div>
+    <div class="head-risen"><span class="pct" id="hero-hyd">72</span><span>% hydration</span></div>
+    <div class="head-next" id="hero-next"><b>4 × 250g</b> · cold retard · 18°C</div>
+  </div>
 </div>
 <div class="stages-bar">
   <div class="stages">
@@ -312,7 +323,7 @@
   </div>
 </div>
 
-<!-- ── Oven Spring hero ──────────────────────────────────────────────────── -->
+<!-- ── Oven Spring hero (SVG only) ───────────────────────────────────────── -->
 <div class="hero">
   <div class="loaf-wrap">
     <div class="halo"></div>
@@ -341,11 +352,6 @@
         </g>
       </g>
     </svg>
-  </div>
-  <div class="hero-text">
-    <div class="k" id="hero-flour">Miller &amp; Baker · Yitpi</div>
-    <div class="risen"><span class="pct" id="hero-hyd">72</span><span>% hydration</span></div>
-    <div class="next" id="hero-next">4 × 250g · cold retard · 18°C</div>
   </div>
 </div>
 
@@ -620,6 +626,26 @@ function updateStageStrip() {
     el.classList.toggle('now', i === idx);
   });
 }
+function setupHeroObserver() {
+  if (typeof IntersectionObserver === 'undefined') return;
+  const hero = document.querySelector('.hero');
+  if (!hero) return;
+  if (window._heroObs) window._heroObs.disconnect();
+  window._heroObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) {
+        const loaf = document.querySelector('.bar-loaf');
+        if (!loaf) return;
+        loaf.classList.remove('bar-loaf-pulse');
+        void loaf.offsetWidth; // force reflow so animation restarts
+        loaf.classList.add('bar-loaf-pulse');
+        setTimeout(() => loaf.classList.remove('bar-loaf-pulse'), 600);
+      }
+    });
+  }, { threshold: 0 });
+  window._heroObs.observe(hero);
+}
+
 function setupStageObserver() {
   if (typeof IntersectionObserver === 'undefined') return;
   if (window._sObs) window._sObs.disconnect();
@@ -1051,7 +1077,8 @@ ${foldSchedRows}
   }).join('\n');
 
   const devNote = developV === 'intensive'
-    ? `<p class="meta" style="margin-top:6px">Development: begin with ~100 slap-and-folds before the first scheduled fold; work until the dough is smooth and shiny.</p>`
+    ? `<p class="meta" style="margin-top:6px">Development: begin with ~100 slap-and-folds before the first scheduled fold; work until the dough is smooth and shiny.</p>
+      <img src="images/knead_slap_fold.gif" alt="Slap and fold technique" class="shaping-gif"><p class="gif-caption">Slap-and-fold: drive the dough down onto the bench, stretch and fold back over. Repeat until smooth and shiny.</p>`
     : developV === 'gentle'
     ? `<p class="meta" style="margin-top:6px">Development: use coil folds only, no aggressive handling.</p>`
     : '';
@@ -1219,6 +1246,7 @@ ${foldTableRows}
   document.getElementById('st-retard').style.display = isRetard ? '' : 'none';
   updateStageStrip();
   setupStageObserver();
+  setupHeroObserver();
 }
 loadPrefs();
 update();
