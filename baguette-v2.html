@@ -140,10 +140,11 @@
 
   /* Advanced toggle */
   .adv-toggle { cursor: pointer; user-select: none; display: flex; align-items: center;
-    justify-content: space-between; font-size: 0.82rem; font-weight: 600; color: var(--ink);
-    padding: 12px 0 4px; border-top: 1px solid var(--line); margin-top: 14px;
-    -webkit-tap-highlight-color: transparent; }
-  .adv-toggle .chev { color: var(--muted); font-size: 0.75rem;
+    justify-content: space-between; font-size: 0.82rem; font-weight: 600;
+    color: var(--accent-soft-ink); background: var(--accent-soft); border-radius: 10px;
+    padding: 12px 14px; margin-top: 14px;
+    -webkit-tap-highlight-color: transparent; min-height: 44px; }
+  .adv-toggle .chev { color: var(--accent-soft-ink); font-size: 0.75rem;
                       transition: transform 0.22s var(--ease); display: inline-block; }
   .adv-toggle.open .chev { transform: rotate(180deg); }
 
