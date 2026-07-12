@@ -47,4 +47,9 @@ check('source default',       sourceOf('fermentolyse', ctx({ fA:'bread', fB:'nuv
 check('buildFolds trims tail', JSON.stringify(buildFolds(['sf','sf','cf','cf'], 2)) === JSON.stringify(['cf','cf']));
 check('buildFolds extends',    JSON.stringify(buildFolds(['cf','cf'], 4)) === JSON.stringify(['cf','cf','cf','cf']));
 
+// loadPrefs tolerates a legacy `season` key from old baguette.html prefs
+global.localStorage.getItem = () => JSON.stringify({ season:'winter', hydration:'68', method:'sameday' });
+assert.doesNotThrow(() => loadPrefs(), 'loadPrefs tolerates legacy season key'); passed++;
+check('legacy prefs still applied', vals.hydration === '68');
+
 console.log(`logic tests passed (${passed} assertions)`);

@@ -117,18 +117,11 @@
 <body>
 <div class="header-row">
   <h1>Perth Poolish Baguettes</h1>
-  <p class="subtitle" id="subtitle">Hand-mixed · cold-retarded · season-adjusted</p>
+  <p class="subtitle" id="subtitle">Hand-mixed · cold-retarded · temperature-adjusted</p>
   <p style="color:var(--muted);font-size:0.78em;letter-spacing:1px">by Paul</p>
 </div>
 <div class="controls white-panel">
   <div class="control-row">
-    <div class="field">
-      <label>Season</label>
-      <div class="toggle" id="seasonToggle">
-        <button class="active" data-v="summer" onclick="setSeason('summer')">Summer</button>
-        <button data-v="winter" onclick="setSeason('winter')">Winter</button>
-      </div>
-    </div>
     <div class="method-row">
       <div class="field">
         <label>Method <button class="info-btn" onclick="event.stopPropagation();document.getElementById('compareModal').classList.add('open')" title="Compare methods">?</button></label>
@@ -235,7 +228,7 @@
 </div>
 <div class="content" id="recipe"></div>
 <script>
-let season = 'summer', method = 'retard', temperTau = 60;
+let method = 'retard', temperTau = 60;
 let foldOverride = null; // null = use dominant flour's default fold sequence
 let userOverride = {};   // per-parameter overrides for the eff() cascade (Task 3 wiring)
 const doneSteps = new Set();
@@ -244,7 +237,7 @@ let poolishStartValue = '21:00';
 const BASSINAGE_PCT = 0.03, SALT_PCT = 0.018;
 const DDT = 24; // Desired Dough Temperature (°C) — Hamelman standard for poolish baguette
 const YEAST_PCT = 0.0033;
-const POOLISH_YEAST_PCT = 0.002; // base (summer); multiplied by season
+const POOLISH_YEAST_PCT = 0.002; // base; scaled by yeastMult (room temperature)
 const FRIDGE_TEMP = 3;    // °C — dough core temp out of fridge
 const TEMPER_TARGET = 10; // °C — target core temp before dividing
 const TAU_DIVIDED = 30;   // min — Newton's law τ for divided rounds on bench
@@ -266,18 +259,7 @@ function fmtSched(absMin) {
 }
 function setPoolishStart(val) { poolishStartValue = val; update(); }
 
-const S = {
-  summer: {
-    fridgeNote: 'Dough warms fast — get it into the fridge promptly after bulk.',
-    samedayNote: 'In summer heat, watch the proof carefully — it can run away from you.',
-    poolishOffsetHrs: 12
-  },
-  winter: {
-    fridgeNote: 'Cold dough takes longer to wake up — give extra proof time after shaping.',
-    samedayNote: 'Winter dough is sluggish — don\'t rush the proof. It may need the full time.',
-    poolishOffsetHrs: 12
-  }
-};
+const POOLISH_OFFSET_HRS = 12; // hours from poolish mix to fermentolyse (overnight)
 
 // ── Flour-profile architecture ────────────────────────────────────────────
 // Each recipe parameter resolves through a cascade: userOverride ?? flour.rx ?? GLOBAL.
@@ -341,17 +323,12 @@ function sourceOf(key, ctx) {
     : flourInfo[ctx.blendA >= 50 ? ctx.fA : ctx.fB].name;
 }
 
-function setSeason(s) {
-  season = s;
-  document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === s));
-  update();
-}
 function setMethod(m) {
   method = m;
   document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === m));
   document.getElementById('subtitle').textContent = m === 'retard'
-    ? 'Hand-mixed · cold-retarded · season-adjusted'
-    : 'Hand-mixed · same-day bake · season-adjusted';
+    ? 'Hand-mixed · cold-retarded · temperature-adjusted'
+    : 'Hand-mixed · same-day bake · temperature-adjusted';
   update();
 }
 function setTemperTau(v) {
@@ -363,7 +340,7 @@ function setTemperTau(v) {
 function savePrefs() {
   try {
     localStorage.setItem('baguette_prefs', JSON.stringify({
-      season, method, temperTau, poolishStartValue, foldOverride, userOverride,
+      method, temperTau, poolishStartValue, foldOverride, userOverride,
       count: document.getElementById('count').value,
       weight: document.getElementById('weight').value,
       hydration: document.getElementById('hydration').value,
@@ -395,14 +372,13 @@ function loadPrefs() {
     if (p.userOverride && typeof p.userOverride === 'object') userOverride = p.userOverride;
     if (p.ambientTemp != null) document.getElementById('ambientTemp').value = p.ambientTemp;
     if (p.poolishPct != null) document.getElementById('poolishPct').value = p.poolishPct;
-    if (p.season) { season = p.season; document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === season)); }
     if (p.temperTau != null) { temperTau = p.temperTau; document.querySelectorAll('#bowlToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === temperTau)); }
     if (p.method) {
       method = p.method;
       document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === method));
       document.getElementById('subtitle').textContent = method === 'retard'
-        ? 'Hand-mixed · cold-retarded · season-adjusted'
-        : 'Hand-mixed · same-day bake · season-adjusted';
+        ? 'Hand-mixed · cold-retarded · temperature-adjusted'
+        : 'Hand-mixed · same-day bake · temperature-adjusted';
     }
   } catch(e) {}
 }
@@ -498,7 +474,6 @@ function update() {
   const folds = foldOverride == null ? baseFolds : buildFolds(baseFolds, foldOverride);
   document.getElementById('foldCount').value = folds.length;
 
-  const s = S[season];
   const isRetard = method === 'retard';
 
   const tempC = Math.max(10, Math.min(35, +document.getElementById('ambientTemp').value));
@@ -552,7 +527,7 @@ function update() {
   // Retard duration: anchored at 15h @ 4°C, scaled by Q10 for FRIDGE_TEMP
   const retardHrs = Math.round(15 * Math.pow(2, (4 - FRIDGE_TEMP) / 10));
   // Water temp: 4-factor DDT formula (room, flour≈room, friction 3°C hand-mix, poolish)
-  // Poolish ferments at room temp and is added at room temp regardless of season.
+  // Poolish ferments at room temp and is added at room temp.
   const poolishTempAssumption = tempC;
   const waterTempCalc = Math.round((DDT * 4) - tempC - tempC - FRICTION - poolishTempAssumption);
   const waterTempDisplay = waterTempCalc <= 2
@@ -590,7 +565,7 @@ function update() {
   const foldInt = foldInterval;
   const T = {};
   T.poolish = poolishMins;
-  T.mix = poolishMins + s.poolishOffsetHrs * 60;
+  T.mix = poolishMins + POOLISH_OFFSET_HRS * 60;
   T.fermentolyseEnd = T.mix + fermentolyseTime;
   const foldTimes = [];
   let foldCursor = T.fermentolyseEnd;
@@ -640,7 +615,7 @@ ${foldSchedRows}
   let steps = '', n = 1;
 
   steps += stepStart(n++, 'Poolish', `${fmt(T.poolish)} · ${poolishTime}`, 's1');
-  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover and leave at room temp (${tempC}°C) for ${poolishTime}. ${season === 'summer' && tempC >= 25 ? 'If your kitchen is very warm, check early — it can peak before the upper end.' : ''}</p>`;
+  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover and leave at room temp (${tempC}°C) for ${poolishTime}. ${tempC >= 25 ? 'If your kitchen is very warm, check early — it can peak before the upper end.' : ''}</p>`;
   steps += tip(
     `Ready when: bubbly, slightly domed, yeasty-sweet smell. At ${tempC}°C expect${tempC <= 18 ? ' the upper end of the range or longer' : tempC >= 28 ? ' the lower end — check early' : ' somewhere in the middle'}. Collapsed and boozy = overripe but still usable.`,
     'How to tell when it\'s ready'
@@ -654,7 +629,7 @@ ${foldSchedRows}
     `To hit DDT ${DDT}°C, your inputs must total ${DDT * 4}.<br><br>
     <strong>1. Add up:</strong> flour + room + poolish = ${tempC} + ${tempC} + ${Math.round(poolishTempAssumption)} = <strong>${tempC * 2 + Math.round(poolishTempAssumption)}°C</strong><br>
     <strong>2. Water temp:</strong> ${DDT * 4} − ${tempC * 2 + Math.round(poolishTempAssumption)} − ${FRICTION}°C friction = <strong>${waterTempCalc}°C</strong><br><br>
-    <em>Winter: don't use water above 40°C — it stresses the yeast. Use warm water and proof bulk in the oven with just the light on instead.</em>`,
+    <em>Cold kitchens: don't use water above 40°C — it stresses the yeast. Use warm water and proof bulk in the oven with just the light on instead.</em>`,
     'DDT formula'
   );
   steps += tip(
@@ -778,7 +753,7 @@ ${foldTableRows}
   document.getElementById('recipe').innerHTML = `
     <div class="white-panel">
       <h2>Formula — ${count} × ${pieceWeight}g</h2>
-      <p class="formula-meta"><strong>${season === 'summer' ? 'Summer' : 'Winter'}</strong> · <strong>${isRetard ? 'Cold Retard' : 'Same Day'}</strong> · Room Temp <span class="temp">${tempC}°C</span> · DDT <span class="temp">${DDT}°C</span> · Water <span class="temp">${waterTempDisplay}</span> · Hydration <strong>${(baseHyd*100).toFixed(0)}%</strong></p>
+      <p class="formula-meta"><strong>${isRetard ? 'Cold Retard' : 'Same Day'}</strong> · Room Temp <span class="temp">${tempC}°C</span> · DDT <span class="temp">${DDT}°C</span> · Water <span class="temp">${waterTempDisplay}</span> · Hydration <strong>${(baseHyd*100).toFixed(0)}%</strong></p>
       <h3>Poolish (${(poolishPct*100).toFixed(0)}% of flour)</h3>
       <table>
         <tr><th>Ingredient</th><th>Amount</th></tr>
