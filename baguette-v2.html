@@ -79,7 +79,7 @@
   .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
   .field label { font-size: 0.68rem; font-weight: 600; color: var(--muted);
                  text-transform: uppercase; letter-spacing: 0.08em;
-                 display: flex; align-items: center; gap: 4px; flex-wrap: wrap; min-height: 22px; }
+                 display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; min-height: 22px; }
   .field label .src { padding: 2px 6px; font-size: 0.63rem; }
 
   /* Select */
@@ -1074,6 +1074,7 @@ ${foldTableRows}
   steps += stepEnd;
 
   steps += stepStart(n++, 'Score & Bake', '22–25 min', 's9');
+  steps += `<img src="images/dough_poke_test.gif" alt="Poke test" class="shaping-gif"><p class="gif-caption">Poke test: dough should spring back slowly and mostly — fully sprung = over-proofed, no spring = under-proofed</p>`;
   steps += `<p>Score 3–5 overlapping cuts at shallow angle. Load onto stone, pour ~1 cup boiling water into steam tray, close door fast.</p>
     <table>
       <tr><td><span class="temp">240°C</span> + steam</td><td>12 min</td></tr>
