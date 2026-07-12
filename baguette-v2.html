@@ -381,6 +381,10 @@
         <input type="number" id="hydration" value="72" min="50" max="100" onchange="setOverrideInput('hydration')">
         <button onclick="stepOverride('hydration',1,50,100)">+</button>
       </div>
+      <div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')">
+        <div class="tip-toggle"><span class="tip-hint">Why this hydration?</span></div>
+        <div class="tip-body"><div class="tip-body-inner">Set by your dominant flour via the cascade (flour rx → GLOBAL 72%). Miller &amp; Baker (Yitpi) targets 75% — coarse stoneground T80 with high bran absorption. Caputo Pizzeria targets 65% — refined 00-type with low absorption. Blending prorates between the two. Wetter dough → more open crumb, harder to shape. Drier → tighter crumb, easier handling.</div></div>
+      </div>
     </div>
     <div class="field">
       <label>Poolish %</label>
@@ -388,6 +392,10 @@
         <button onclick="step('poolishPct',-1)">−</button>
         <input type="number" id="poolishPct" value="30" min="20" max="40" onchange="update()">
         <button onclick="step('poolishPct', 1)">+</button>
+      </div>
+      <div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')">
+        <div class="tip-toggle"><span class="tip-hint">Why 30%?</span></div>
+        <div class="tip-body"><div class="tip-body-inner">30% pre-fermented flour balances flavour complexity against structure. Below 20%: too little poolish acid to develop character. Above 40%: excess acid degrades gluten. 30% is Hamelman's baguette baseline — a one-day poolish at room temp delivers complex flavour without weakening the final dough.</div></div>
       </div>
     </div>
   </div>
@@ -425,6 +433,10 @@
             <button data-v="90" onclick="setTemperTau(90)">Glass</button>
             <button data-v="111" onclick="setTemperTau(111)">Plastic tub</button>
           </div>
+          <div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')">
+            <div class="tip-toggle"><span class="tip-hint">What is τ (tau)?</span></div>
+            <div class="tip-body"><div class="tip-body-inner">τ is the Newton's-law cooling time constant for your container — how fast the dough core reaches ambient temperature. Lower τ = faster. Formula for warm-up time: t = τ × ln((T<sub>amb</sub> − T<sub>fridge</sub>) / (T<sub>amb</sub> − T<sub>target</sub>)). Metal bowl (τ=60) conducts heat quickly; glass (τ=90) slower; a tall plastic tub (τ=111) slowest due to insulating walls and poor surface-to-volume ratio.</div></div>
+          </div>
         </div>
       </div>
       <div class="control-row">
@@ -435,6 +447,10 @@
             <input type="number" id="foldCount" value="4" min="1" max="6" onchange="stepFold(0)">
             <button onclick="stepFold(1)">+</button>
           </div>
+          <div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')">
+            <div class="tip-toggle"><span class="tip-hint">Why does fold count vary?</span></div>
+            <div class="tip-body"><div class="tip-body-inner">Set by your dominant flour's gluten character. Strong, elastic flours (Miller &amp; Baker) need only 2 coil folds — the tight network builds quickly and over-folding makes it too stiff. Extensible flours (Caputo Pizzeria) need 4 folds (2 stretch-and-fold + 2 coil) to develop structure progressively. Fewer folds → the coil folds from the tail of the sequence are kept (highest structural value).</div></div>
+          </div>
         </div>
         <div class="field">
           <label>Fermentolyse (min) <span class="src" id="src-fermentolyse" onclick="resetOverride('fermentolyse')"></span></label>
@@ -443,6 +459,10 @@
             <input type="number" id="fermentolyse" value="45" min="30" max="90" step="5" onchange="setOverrideInput('fermentolyse')">
             <button onclick="stepOverride('fermentolyse',5,30,90)">+</button>
           </div>
+          <div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')">
+            <div class="tip-toggle"><span class="tip-hint">Why this rest time?</span></div>
+            <div class="tip-body"><div class="tip-body-inner">Fermentolyse lets the gluten hydrate and relax before salt and bassinage are added, cutting mixing time by ~60%. GLOBAL baseline is 45 min. Miller &amp; Baker targets 60 min — the stoneground bran particles absorb water slowly and the tight network needs longer to relax. Visual cue: dough shaggy at the start, a smooth window panel forming by the end.</div></div>
+          </div>
         </div>
         <div class="field">
           <label>Bench-rest floor (min) <span class="src" id="src-detente" onclick="resetOverride('detente')"></span></label>
@@ -450,6 +470,10 @@
             <button onclick="stepOverride('detente',-5,15,45)">−</button>
             <input type="number" id="detente" value="20" min="15" max="45" step="5" onchange="setOverrideInput('detente')">
             <button onclick="stepOverride('detente',5,15,45)">+</button>
+          </div>
+          <div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')">
+            <div class="tip-toggle"><span class="tip-hint">Why 20 min minimum?</span></div>
+            <div class="tip-body"><div class="tip-body-inner">Gluten relaxation is time-limited, not just temperature-limited — below ~20 min the network doesn't fully release regardless of temperature, making final shaping tear the dough. The formula (t = 40 × 2^((17−T)/10)) gives longer rests at colder temps but is always floored here. Miller &amp; Baker's tight network benefits from 28+ min; that's why its flour profile sets the floor higher.</div></div>
           </div>
         </div>
       </div>
@@ -461,12 +485,20 @@
             <button data-v="standard" onclick="setDevelop('standard')">Standard</button>
             <button data-v="intensive" onclick="setDevelop('intensive')">Intensive</button>
           </div>
+          <div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')">
+            <div class="tip-toggle"><span class="tip-hint">Gentle / Standard / Intensive</span></div>
+            <div class="tip-body"><div class="tip-body-inner"><strong>Gentle:</strong> coil folds only, no aggressive handling. Best for strong elastic flours (Miller &amp; Baker) that build structure easily and tear if over-worked.<br><br><strong>Standard:</strong> the scheduled stretch-and-fold + coil-fold sequence. Suits most flour blends.<br><br><strong>Intensive:</strong> begin with ~100 slap-and-folds before the first scheduled fold, until the dough is smooth and shiny. For extensible, lower-protein Italian flours (Caputo Pizzeria) that need mechanical development to form a network.</div></div>
+          </div>
         </div>
         <div class="field">
           <label>Diastatic malt <span class="src" id="src-malt" onclick="resetOverride('malt')"></span></label>
           <div class="toggle" id="maltToggle">
             <button data-v="0" onclick="setMalt(0)">Off</button>
             <button data-v="0.5" onclick="setMalt(0.5)">0.5%</button>
+          </div>
+          <div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')">
+            <div class="tip-toggle"><span class="tip-hint">Why diastatic malt?</span></div>
+            <div class="tip-body"><div class="tip-body-inner">Diastatic malt adds active α-amylase enzymes that break starch into fermentable sugars. At 0.5% it boosts crust browning (more reducing sugars for the Maillard reaction) and feeds gas production in the final proof. Caputo Pizzeria has very low natural enzyme activity — malt compensates. Don't exceed 0.5% of flour: over-enzymed dough becomes sticky and slack and won't hold its shape.</div></div>
           </div>
         </div>
       </div>
@@ -897,6 +929,10 @@ ${foldSchedRows}
     'Dough will feel like it\'s falling apart when you add the water. Keep pinching — it comes together in 2–3 min. Wet your hands.',
     'Dough falling apart? That\'s normal'
   );
+  steps += tip(
+    'Salt at 1.8% of total flour is Hamelman\'s poolish baguette baseline. Below 1.5%: flat, underseasoned flavour. Above 2.0%: noticeably inhibits yeast. 1.8% hits the sweet spot for flavour, fermentation control, and crust colour from the Maillard reaction.',
+    'Why 1.8% salt?'
+  );
   steps += stepEnd;
 
   // Bulk fermentation fold table
@@ -942,6 +978,7 @@ ${foldTableRows}
     steps += stepStart(n++, 'Cold Retard', `${fmt(T.fridgeIn)} → ${fmtSched(T.fridgeOut)}`, 's5');
     steps += `<p>Cover bowl tightly. Fridge at <span class="temp">${FRIDGE_TEMP}°C</span> for <strong>~${retardHrs}h</strong>. Formula: 15h @ 4°C × 2<sup>((4−${FRIDGE_TEMP})/10)</sup> = ${retardHrs}h @ ${FRIDGE_TEMP}°C. 18–36h is safe if needed.</p>`;
     steps += tip('Dough may rise a little in the fridge — normal. If it more than doubles, bulk went too far or fridge is too warm.', 'How much rise is normal?');
+    steps += tip(`15h at 4°C as the anchor: cold enough to slow fermentation to ~¼ of room-temp speed, long enough to develop flavour, short enough to not over-proof. The formula (×2^((4−${FRIDGE_TEMP})/10)) just adjusts for your actual fridge temp while keeping the same effective fermentation load. 12–36h is safe; 15h is the centre.`, 'Why ~15h?');
     steps += stepEnd;
 
     steps += stepStart(n++, 'Take out of fridge', `${fmtSched(T.fridgeOut)} · ~${warmupMins} min`, 's5b');
