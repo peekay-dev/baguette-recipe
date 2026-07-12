@@ -26,7 +26,7 @@
              line-height: 1.05; letter-spacing: -0.01em; }
   .head .formula-line { font-size: 0.82rem; opacity: 0.88; margin-top: 5px;
                         font-variant-numeric: tabular-nums; }
-  .stages-bar { background: var(--accent); padding: 0 0 12px;
+  .stages-bar { background: var(--accent); padding: 10px 0 12px;
                 position: sticky; top: 0; z-index: 100;
                 border-radius: 0 0 16px 16px; }
   .stages { display: flex; gap: 4px; padding: 0 16px; }
@@ -76,10 +76,11 @@
   .group-label:first-child { margin-top: 0; }
   .control-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; margin-bottom: 10px; }
   .control-row:last-child { margin-bottom: 0; }
-  .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; justify-content: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
   .field label { font-size: 0.68rem; font-weight: 600; color: var(--muted);
                  text-transform: uppercase; letter-spacing: 0.08em;
-                 display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+                 display: flex; align-items: center; gap: 4px; flex-wrap: wrap; min-height: 22px; }
+  .field label .src { padding: 2px 6px; font-size: 0.63rem; }
 
   /* Select */
   select { font-family: var(--body), system-ui; font-size: 15px; padding: 9px 28px 9px 10px;
@@ -791,7 +792,7 @@ function shortFlour(name) {
 function setPill(key) {
   const el = document.getElementById('src-' + key);
   if (!el) return;
-  if (userOverride[key] != null) { el.textContent = 'custom · tap to reset'; return; }
+  if (userOverride[key] != null) { el.style.display = ''; el.textContent = 'custom · tap to reset'; return; }
   const s = sourceOf(key, ctxNow());
   const label = s === 'default' ? '' : s.startsWith('blend of ') ? 'blend' : shortFlour(s);
   el.textContent = label;
