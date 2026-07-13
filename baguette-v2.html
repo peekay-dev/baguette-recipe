@@ -31,7 +31,14 @@
           overflow: hidden; isolation: isolate; }
   .hearth { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
             display: block; }
-  .head h1, .head-body { position: relative; z-index: 1; }
+  .head h1, .head-body, .crumb-wrap { position: relative; z-index: 1; }
+  /* Living crumb cross-section — morphs with hydration */
+  .crumb-wrap { margin-top: 16px; }
+  .crumb-viz { display: block; width: 100%; height: 56px;
+               filter: drop-shadow(0 3px 15px rgba(237,138,92,0.32)); }
+  .crumb-cap { margin-top: 8px; font-size: 0.8rem; color: var(--accent-soft-ink); font-weight: 500;
+               line-height: 1.3; }
+  .crumb-cap b { color: var(--accent-ink); font-weight: 700; }
   .share-btn { position: absolute; top: 20px; right: 18px; z-index: 2; display: inline-flex; align-items: center; gap: 5px;
                font-family: inherit; font-size: 0.78rem; font-weight: 600; color: var(--accent-ink);
                background: rgba(247,236,228,0.10); border: 1px solid rgba(247,236,228,0.38);
@@ -480,6 +487,10 @@
       <div class="head-next" id="hero-next"><b>4 × 250g</b> · cold retard · 18°C</div>
     </div>
   </div>
+  <div class="crumb-wrap">
+    <canvas id="crumb" class="crumb-viz" aria-hidden="true"></canvas>
+    <div class="crumb-cap" id="crumbCap"></div>
+  </div>
 </div>
 <div class="stages-bar">
   <div class="stages">
@@ -683,6 +694,7 @@
 <script>
 let method = 'retard', temperTau = 60;
 let hearthHeat = 0.4, hearthPulse = 0;
+let crumbSet = null;
 let foldOverride = null;
 let userOverride = {};
 const doneSteps = new Set();
@@ -1534,6 +1546,7 @@ ${foldTableRows}
   // Feed the living hearth: warmer kitchen → hotter glow, more embers; pulse on change
   hearthHeat = Math.max(0, Math.min(1, (tempC - 10) / 22));
   hearthPulse = Math.min(1.6, hearthPulse + 0.5);
+  if (crumbSet) crumbSet(hydPct, tempC);
   document.getElementById('hero-next').innerHTML =
     `<b>${count} × ${pieceWeight}g</b> · ${isRetard ? 'cold retard' : 'same day'} · ${tempC}°C`;
 
@@ -1872,6 +1885,93 @@ suppressSave = false;
       { threshold: 0 }).observe(head);
   } else { onScreen = true; }
   if (reduce()) drawStatic(); else start();
+})();
+
+// ══ Living crumb — cross-section that morphs with hydration ══════════════════
+(function () {
+  const canvas = document.getElementById('crumb');
+  const cap = document.getElementById('crumbCap');
+  if (!canvas || !canvas.getContext) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const reduce = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const rand = (a, b) => a + Math.random() * (b - a);
+  let W = 1, H = 1, dpr = 1, holes = [], cur = 0.5, target = 0.5, raf = 0;
+
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    W = Math.max(1, r.width); H = Math.max(1, r.height);
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function genHoles() {
+    holes = [];
+    const cols = Math.max(10, Math.round(W / 26)), rows = 3;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      if (Math.random() < 0.12) continue;
+      holes.push({ nx: (c + 0.5) / cols + rand(-0.03, 0.03), ny: (r + 0.5) / rows + rand(-0.06, 0.06),
+                   base: rand(0.5, 1), variance: rand(0.6, 1.5) });
+    }
+  }
+  function slicePath(pad) {
+    const x = pad, y = pad, w = W - pad * 2, h = H - pad * 2, rr = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y); ctx.lineTo(x + w - rr, y);
+    ctx.arc(x + w - rr, y + rr, rr, -Math.PI / 2, Math.PI / 2);
+    ctx.lineTo(x + rr, y + h); ctx.arc(x + rr, y + rr, rr, Math.PI / 2, -Math.PI / 2);
+    ctx.closePath();
+  }
+  function draw(openness) {
+    ctx.clearRect(0, 0, W, H);
+    ctx.save(); slicePath(2);
+    const crust = ctx.createLinearGradient(0, 0, 0, H);
+    crust.addColorStop(0, '#F0C878'); crust.addColorStop(0.5, '#D89A4C'); crust.addColorStop(1, '#A9702F');
+    ctx.fillStyle = crust; ctx.fill(); ctx.restore();
+    const inset = 5.5;
+    ctx.save(); slicePath(inset); ctx.clip();
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#F4E2BA'); g.addColorStop(1, '#E7CF9C');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    for (const ho of holes) {
+      const cx = ho.nx * W, cy = inset + ho.ny * (H - inset * 2);
+      const centre = 1 - Math.abs(ho.ny - 0.5) * 0.9;
+      const r = (1.2 + openness * 6.5 * ho.variance) * ho.base * (0.6 + 0.7 * centre);
+      if (r < 0.4) continue;
+      const rg = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      rg.addColorStop(0, 'rgba(120,84,40,0.55)'); rg.addColorStop(0.7, 'rgba(150,110,60,0.3)');
+      rg.addColorStop(1, 'rgba(150,110,60,0)');
+      ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.2832); ctx.fill();
+    }
+    ctx.restore();
+    ctx.save(); slicePath(2); ctx.clip();
+    ctx.strokeStyle = 'rgba(255,242,205,0.45)'; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.moveTo(W * 0.16, 4.5); ctx.lineTo(W * 0.84, 4.5); ctx.stroke();
+    ctx.restore();
+  }
+  function label(openness, hyd) {
+    if (!cap) return;
+    const kind = openness < 0.32 ? 'Tight, even crumb' : openness < 0.62 ? 'Balanced crumb' : 'Open, airy crumb';
+    cap.innerHTML = kind + ' &middot; <b>' + Math.round(hyd) + '% hydration</b>';
+  }
+  function opennessFor(hyd) { return Math.max(0, Math.min(1, (hyd - 62) / 20)); }
+  function animate() {
+    cur += (target - cur) * 0.16; draw(cur);
+    if (Math.abs(target - cur) > 0.002) raf = requestAnimationFrame(animate);
+    else { cur = target; draw(cur); raf = 0; }
+  }
+  crumbSet = function (hyd) {
+    target = opennessFor(hyd); label(target, hyd);
+    if (reduce()) { cur = target; draw(cur); return; }
+    if (!raf) raf = requestAnimationFrame(animate);
+  };
+  function redraw() { resize(); genHoles(); draw(cur); }
+  window.addEventListener('resize', redraw, { passive: true });
+  window.addEventListener('load', redraw, { passive: true });
+  resize(); genHoles();
+  const el = document.getElementById('hydration');
+  const hyd0 = (el && +el.value) || 72;
+  cur = target = opennessFor(hyd0); label(target, hyd0); draw(cur);
 })();
 </script>
 
