@@ -41,9 +41,10 @@
   .bar-loaf { width: 44px; height: 28px; flex-shrink: 0; opacity: 0;
               transition: opacity 0.35s ease-out, transform 0.35s ease-out; transform: scale(0.7); }
   .bar-loaf.bar-loaf-visible { opacity: 1; transform: scale(1); }
+  .bar-spacer { width: 44px; flex-shrink: 0; }
   .bar-steam { fill: none; stroke: rgba(247,236,228,0.85); stroke-width: 1.6; stroke-linecap: round;
                opacity: 0; animation: steam var(--st,4s) ease-out var(--sdl,0.8s) infinite; }
-  @media (max-width: 359px) { .bar-loaf { display: none; } }
+  @media (max-width: 359px) { .bar-loaf, .bar-spacer { display: none; } }
   .stage { flex: 1; font-size: 0.68rem; font-weight: 600; padding: 10px 4px;
            border-radius: 20px; white-space: nowrap; text-align: center; border: 1px solid rgba(247,236,228,0.35);
            color: var(--accent-ink); opacity: 0.45; cursor: pointer;
@@ -384,6 +385,7 @@
     <span class="stage" id="st-retard" onclick="tapStage('retard')">Retard</span>
     <span class="stage" id="st-shape" onclick="tapStage('shape')">Shape</span>
     <span class="stage" id="st-bake" onclick="tapStage('bake')">Bake</span>
+    <div class="bar-spacer" aria-hidden="true"></div>
   </div>
 </div>
 
@@ -1159,7 +1161,7 @@ ${foldSchedRows}
   let steps = '', n = 1;
 
   steps += stepStart(n++, 'Poolish', `${fmt(T.poolish)} · ${poolishTime}`, 's1');
-  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover and leave at room temp (${tempC}°C) for ${poolishTime}. ${tempC >= 25 ? 'If your kitchen is very warm, check early (it can peak before the upper end).' : ''}</p>`;
+  steps += `<p>Dissolve <strong>${poolishYeast.toFixed(1)}g yeast</strong> in <strong>${r(poolishWater)}g</strong> room-temperature water, then add <strong>${r(poolishFlour)}g</strong> poolish flour. Stir until just combined. Cover and leave at room temp (${tempC}°C) for ${poolishTime}. ${tempC >= 25 ? 'If your kitchen is very warm, check early (it can peak before the upper end).' : ''}</p>`;
   steps += tip(
     `Ready when: bubbly, slightly domed, yeasty-sweet smell. At ${tempC}°C expect${tempC <= 18 ? ' the upper end of the range or longer' : tempC >= 28 ? ' the lower end; check early' : ' somewhere in the middle'}. Collapsed and boozy = overripe but still usable.`,
     'How to tell when it\'s ready'
@@ -1183,7 +1185,7 @@ ${foldSchedRows}
   steps += stepEnd;
 
   steps += stepStart(n++, 'Salt, Yeast & Bassinage', fmt(T.fermentolyseEnd), 's3');
-  steps += `<p>Sprinkle salt and remaining yeast over dough. Pour <strong>${r(bassinage)}g bassinage</strong> on top. Pinch and fold 3–4 min until absorbed and cohesive. Cover and rest <strong>${foldInt} min</strong> before your first fold.</p>`;
+  steps += `<p>Sprinkle <strong>${salt.toFixed(1)}g salt</strong> and <strong>${finalYeast.toFixed(1)}g remaining yeast</strong> over dough. Pour <strong>${r(bassinage)}g bassinage</strong> on top. Pinch and fold 3–4 min until absorbed and cohesive. Cover and rest <strong>${foldInt} min</strong> before your first fold.</p>`;
   steps += tip(
     'Dough will feel like it\'s falling apart when you add the water. Keep pinching — it comes together in 2–3 min. Wet your hands.',
     'Dough falling apart? That\'s normal'
@@ -1239,7 +1241,7 @@ ${foldTableRows}
 
   if (isRetard) {
     steps += stepStart(n++, 'Cold Retard', `${fmt(T.fridgeIn)} → ${fmtSched(T.fridgeOut)}`, 's5');
-    steps += `<p>Cover bowl tightly. Fridge at <span class="temp">${FRIDGE_TEMP}°C</span> for <strong>~${retardHrs}h</strong>. Formula: 15h @ 4°C × 2<sup>((4−${FRIDGE_TEMP})/10)</sup> = ${retardHrs}h @ ${FRIDGE_TEMP}°C. 18–36h is safe if needed.</p>`;
+    steps += `<p>Cover bowl tightly. Fridge at <span class="temp">${FRIDGE_TEMP}°C</span> for <strong>~${retardHrs}h</strong>. 18–36h is safe if needed.</p>`;
     steps += tip('A little rise in the fridge is normal. If it more than doubles, bulk went too far or the fridge is too warm.', 'How much rise is normal?');
     steps += tip(`15h at 4°C as the anchor: cold enough to slow fermentation to ~¼ of room-temp speed, long enough to develop flavour, short enough to not over-proof. The formula (×2^((4−${FRIDGE_TEMP})/10)) just adjusts for your actual fridge temp while keeping the same effective fermentation load. 12–36h is safe; 15h is the centre.`, 'Why ~15h?');
     steps += stepEnd;
