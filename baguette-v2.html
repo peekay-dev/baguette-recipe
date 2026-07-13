@@ -3,21 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#24110B">
 <title>Perth Baguettes v2 — Poolish Method</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif:opsz@12..24&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* "Oven at night" — drenched dark hearth theme */
-    --bg: #160E0B; --surface: #221610; --ink: #F3E7DB; --muted: #B7998A;
-    --line: #392820;
-    --accent: #ED8A5C;        /* bright ember — TEXT / icons / accents on dark */
-    --accent-fill: #B5402A;   /* terracotta — filled buttons (cream text) */
-    --head-bg: #24110B;       /* deep oxblood — header & stage bar */
-    --accent-ink: #FBEFE7;    /* cream — text on terracotta fills + header */
-    --accent-soft: #2C1A13; --accent-soft-ink: #F0A97E;
+    --bg: #FFFFFF; --surface: #FBF7F4; --ink: #1C1B1A; --muted: #6E5A54;
+    --line: #EADFD8; --accent: #9E3B2E; --accent-ink: #F7ECE4;
+    --accent-soft: #F6E7E1; --accent-soft-ink: #8A3226;
     --disp: 'Hedvig Letters Serif'; --body: 'Figtree';
     --ease: cubic-bezier(0.25, 0, 0, 1);
   }
@@ -27,7 +21,7 @@
          padding: 0 0 60px; -webkit-font-smoothing: antialiased; }
 
   /* ── Header ─────────────────────────────────────────────────────────── */
-  .head { background: var(--head-bg); color: var(--accent-ink); padding: 24px 20px 18px; position: relative;
+  .head { background: var(--accent); color: var(--accent-ink); padding: 24px 20px 18px; position: relative;
           overflow: hidden; isolation: isolate; }
   .hearth { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
             display: block; }
@@ -56,12 +50,12 @@
                -webkit-tap-highlight-color: transparent; transition: background 0.2s, border-color 0.2s; }
   .share-btn:hover { background: rgba(247,236,228,0.18); }
   .share-btn:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-  .share-btn.copied { background: var(--accent); color: var(--head-bg); border-color: var(--accent); }
-  .head h1 { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 2.35rem;
-             line-height: 1.02; letter-spacing: -0.02em; text-wrap: balance; }
+  .share-btn.copied { background: var(--accent-ink); color: var(--accent); border-color: var(--accent-ink); }
+  .head h1 { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 2rem;
+             line-height: 1.05; letter-spacing: -0.01em; }
   .head-body { display: flex; align-items: stretch; justify-content: flex-start;
                gap: 18px; margin-top: 16px; }
-  .stages-bar { background: var(--head-bg); padding: 10px 0 12px;
+  .stages-bar { background: var(--accent); padding: 10px 0 12px;
                 position: sticky; top: 0; z-index: 100;
                 border-radius: 0 0 16px 16px; }
   .stages { display: flex; gap: 4px; padding: 0 16px; align-items: center; }
@@ -79,8 +73,8 @@
            transition: opacity 0.2s, background 0.2s, color 0.2s; }
   .stage:hover { opacity: 0.7; }
   .stage.done { opacity: 0.65; }
-  .stage.now { background: var(--accent); color: var(--head-bg); opacity: 1;
-               border-color: var(--accent); font-weight: 700; }
+  .stage.now { background: var(--accent-ink); color: var(--accent); opacity: 1;
+               border-color: var(--accent-ink); }
 
   /* ── Head stats (hero text + baguette live in terracotta header) ────── */
   .head-stats { flex: 0 1 auto; min-width: 0; }
@@ -149,9 +143,9 @@
   select { font-family: var(--body), system-ui; font-size: 15px; padding: 9px 28px 9px 10px;
            border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg);
            width: 100%; height: 44px; color: var(--ink); appearance: none; -webkit-appearance: none;
-           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23B7998A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236E5A54' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
            background-repeat: no-repeat; background-position: right 10px center; }
-  select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(237,138,92,0.22); }
+  select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(158,59,46,0.12); }
 
   /* Number / time inputs */
   input[type=number], input[type=time] { font-family: var(--body), system-ui; font-size: 15px;
@@ -159,7 +153,7 @@
     background: var(--bg); width: 100%; height: 44px; color: var(--ink);
     -webkit-appearance: none; appearance: none; }
   input[type=number]:focus, input[type=time]:focus { outline: none; border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(237,138,92,0.22); }
+    box-shadow: 0 0 0 3px rgba(158,59,46,0.12); }
   input[type=range] { flex: 1; accent-color: var(--accent); min-height: 44px; }
 
   /* Stepper */
@@ -181,7 +175,7 @@
     font-weight: 600; font-size: 0.83rem; cursor: pointer; background: transparent;
     color: var(--muted); transition: background 0.15s var(--ease), color 0.15s;
     min-height: 44px; border-radius: 9px; white-space: nowrap; -webkit-appearance: none; }
-  .toggle button.active { background: var(--accent-fill); color: var(--accent-ink); }
+  .toggle button.active { background: var(--accent); color: var(--accent-ink); }
   .toggle button:not(.active):hover { background: var(--accent-soft); color: var(--ink); }
 
   /* Blend */
@@ -240,12 +234,12 @@
   th { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--muted);
        letter-spacing: 0.08em; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
   th:last-child, td.amt { text-align: right; }
-  td { border-bottom: 1px solid rgba(255,255,255,0.06); }
+  td { border-bottom: 1px solid rgba(0,0,0,0.04); }
   td.amt { font-weight: 600; font-size: 1.05rem; font-variant-numeric: tabular-nums;
            color: var(--ink); text-align: right; }
 
   /* Steps */
-  .step { margin-bottom: 4px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+  .step { margin-bottom: 4px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04);
           scroll-margin-top: 48px;
           transition: opacity 0.2s; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .step:last-child { border-bottom: none; }
@@ -294,7 +288,7 @@
   .formula-meta { font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
   /* Modal */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.62);
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35);
     z-index: 200; justify-content: center; align-items: center; padding: 20px; }
   .modal-overlay.open { display: flex; }
   .modal { background: var(--bg); border-radius: 14px; padding: 20px; max-width: 500px;
@@ -358,7 +352,7 @@
   .cook-fab { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
     z-index: var(--z-fab); display: inline-flex; align-items: center; gap: 10px;
     font-family: var(--body); font-weight: 600; font-size: 0.9rem; color: var(--accent-ink);
-    background: var(--accent-fill); border: none; border-radius: 26px; padding: 12px 20px 12px 15px;
+    background: var(--accent); border: none; border-radius: 26px; padding: 12px 20px 12px 15px;
     box-shadow: 0 8px 22px -8px rgba(158,59,46,0.55), 0 2px 6px rgba(0,0,0,0.12);
     cursor: pointer; min-height: 50px; max-width: calc(100vw - 28px);
     -webkit-tap-highlight-color: transparent;
@@ -405,7 +399,7 @@
   .cook-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
   .cook-card { max-width: 640px; margin: 0 auto; padding: 10px 22px 34px; view-transition-name: cook-card; }
   .cook-num { font-family: var(--disp), Georgia, serif; font-size: 2.9rem; line-height: 1;
-    color: var(--accent); opacity: 0.55; letter-spacing: -0.02em; }
+    color: var(--accent); opacity: 0.32; letter-spacing: -0.02em; }
   .cook-title { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 1.85rem; line-height: 1.12;
     color: var(--ink); margin: 2px 0 8px; letter-spacing: -0.01em; text-wrap: balance; }
   .cook-time { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600;
@@ -429,9 +423,9 @@
   .cook-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .cook-prev { flex: 0 0 auto; min-width: 60px; color: var(--accent-soft-ink); }
   .cook-prev:disabled { opacity: 0.32; cursor: default; }
-  .cook-next { flex: 1; background: var(--accent-fill); color: var(--accent-ink); border-color: var(--accent-fill); }
+  .cook-next { flex: 1; background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
   .cook-next.is-done { background: var(--accent-soft); color: var(--accent-soft-ink); border-color: transparent; }
-  .cook-next.is-finish { background: var(--accent-fill); color: var(--accent-ink); border-color: var(--accent-fill); }
+  .cook-next.is-finish { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 
   /* View Transitions: morph step ⇄ card on enter/exit, slide between steps */
   @media (prefers-reduced-motion: no-preference) {
