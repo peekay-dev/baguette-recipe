@@ -21,7 +21,15 @@
          padding: 0 0 60px; -webkit-font-smoothing: antialiased; }
 
   /* ── Header ─────────────────────────────────────────────────────────── */
-  .head { background: var(--accent); color: var(--accent-ink); padding: 24px 20px 18px; }
+  .head { background: var(--accent); color: var(--accent-ink); padding: 24px 20px 18px; position: relative; }
+  .share-btn { position: absolute; top: 20px; right: 18px; display: inline-flex; align-items: center; gap: 5px;
+               font-family: inherit; font-size: 0.78rem; font-weight: 600; color: var(--accent-ink);
+               background: rgba(247,236,228,0.10); border: 1px solid rgba(247,236,228,0.38);
+               border-radius: 20px; padding: 7px 13px; cursor: pointer; min-height: 36px;
+               -webkit-tap-highlight-color: transparent; transition: background 0.2s, border-color 0.2s; }
+  .share-btn:hover { background: rgba(247,236,228,0.18); }
+  .share-btn:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+  .share-btn.copied { background: var(--accent-ink); color: var(--accent); border-color: var(--accent-ink); }
   .head h1 { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 2rem;
              line-height: 1.05; letter-spacing: -0.01em; }
   .head-body { display: flex; align-items: stretch; justify-content: flex-start;
@@ -78,6 +86,22 @@
   /* Mini loaf handoff: scales up from nothing on first reveal */
   @keyframes loafenter { 0% { opacity: 0; transform: scale(0.5); } 60% { transform: scale(1.12); } 100% { opacity: 1; transform: scale(1); } }
   .bar-loaf-enter { animation: loafenter 0.45s var(--ease) both; }
+
+  /* Finale — end-of-recipe celebration beat (visible by default; motion only enhances) */
+  .finale { text-align: center; padding: 30px 20px 14px; border-top: 1px solid var(--line); margin-top: 8px; }
+  .finale-loaf { width: 128px; height: auto; display: block; margin: 0 auto 6px;
+                 cursor: pointer; -webkit-tap-highlight-color: transparent; transform-origin: center bottom; }
+  .finale-steam { fill: none; stroke: rgba(178,110,44,0.5); stroke-width: 2; stroke-linecap: round;
+                  opacity: 0; animation: steam var(--st,4.6s) ease-out var(--sdl,0.8s) infinite; }
+  .finale-breathe { transform-box: fill-box; transform-origin: center; animation: breathe 5s var(--ease) infinite; }
+  .finale-title { font-family: var(--disp), Georgia, serif; font-size: 1.7rem; color: var(--accent);
+                  font-weight: 400; letter-spacing: -0.01em; line-height: 1.1; margin: 0; text-wrap: balance; }
+  .finale-note { margin: 8px auto 0; max-width: 34ch; font-size: 0.9rem; color: var(--ink); opacity: 0.72;
+                 line-height: 1.5; text-wrap: pretty; }
+  .finale-in .finale-loaf { animation: finalepop 0.7s var(--ease); }
+  .finale-in .finale-title { animation: finalerise 0.55s var(--ease) 0.12s both; }
+  .finale-in .finale-note { animation: finalerise 0.55s var(--ease) 0.24s both; }
+  .finale-loaf.pop { animation: finalepop 0.7s var(--ease); }
 
   /* ── Controls ────────────────────────────────────────────────────────── */
   .controls { padding: 16px; margin: 16px 20px; background: var(--surface); border-radius: 14px; }
@@ -150,9 +174,15 @@
     color: var(--accent-soft-ink); background: var(--accent-soft); border-radius: 10px;
     padding: 12px 14px; margin-top: 14px;
     -webkit-tap-highlight-color: transparent; min-height: 44px; }
-  .adv-toggle .chev { color: var(--accent-soft-ink); font-size: 0.75rem;
-                      transition: transform 0.22s var(--ease); display: inline-block; }
-  .adv-toggle.open .chev { transform: rotate(180deg); }
+  .adv-toggle .chev, .tip .chev { color: var(--accent-soft-ink); font-size: 0.75rem;
+                      transition: transform 0.22s var(--ease); display: inline-block; flex-shrink: 0; }
+  .adv-toggle.open .chev, .tip.open .chev { transform: rotate(180deg); }
+  .blend-add { display: inline-block; background: none; border: none; color: var(--accent);
+               font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+               padding: 4px 2px; margin: 2px 0 8px; -webkit-tap-highlight-color: transparent; }
+  .blend-add:hover { text-decoration: underline; }
+  .blend-add:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .field[hidden] { display: none; }
 
   /* Collapsibles — grid-template-rows (no layout-property animation) */
   .collapsible-grid { display: grid; grid-template-rows: 0fr;
@@ -163,8 +193,9 @@
   /* Schedule collapsible header */
   .collapsible-header { display: flex; justify-content: space-between; align-items: center;
     cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
-  .collapsible-header::after { content: '+'; font-size: 1.1em; color: var(--accent); }
-  .collapsible-header.open::after { content: '−'; }
+  .collapsible-header::after { content: '▾'; font-size: 0.8rem; color: var(--accent);
+    transition: transform 0.22s var(--ease); display: inline-block; }
+  .collapsible-header.open::after { transform: rotate(180deg); }
 
   /* ── Content ─────────────────────────────────────────────────────────── */
   .content { padding: 0 20px; }
@@ -203,11 +234,9 @@
 
   /* Tips — collapsible (recipe steps) */
   .tip { background: var(--accent-soft); border-radius: 10px; margin: 6px 0; font-size: 0.88rem; }
-  .tip-toggle { display: flex; align-items: center; padding: 8px 12px; cursor: pointer;
+  .tip-toggle { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer;
     -webkit-tap-highlight-color: transparent; user-select: none; gap: 6px;
     font-weight: 600; font-size: 0.88rem; color: var(--accent-soft-ink); min-height: 44px; }
-  .tip-toggle::before { content: '+'; font-size: 1.1em; flex-shrink: 0; }
-  .tip.open .tip-toggle::before { content: '−'; }
   .tip-hint { color: var(--accent-soft-ink); font-size: 0.75em; font-weight: 400; opacity: 0.7; }
   .tip-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.22s var(--ease); }
   .tip.open .tip-body { grid-template-rows: 1fr; }
@@ -257,6 +286,8 @@
   @keyframes scoreopen { from { transform: rotate(10deg) scale(0.2); } to { transform: rotate(-18deg) scale(1); } }
   @keyframes ovenglow { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
   @keyframes steam    { 0% { opacity: 0; transform: translateY(5px); } 25% { opacity: 0.88; } 100% { opacity: 0; transform: translateY(-32px); } }
+  @keyframes finalepop  { 0% { transform: translateY(6px) scale(0.84); } 55% { transform: translateY(0) scale(1.05); } 100% { transform: translateY(0) scale(1); } }
+  @keyframes finalerise { from { transform: translateY(10px); } to { transform: translateY(0); } }
 
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
@@ -291,6 +322,7 @@
 <!-- ── Terracotta header (title + stats + Oven Spring baguette) ──────────── -->
 <div class="head">
   <h1>Poolish Baguettes</h1>
+  <button class="share-btn" type="button" onclick="shareRecipe(this)" aria-label="Copy a shareable link to this recipe">↗ Share</button>
   <div class="head-body">
     <div class="loaf-wrap">
       <div class="halo"></div>
@@ -390,33 +422,36 @@
         <option value="wholemeal">Wholemeal Wheat</option>
       </select>
     </div>
-    <div class="field num-field">
+    <div class="field num-field" id="pctAField" hidden>
       <label>%</label>
-      <input type="number" id="pctA" value="85" min="0" max="100" onchange="syncBlend('a')" style="text-align:center">
+      <input type="number" id="pctA" value="100" min="0" max="100" onchange="syncBlend('a')" style="text-align:center">
     </div>
   </div>
-  <div class="control-row">
-    <div class="field">
-      <label for="flourB">Flour B</label>
-      <select id="flourB" onchange="onFlourChange()">
-        <option value="mb">Miller &amp; Baker Plain Flour</option>
-        <option value="pizzeria">Caputo Pizzeria Blue (12.5%)</option>
-        <option value="nuvola">Caputo Nuvola (13%)</option>
-        <option value="bread">Strong Bread (12–13%)</option>
-        <option value="wholemeal" selected>Wholemeal Wheat</option>
-      </select>
+  <button type="button" id="blendToggle" class="blend-add" onclick="toggleBlendMode()">+ Blend a second flour</button>
+  <div id="blendGroup" hidden>
+    <div class="control-row">
+      <div class="field">
+        <label for="flourB">Flour B</label>
+        <select id="flourB" onchange="onFlourChange()">
+          <option value="mb" selected>Miller &amp; Baker Plain Flour</option>
+          <option value="pizzeria">Caputo Pizzeria Blue (12.5%)</option>
+          <option value="nuvola">Caputo Nuvola (13%)</option>
+          <option value="bread">Strong Bread (12–13%)</option>
+          <option value="wholemeal">Wholemeal Wheat</option>
+        </select>
+      </div>
+      <div class="field num-field">
+        <label>%</label>
+        <input type="number" id="pctB" value="0" min="0" max="100" onchange="syncBlend('b')" style="text-align:center">
+      </div>
     </div>
-    <div class="field num-field">
-      <label>%</label>
-      <input type="number" id="pctB" value="15" min="0" max="100" onchange="syncBlend('b')" style="text-align:center">
+    <div class="control-row" style="flex-direction:column;gap:4px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:0.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Flour blend</span>
+        <span id="blend-label" style="font-size:0.72rem;color:var(--muted);font-variant-numeric:tabular-nums">100% A / 0% B</span>
+      </div>
+      <input type="range" id="blend" min="0" max="100" value="100" oninput="syncBlend('slider')" style="width:100%">
     </div>
-  </div>
-  <div class="control-row" style="flex-direction:column;gap:4px">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:0.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Flour blend</span>
-      <span id="blend-label" style="font-size:0.72rem;color:var(--muted);font-variant-numeric:tabular-nums">85% A / 15% B</span>
-    </div>
-    <input type="range" id="blend" min="0" max="100" value="85" oninput="syncBlend('slider')" style="width:100%">
   </div>
   <div class="control-row">
     <div class="field">
@@ -696,50 +731,93 @@ function setTemperTau(v) {
   update();
 }
 
+function collectState() {
+  return {
+    method, temperTau, poolishStartValue, foldOverride, userOverride,
+    count: document.getElementById('count').value,
+    weight: document.getElementById('weight').value,
+    hydration: document.getElementById('hydration').value,
+    flourA: document.getElementById('flourA').value,
+    flourB: document.getElementById('flourB').value,
+    pctA: document.getElementById('pctA').value,
+    ambientTemp: document.getElementById('ambientTemp').value,
+    poolishPct: document.getElementById('poolishPct').value
+  };
+}
+let suppressSave = false;
 function savePrefs() {
-  try {
-    localStorage.setItem('baguette_prefs', JSON.stringify({
-      method, temperTau, poolishStartValue, foldOverride, userOverride,
-      count: document.getElementById('count').value,
-      weight: document.getElementById('weight').value,
-      hydration: document.getElementById('hydration').value,
-      flourA: document.getElementById('flourA').value,
-      flourB: document.getElementById('flourB').value,
-      pctA: document.getElementById('pctA').value,
-      ambientTemp: document.getElementById('ambientTemp').value,
-      poolishPct: document.getElementById('poolishPct').value
-    }));
-  } catch(e) {}
+  if (suppressSave) return;
+  try { localStorage.setItem('baguette_prefs', JSON.stringify(collectState())); } catch(e) {}
 }
 
+function applyState(p) {
+  if (!p) return;
+  if (p.count)   document.getElementById('count').value = p.count;
+  if (p.weight)  document.getElementById('weight').value = p.weight;
+  if (p.hydration) document.getElementById('hydration').value = p.hydration;
+  if (p.flourA)  document.getElementById('flourA').value = p.flourA;
+  if (p.flourB)  document.getElementById('flourB').value = p.flourB;
+  if (p.pctA != null) {
+    document.getElementById('pctA').value = p.pctA;
+    document.getElementById('pctB').value = 100 - p.pctA;
+    document.getElementById('blend').value = p.pctA;
+  }
+  if (p.poolishStartValue) poolishStartValue = p.poolishStartValue;
+  if (p.foldOverride != null) foldOverride = p.foldOverride;
+  if (p.userOverride && typeof p.userOverride === 'object') userOverride = p.userOverride;
+  if (p.ambientTemp != null) document.getElementById('ambientTemp').value = p.ambientTemp;
+  if (p.poolishPct != null) document.getElementById('poolishPct').value = p.poolishPct;
+  if (p.temperTau != null) {
+    temperTau = p.temperTau;
+    document.querySelectorAll('#bowlToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === temperTau));
+  }
+  if (p.method) {
+    method = p.method;
+    document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === method));
+  }
+}
 function loadPrefs() {
   try {
     const p = JSON.parse(localStorage.getItem('baguette_prefs') || 'null');
-    if (!p) return;
-    if (p.count)   document.getElementById('count').value = p.count;
-    if (p.weight)  document.getElementById('weight').value = p.weight;
-    if (p.hydration) document.getElementById('hydration').value = p.hydration;
-    if (p.flourA)  document.getElementById('flourA').value = p.flourA;
-    if (p.flourB)  document.getElementById('flourB').value = p.flourB;
-    if (p.pctA != null) {
-      document.getElementById('pctA').value = p.pctA;
-      document.getElementById('pctB').value = 100 - p.pctA;
-      document.getElementById('blend').value = p.pctA;
-    }
-    if (p.poolishStartValue) poolishStartValue = p.poolishStartValue;
-    if (p.foldOverride != null) foldOverride = p.foldOverride;
-    if (p.userOverride && typeof p.userOverride === 'object') userOverride = p.userOverride;
-    if (p.ambientTemp != null) document.getElementById('ambientTemp').value = p.ambientTemp;
-    if (p.poolishPct != null) document.getElementById('poolishPct').value = p.poolishPct;
-    if (p.temperTau != null) {
-      temperTau = p.temperTau;
-      document.querySelectorAll('#bowlToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === temperTau));
-    }
-    if (p.method) {
-      method = p.method;
-      document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === method));
-    }
+    if (p) applyState(p);
   } catch(e) {}
+}
+// ── Shareable URL: encode/decode the same state object into the location hash ──
+function encodeState(obj) {
+  const json = JSON.stringify(Object.assign({ v: 1 }, obj));
+  return btoa(unescape(encodeURIComponent(json))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function decodeState(str) {
+  if (!str) return null;
+  try {
+    let b = str.replace(/-/g, '+').replace(/_/g, '/');
+    while (b.length % 4) b += '=';
+    const obj = JSON.parse(decodeURIComponent(escape(atob(b))));
+    return (obj && typeof obj === 'object') ? obj : null;
+  } catch(e) { return null; }
+}
+function hashParam(k) {
+  try { return new URLSearchParams(location.hash.replace(/^#/, '')).get(k); } catch(e) { return null; }
+}
+function fallbackCopy(text, done) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    const ok = document.execCommand('copy'); document.body.removeChild(ta);
+    ok ? done() : prompt('Copy this link:', text);
+  } catch(e) { prompt('Copy this link:', text); }
+}
+function shareRecipe(btn) {
+  const link = location.href.split('#')[0] + '#r=' + encodeState(collectState());
+  const orig = btn.textContent;
+  const done = () => {
+    btn.textContent = 'Link copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(done).catch(() => fallbackCopy(link, done));
+  } else { fallbackCopy(link, done); }
 }
 function r(v) { return Math.round(v); }
 
@@ -756,7 +834,7 @@ function solveStageDuration(anchor, anchorTemp, tau, T_start, T_amb) {
 }
 
 function tip(text, hint) {
-  return `<div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}"><div class="tip-toggle"><span class="tip-hint">${hint || ''}</span></div><div class="tip-body"><div class="tip-body-inner">${text}</div></div></div>`;
+  return `<div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}"><div class="tip-toggle"><span class="tip-hint">${hint || ''}</span><span class="chev">▾</span></div><div class="tip-body"><div class="tip-body-inner">${text}</div></div></div>`;
 }
 
 const INFO = {
@@ -841,7 +919,40 @@ function step(id, delta) {
   update();
 }
 
-function onFlourChange() { foldOverride = null; update(); }
+function onFlourChange() {
+  if (!blendMode) document.getElementById('flourB').value = document.getElementById('flourA').value;
+  foldOverride = null; update();
+}
+let blendMode = false;
+function applyBlendVisibility() {
+  document.getElementById('pctAField').hidden = !blendMode;
+  document.getElementById('blendGroup').hidden = !blendMode;
+  document.getElementById('blendToggle').textContent = blendMode ? '− Use a single flour' : '+ Blend a second flour';
+}
+function toggleBlendMode() {
+  blendMode = !blendMode;
+  const fa = document.getElementById('flourA'), fb = document.getElementById('flourB');
+  if (blendMode) {
+    if (fb.value === fa.value) fb.value = (fa.value === 'wholemeal' ? 'mb' : 'wholemeal');
+    if (+document.getElementById('pctA').value >= 100) {
+      document.getElementById('pctA').value = 85;
+      document.getElementById('pctB').value = 15;
+      document.getElementById('blend').value = 85;
+    }
+  } else {
+    fb.value = fa.value;
+    document.getElementById('pctA').value = 100;
+    document.getElementById('pctB').value = 0;
+    document.getElementById('blend').value = 100;
+  }
+  applyBlendVisibility();
+  update();
+}
+function initBlendMode() {
+  blendMode = (+document.getElementById('pctA').value) < 100;
+  if (!blendMode) document.getElementById('flourB').value = document.getElementById('flourA').value;
+  applyBlendVisibility();
+}
 
 function stepFold(delta) {
   const el = document.getElementById('foldCount');
@@ -890,6 +1001,17 @@ function setPill(key) {
   el.style.display = label ? '' : 'none';
 }
 
+function setupFinaleObserver() {
+  if (typeof IntersectionObserver === 'undefined' || typeof document.querySelector !== 'function') return;
+  const fin = document.querySelector('.finale');
+  if (!fin) return;
+  if (window._finaleObs) window._finaleObs.disconnect();
+  window._finaleObs = new IntersectionObserver((entries, obs) => {
+    entries.forEach(e => { if (e.isIntersecting) { fin.classList.add('finale-in'); obs.disconnect(); } });
+  }, { threshold: 0.4 });
+  window._finaleObs.observe(fin);
+}
+function popLoaf(el) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
 function update() {
   savePrefs();
   const count = Math.max(1, +document.getElementById('count').value);
@@ -1179,7 +1301,25 @@ ${foldTableRows}
     <p>Cool on wire rack <strong>20 min</strong> before cutting.</p>`;
   steps += tip('Crust softens as it cools; it crisps back up. For extra crackle, oven off, door ajar, 5 min.', 'Getting a crackly crust');
   steps += stepEnd;
-  steps += `<div style="text-align:center;padding:20px 0 8px;border-top:1px solid var(--line);margin-top:8px"><p style="font-family:var(--disp),Georgia,serif;font-size:1.3rem;color:var(--accent);font-weight:400;letter-spacing:0.01em">You made baguettes.</p></div>`;
+  steps += `
+    <div class="finale">
+      <svg class="finale-loaf" viewBox="0 0 138 96" role="img" aria-label="A finished baguette, steaming" onclick="popLoaf(this)">
+        <path class="finale-steam" style="--st:4.6s;--sdl:0.5s" d="M60 34 q-5 -11 0 -22"/>
+        <path class="finale-steam" style="--st:5.2s;--sdl:1.5s" d="M78 30 q6 -11 0 -22"/>
+        <path class="finale-steam" style="--st:4.9s;--sdl:2.6s" d="M50 37 q-6 -11 0 -22"/>
+        <g transform="translate(69 64) rotate(-40)">
+          <g class="finale-breathe">
+            <path fill="url(#crust)" d="M-50 0 C -42 -15, 42 -15, 50 0 C 42 15, -42 15, -50 0 Z"/>
+            <ellipse cx="0" cy="-4" rx="42" ry="4" fill="#F0D49A" opacity="0.45"/>
+            <g transform="translate(-18 1.5)"><path class="ear" style="--sd:0.95s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+            <g transform="translate(2 0)"><path class="ear" style="--sd:1.08s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+            <g transform="translate(22 1.5)"><path class="ear" style="--sd:1.21s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+          </g>
+        </g>
+      </svg>
+      <p class="finale-title">You made baguettes.</p>
+      <p class="finale-note">Hold one to your ear as it cools — that faint crackle is the crust singing.</p>
+    </div>`;
 
   document.getElementById('recipe').innerHTML = `
     <div class="white-panel">
@@ -1256,9 +1396,19 @@ ${foldTableRows}
   updateStageStrip();
   setupStageObserver();
   setupHeroObserver();
+  setupFinaleObserver();
 }
-loadPrefs();
+suppressSave = true;
+const sharedState = decodeState(hashParam('r'));
+if (sharedState) {
+  applyState(sharedState);
+  history.replaceState(null, '', location.href.split('#')[0]);
+} else {
+  loadPrefs();
+}
+initBlendMode();
 update();
+suppressSave = false;
 </script>
 
 <div class="modal-overlay" id="infoModal" onclick="if(event.target===this)this.classList.remove('open')">

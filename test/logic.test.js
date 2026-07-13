@@ -17,8 +17,14 @@ const stub = id => ({ get value(){ return vals[id]; }, set value(v){ vals[id] = 
 global.document = { getElementById: stub, querySelectorAll: () => [] };
 global.localStorage = { getItem: () => null, setItem: () => {} };
 global.window = {};
+global.location = { hash: '', href: 'file:///baguette-v2.html', pathname: '/baguette-v2.html', origin: 'null' };
+global.history = { replaceState() {} };
+if (typeof btoa === 'undefined') {
+  global.btoa = s => Buffer.from(s, 'binary').toString('base64');
+  global.atob = s => Buffer.from(s, 'base64').toString('binary');
+}
 
-eval(js); // runs loadPrefs() + update() once with the stub; leaks eff/sourceOf/buildFolds
+eval(js); // runs loadPrefs()/URL-hydration + update() once with the stub; leaks pure fns
 
 let passed = 0;
 const check = (desc, cond) => { assert.ok(cond, desc); passed++; };
@@ -51,5 +57,19 @@ check('buildFolds extends',    JSON.stringify(buildFolds(['cf','cf'], 4)) === JS
 global.localStorage.getItem = () => JSON.stringify({ season:'winter', hydration:'68', method:'sameday' });
 assert.doesNotThrow(() => loadPrefs(), 'loadPrefs tolerates legacy season key'); passed++;
 check('legacy prefs still applied', vals.hydration === '68');
+
+// ── Shareable URL round-trips ──
+const sample = { method:'sameday', hydration:'71', flourA:'mb', flourB:'wholemeal', pctA:'80', userOverride:{ hydration:80 } };
+const rt = decodeState(encodeState(sample));
+check('encode/decode round-trips method',   rt.method === 'sameday');
+check('encode/decode round-trips nested',    rt.userOverride.hydration === 80);
+check('encodeState stamps version v:1',      rt.v === 1);
+check('decodeState rejects garbage',         decodeState('@@not base64@@') === null);
+check('decodeState null on empty',           decodeState('') === null);
+vals.hydration = '66';
+const enc = encodeState(collectState());
+vals.hydration = '99';
+applyState(decodeState(enc));
+check('collect->encode->decode->apply keeps hydration', vals.hydration === '66');
 
 console.log(`logic tests passed (${passed} assertions)`);
