@@ -316,6 +316,116 @@
     .toggle button { padding: 8px 6px; font-size: 0.78rem; white-space: normal; line-height: 1.2; }
     .control-row.stack { flex-direction: column; align-items: stretch; }
   }
+
+  /* ══ Cook Mode — guided one-step focus (Baker's Companion) ═══════════════ */
+  :root { --z-fab: 120; --z-cook: 150; --z-modal: 200; }
+
+  /* Spring progress underline on the sticky stage strip */
+  .stage-track { height: 2px; margin: 9px 16px 0; border-radius: 2px;
+                 background: rgba(247,236,228,0.22); }
+  .stage-track-fill { display: block; height: 100%; border-radius: 2px; background: var(--accent-ink);
+                      transform-origin: left center; transform: scaleX(0);
+                      transition: transform 0.5s var(--ease); }
+
+  /* Floating entry pill — label morphs to the current stage */
+  .cook-fab { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+    z-index: var(--z-fab); display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--body); font-weight: 600; font-size: 0.9rem; color: var(--accent-ink);
+    background: var(--accent); border: none; border-radius: 26px; padding: 12px 20px 12px 15px;
+    box-shadow: 0 8px 22px -8px rgba(158,59,46,0.55), 0 2px 6px rgba(0,0,0,0.12);
+    cursor: pointer; min-height: 50px; max-width: calc(100vw - 28px);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease), opacity 0.28s var(--ease); }
+  .cook-fab:hover { transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 12px 28px -8px rgba(158,59,46,0.6), 0 3px 9px rgba(0,0,0,0.14); }
+  .cook-fab:active { transform: translateX(-50%) translateY(0); }
+  .cook-fab:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .cook-fab .cf-play { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%;
+    background: rgba(247,236,228,0.18); flex-shrink: 0; }
+  .cook-fab .cf-play svg { width: 9px; height: 11px; display: block; }
+  .cook-fab .cf-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cook-fab .cf-label b { font-weight: 700; }
+  .cook-fab.hidden { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(24px); }
+  @keyframes cf-swap { from { opacity: 0.15; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+  .cook-fab .cf-label.swap { animation: cf-swap 0.32s var(--ease); }
+
+  /* Full-screen guided overlay */
+  .cook { position: fixed; inset: 0; z-index: var(--z-cook); display: none; flex-direction: column;
+    background: var(--bg);
+    background-image: radial-gradient(130% 55% at 50% -8%, var(--accent-soft) 0%, rgba(246,231,225,0) 58%);
+    color: var(--ink); }
+  .cook.open { display: flex; }
+  .cook::before { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(120% 44% at 50% -6%, rgba(216,154,76,0.18), rgba(216,154,76,0) 60%);
+    animation: ovenglow 6.5s ease-in-out infinite; }
+  .cook-top, .cook-progress, .cook-scroll, .cook-nav { position: relative; z-index: 1; }
+  .cook-top { display: flex; align-items: center; gap: 12px; padding: 14px 18px 8px;
+    padding-top: max(14px, env(safe-area-inset-top)); }
+  .cook-exit { font-family: var(--body); font-weight: 600; font-size: 0.85rem; color: var(--accent);
+    background: none; border: none; cursor: pointer; padding: 8px; margin: -8px 0 -8px -8px; min-height: 40px;
+    -webkit-tap-highlight-color: transparent; display: inline-flex; align-items: center; gap: 5px; }
+  .cook-stage-name { font-family: var(--disp), Georgia, serif; font-size: 1.05rem; color: var(--accent);
+    flex: 1; min-width: 0; text-align: center; letter-spacing: 0.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cook-count { font-size: 0.75rem; font-weight: 700; color: var(--accent-soft-ink);
+    font-variant-numeric: tabular-nums; background: var(--accent-soft); padding: 6px 11px; border-radius: 20px;
+    flex-shrink: 0; }
+  .cook-exit:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+  .cook-progress { height: 3px; margin: 2px 18px 4px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .cook-progress-fill { display: block; height: 100%; background: var(--accent); border-radius: 3px;
+    transform-origin: left center; transform: scaleX(0); transition: transform 0.55s var(--ease); }
+
+  .cook-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+  .cook-card { max-width: 640px; margin: 0 auto; padding: 10px 22px 34px; view-transition-name: cook-card; }
+  .cook-num { font-family: var(--disp), Georgia, serif; font-size: 2.9rem; line-height: 1;
+    color: var(--accent); opacity: 0.32; letter-spacing: -0.02em; }
+  .cook-title { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 1.85rem; line-height: 1.12;
+    color: var(--ink); margin: 2px 0 8px; letter-spacing: -0.01em; text-wrap: balance; }
+  .cook-time { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600;
+    color: var(--accent-soft-ink); background: var(--accent-soft); padding: 6px 12px; border-radius: 20px;
+    font-variant-numeric: tabular-nums; margin-bottom: 16px; }
+  .cook-body { font-size: 1.02rem; line-height: 1.72; }
+  .cook-body > p:first-child { margin-top: 0; }
+  .cook-body p { margin: 11px 0; }
+  .cook-body table { font-size: 0.95rem; }
+  .cook-body .shaping-gif { border-radius: 10px; }
+  .cook-body .tip { font-size: 0.94rem; }
+  .cook-hint-empty { color: var(--muted); font-style: italic; }
+
+  .cook-nav { display: flex; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--bg);
+    padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .cook-btn { font-family: var(--body); font-weight: 600; font-size: 0.95rem; cursor: pointer; border-radius: 12px;
+    min-height: 52px; padding: 0 18px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink);
+    -webkit-tap-highlight-color: transparent; display: inline-flex; align-items: center; justify-content: center;
+    gap: 7px; transition: background 0.15s, border-color 0.15s, transform 0.1s var(--ease); }
+  .cook-btn:active { transform: scale(0.98); }
+  .cook-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .cook-prev { flex: 0 0 auto; min-width: 60px; color: var(--accent-soft-ink); }
+  .cook-prev:disabled { opacity: 0.32; cursor: default; }
+  .cook-next { flex: 1; background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .cook-next.is-done { background: var(--accent-soft); color: var(--accent-soft-ink); border-color: transparent; }
+  .cook-next.is-finish { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  /* View Transitions: morph step ⇄ card on enter/exit, slide between steps */
+  @media (prefers-reduced-motion: no-preference) {
+    ::view-transition-old(cook-card), ::view-transition-new(cook-card) {
+      animation-duration: 0.4s; animation-timing-function: var(--ease); }
+    .cook-dir-next::view-transition-old(cook-card) { animation-name: cook-out-left; }
+    .cook-dir-next::view-transition-new(cook-card) { animation-name: cook-in-right; }
+    .cook-dir-prev::view-transition-old(cook-card) { animation-name: cook-out-right; }
+    .cook-dir-prev::view-transition-new(cook-card) { animation-name: cook-in-left; }
+  }
+  @keyframes cook-out-left  { to   { transform: translateX(-26px); opacity: 0; } }
+  @keyframes cook-in-right  { from { transform: translateX(26px);  opacity: 0; } }
+  @keyframes cook-out-right { to   { transform: translateX(26px);  opacity: 0; } }
+  @keyframes cook-in-left   { from { transform: translateX(-26px); opacity: 0; } }
+
+  @media (max-width: 600px) {
+    .cook-card { padding: 8px 16px 30px; }
+    .cook-title { font-size: 1.6rem; }
+    .cook-num { font-size: 2.5rem; }
+    .cook-body { font-size: 1rem; }
+  }
 </style>
 </head>
 <body>
@@ -387,6 +497,7 @@
     <span class="stage" id="st-bake" onclick="tapStage('bake')">Bake</span>
     <div class="bar-spacer" aria-hidden="true"></div>
   </div>
+  <div class="stage-track" aria-hidden="true"><span class="stage-track-fill" id="stageFill"></span></div>
 </div>
 
 
@@ -655,6 +766,9 @@ function tapStage(name) {
   const el = document.querySelector('[data-step="' + STAGE_STEP[name] + '"]');
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+const STAGE_LABEL = { poolish: 'Poolish', mix: 'Mix & Rest', bulk: 'Bulk Ferment',
+                      retard: 'Cold Retard', shape: 'Shape', bake: 'Bake' };
+function visibleStages() { return STAGES.filter(s => s !== 'retard' || method === 'retard'); }
 function updateStageStrip() {
   const idx = currentStage ? STAGES.indexOf(currentStage) : -1;
   STAGES.forEach((s, i) => {
@@ -663,6 +777,21 @@ function updateStageStrip() {
     el.classList.toggle('done', i < idx);
     el.classList.toggle('now', i === idx);
   });
+  // Spring progress underline (fraction of visible stages completed)
+  const vis = visibleStages();
+  const done = currentStage ? vis.filter(s => STAGES.indexOf(s) <= idx).length : 0;
+  const fill = document.getElementById('stageFill');
+  if (fill) fill.style.transform = 'scaleX(' + (done / vis.length).toFixed(4) + ')';
+  updateCookFab();
+}
+function updateCookFab() {
+  const lbl = document.getElementById('cookFabLabel');
+  if (!lbl) return;
+  const next = currentStage ? '<b>' + (STAGE_LABEL[currentStage] || '') + '</b>' : 'Cook along';
+  if (lbl.innerHTML !== next) {
+    lbl.innerHTML = next;
+    lbl.classList.remove('swap'); void lbl.offsetWidth; lbl.classList.add('swap');
+  }
 }
 function setupHeroObserver() {
   if (typeof IntersectionObserver === 'undefined' || typeof document.querySelector !== 'function') return;
@@ -1400,6 +1529,182 @@ ${foldTableRows}
   setupHeroObserver();
   setupFinaleObserver();
 }
+// ══ Cook Mode engine ═══════════════════════════════════════════════════════
+const STEP_STAGE = Object.fromEntries(Object.entries(STAGE_STEP).map(([s, id]) => [id, s]));
+let cookSteps = [], cookIdx = 0, cookLastFocus = null, _cookBound = false;
+
+function reduceMotion() {
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+function canVT() { return typeof document.startViewTransition === 'function' && !reduceMotion(); }
+
+function collectCookSteps() {
+  const nodes = Array.from(document.querySelectorAll('#recipe .step'));
+  let cur = 'poolish';
+  return nodes.map(el => {
+    const id = el.dataset.step;
+    if (STEP_STAGE[id]) cur = STEP_STAGE[id];
+    const clone = el.cloneNode(true);
+    const h = clone.querySelector('.step-header'); if (h) h.remove();
+    const c = clone.querySelector('.step-check'); if (c) c.remove();
+    return {
+      id,
+      num: (el.querySelector('.step-num')?.textContent || '').replace(/\D/g, ''),
+      title: el.querySelector('.step-title')?.textContent || '',
+      time: el.querySelector('.step-time')?.textContent || '',
+      body: clone.innerHTML,
+      stage: cur
+    };
+  });
+}
+
+function paintCookCard() {
+  const s = cookSteps[cookIdx];
+  const card = document.getElementById('cookCard');
+  card.innerHTML =
+    '<div class="cook-num" aria-hidden="true">' + (s.num || '') + '</div>' +
+    '<h2 class="cook-title">' + s.title + '</h2>' +
+    (s.time ? '<div class="cook-time">🕑 ' + s.time + '</div>' : '') +
+    '<div class="cook-body">' + s.body + '</div>';
+  const scroller = document.getElementById('cookScroll');
+  if (scroller) scroller.scrollTop = 0;
+  document.getElementById('cookStageName').textContent = STAGE_LABEL[s.stage] || '';
+  document.getElementById('cookCount').textContent = (cookIdx + 1) + ' / ' + cookSteps.length;
+  const frac = (cookIdx + 1) / cookSteps.length;
+  document.getElementById('cookFill').style.transform = 'scaleX(' + frac.toFixed(4) + ')';
+  const isDone = doneSteps.has(s.id), last = cookIdx === cookSteps.length - 1;
+  document.getElementById('cookPrev').disabled = cookIdx === 0;
+  const next = document.getElementById('cookNext');
+  next.classList.toggle('is-done', isDone && !last);
+  next.classList.toggle('is-finish', last);
+  next.textContent = last ? (isDone ? 'Finish ✓' : 'Done — finish ✓') : (isDone ? 'Next →' : 'Mark done →');
+  if (s.stage && s.stage !== currentStage) { currentStage = s.stage; updateStageStrip(); }
+}
+
+function renderCookCard(dir) {
+  const root = document.getElementById('cookMode');
+  if (!dir || !canVT()) { paintCookCard(); return; }
+  root.classList.remove('cook-dir-next', 'cook-dir-prev');
+  root.classList.add(dir > 0 ? 'cook-dir-next' : 'cook-dir-prev');
+  const t = document.startViewTransition(paintCookCard);
+  t.finished.finally(() => root.classList.remove('cook-dir-next', 'cook-dir-prev'));
+}
+
+function openCook(startId) {
+  cookSteps = collectCookSteps();
+  if (!cookSteps.length) return;
+  let idx = 0;
+  if (startId) idx = cookSteps.findIndex(s => s.id === startId);
+  else if (currentStage && STAGE_STEP[currentStage]) idx = cookSteps.findIndex(s => s.id === STAGE_STEP[currentStage]);
+  cookIdx = idx < 0 ? 0 : idx;
+  cookLastFocus = document.activeElement;
+  paintCookCard();
+  bindCookGestures();
+  const overlay = document.getElementById('cookMode');
+  const source = document.querySelector('#recipe .step[data-step="' + cookSteps[cookIdx].id + '"]');
+  const reveal = () => {
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    if (source) source.style.viewTransitionName = '';
+    document.getElementById('cookNext').focus();
+  };
+  document.getElementById('cookFab').classList.add('hidden');
+  if (source && canVT()) {
+    source.style.viewTransitionName = 'cook-card';
+    document.startViewTransition(reveal);
+  } else {
+    reveal();
+  }
+}
+
+function cookGo(delta) {
+  const n = cookIdx + delta;
+  if (n < 0 || n >= cookSteps.length) return;
+  cookIdx = n;
+  renderCookCard(delta);
+}
+
+function cookNext() {
+  const s = cookSteps[cookIdx];
+  if (!doneSteps.has(s.id)) {
+    doneSteps.add(s.id);
+    const el = document.querySelector('#recipe .step[data-step="' + s.id + '"]');
+    if (el) { el.classList.add('done'); const c = el.querySelector('.step-check'); if (c) c.textContent = '✓ done'; }
+    burstDone();
+  }
+  if (cookIdx === cookSteps.length - 1) { closeCook(true); return; }
+  cookGo(1);
+}
+
+function closeCook(finished) {
+  const overlay = document.getElementById('cookMode');
+  const target = document.querySelector('#recipe .step[data-step="' + (cookSteps[cookIdx] ? cookSteps[cookIdx].id : '') + '"]');
+  if (target) target.scrollIntoView({ block: 'center' });
+  const hide = () => {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (target) target.style.viewTransitionName = 'cook-card';
+  };
+  const cleanup = () => { if (target) target.style.viewTransitionName = ''; };
+  if (target && canVT()) {
+    document.startViewTransition(hide).finished.finally(cleanup);
+  } else {
+    hide(); cleanup();
+    if (target) target.scrollIntoView({ block: 'start' });
+  }
+  document.getElementById('cookFab').classList.remove('hidden');
+  if (cookLastFocus && cookLastFocus.focus) cookLastFocus.focus();
+  if (finished) setTimeout(() => { const f = document.querySelector('.finale-loaf'); if (f) { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); popLoaf(f); } }, 420);
+}
+
+// Wow: a small flour-and-crust puff when a step is marked done
+function burstDone() {
+  if (reduceMotion()) return;
+  const btn = document.getElementById('cookNext');
+  const host = document.getElementById('cookMode');
+  if (!btn || !host) return;
+  const r = btn.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const cols = ['#EDC584', '#D89A4C', '#B26E2C', '#F6E7C6'];
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('span');
+    const sz = 5 + Math.random() * 5;
+    p.style.cssText = 'position:fixed;left:' + cx + 'px;top:' + cy + 'px;width:' + sz + 'px;height:' + sz +
+      'px;border-radius:50%;pointer-events:none;z-index:999;background:' + cols[i % cols.length] + ';will-change:transform,opacity;';
+    host.appendChild(p);
+    const ang = -Math.PI * (0.15 + Math.random() * 0.7);
+    const dist = 45 + Math.random() * 85;
+    const dx = Math.cos(ang) * dist * (Math.random() < 0.5 ? -1 : 1);
+    const dy = Math.sin(ang) * dist - 16;
+    p.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(0.35)', opacity: 0 }
+    ], { duration: 620 + Math.random() * 320, easing: 'cubic-bezier(0.2,0.65,0.25,1)' })
+      .finished.then(() => p.remove()).catch(() => p.remove());
+  }
+  if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+}
+
+function bindCookGestures() {
+  if (_cookBound) return;
+  _cookBound = true;
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('cookMode').classList.contains('open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeCook(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); cookGo(1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); cookGo(-1); }
+  });
+  const cs = document.getElementById('cookScroll');
+  let tx = 0, ty = 0;
+  cs.addEventListener('touchstart', e => { tx = e.changedTouches[0].clientX; ty = e.changedTouches[0].clientY; }, { passive: true });
+  cs.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.4) cookGo(dx < 0 ? 1 : -1);
+  }, { passive: true });
+}
+
 suppressSave = true;
 const sharedState = decodeState(hashParam('r'));
 if (sharedState) {
@@ -1412,6 +1717,30 @@ initBlendMode();
 update();
 suppressSave = false;
 </script>
+
+<!-- ── Cook Mode — guided one-step focus ─────────────────────────────────── -->
+<button class="cook-fab" id="cookFab" type="button" onclick="openCook()" aria-haspopup="dialog">
+  <span class="cf-play" aria-hidden="true">
+    <svg viewBox="0 0 9 11"><path d="M0 0 L9 5.5 L0 11 Z" fill="currentColor"/></svg>
+  </span>
+  <span class="cf-label" id="cookFabLabel">Cook along</span>
+</button>
+
+<div class="cook" id="cookMode" role="dialog" aria-modal="true" aria-label="Guided cook mode" aria-hidden="true">
+  <div class="cook-top">
+    <button class="cook-exit" type="button" onclick="closeCook()" aria-label="Exit cook mode">✕ Done</button>
+    <div class="cook-stage-name" id="cookStageName">Poolish</div>
+    <div class="cook-count" id="cookCount">1 / 9</div>
+  </div>
+  <div class="cook-progress" aria-hidden="true"><span class="cook-progress-fill" id="cookFill"></span></div>
+  <div class="cook-scroll" id="cookScroll">
+    <article class="cook-card" id="cookCard" aria-live="polite"></article>
+  </div>
+  <div class="cook-nav">
+    <button class="cook-btn cook-prev" id="cookPrev" type="button" onclick="cookGo(-1)" aria-label="Previous step">←</button>
+    <button class="cook-btn cook-next" id="cookNext" type="button" onclick="cookNext()">Mark done →</button>
+  </div>
+</div>
 
 <div class="modal-overlay" id="infoModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal">
