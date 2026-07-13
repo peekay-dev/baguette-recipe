@@ -27,14 +27,20 @@
             display: block; }
   .haze { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
           display: block; mix-blend-mode: screen; }
-  .head h1, .head-body, .crumb-wrap { position: relative; z-index: 1; }
-  /* Living crumb cross-section — morphs with hydration */
-  .crumb-wrap { margin-top: 16px; }
-  .crumb-viz { display: block; width: 100%; height: 56px;
-               filter: drop-shadow(0 3px 15px rgba(237,138,92,0.32)); }
-  .crumb-cap { margin-top: 8px; font-size: 0.8rem; color: var(--accent-soft-ink); font-weight: 500;
-               line-height: 1.3; }
-  .crumb-cap b { color: var(--accent-ink); font-weight: 700; }
+  .head h1, .head-body, .rise-wrap { position: relative; z-index: 1; }
+  /* Dough-rise gauge — dough proofing toward its target */
+  .rise-wrap { margin-top: 16px; }
+  .rise-viz { display: block; width: 100%; height: 66px;
+              filter: drop-shadow(0 3px 14px rgba(0,0,0,0.18)); }
+  .rise-cap { margin-top: 8px; font-size: 0.8rem; color: rgba(247,236,228,0.82); font-weight: 500;
+              line-height: 1.3; }
+  .rise-cap b { color: var(--accent-ink); font-weight: 700; }
+  /* Loaf bakes as you complete steps (--bake 0→1 deepens the crust) */
+  .loaf-svg, .finale-loaf { transition: filter 0.7s var(--ease); }
+  .loaf-svg, .finale-loaf {
+    filter: saturate(calc(1 + var(--bake, 0) * 0.55))
+            brightness(calc(1 - var(--bake, 0) * 0.13))
+            contrast(calc(1 + var(--bake, 0) * 0.12)); }
 
   /* Scroll cinematics — warmth-on-descent + staggered reveals */
   .warmth { position: fixed; left: 0; right: 0; bottom: 0; height: 46vh; z-index: 90; pointer-events: none;
@@ -492,9 +498,9 @@
       <div class="head-next" id="hero-next"><b>4 × 250g</b> · cold retard · 18°C</div>
     </div>
   </div>
-  <div class="crumb-wrap">
-    <canvas id="crumb" class="crumb-viz" aria-hidden="true"></canvas>
-    <div class="crumb-cap" id="crumbCap"></div>
+  <div class="rise-wrap">
+    <canvas id="rise" class="rise-viz" aria-hidden="true"></canvas>
+    <div class="rise-cap" id="riseCap"></div>
   </div>
 </div>
 <div class="stages-bar">
@@ -699,7 +705,7 @@
 <script>
 let method = 'retard', temperTau = 60;
 let hearthHeat = 0.4, hearthPulse = 0;
-let crumbSet = null;
+let riseSet = null;
 let foldOverride = null;
 let userOverride = {};
 const doneSteps = new Set();
@@ -1052,6 +1058,7 @@ function toggleStep(id, el) {
   if (doneSteps.has(id)) doneSteps.delete(id); else doneSteps.add(id);
   el.classList.toggle('done');
   el.querySelector('.step-check').textContent = doneSteps.has(id) ? '✓ done' : 'tap to mark done';
+  updateBake();
 }
 
 function syncBlend(src) {
@@ -1172,6 +1179,12 @@ function setupFinaleObserver() {
   window._finaleObs.observe(fin);
 }
 function popLoaf(el) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+function updateBake() {
+  const total = (typeof document.querySelectorAll === 'function') ? document.querySelectorAll('#recipe .step').length : 0;
+  const p = total > 0 ? Math.max(0, Math.min(1, doneSteps.size / total)) : 0;
+  if (document.documentElement && document.documentElement.style)
+    document.documentElement.style.setProperty('--bake', p.toFixed(3));
+}
 let _revealObs = null, _revealSafety = 0;
 function revealAll() {
   if (typeof document.querySelectorAll !== 'function') return;
@@ -1572,7 +1585,7 @@ ${foldTableRows}
   // Feed the living hearth: warmer kitchen → hotter glow, more embers; pulse on change
   hearthHeat = Math.max(0, Math.min(1, (tempC - 10) / 22));
   hearthPulse = Math.min(1.6, hearthPulse + 0.5);
-  if (crumbSet) crumbSet(hydPct, tempC);
+  if (riseSet) riseSet(isRetard);
   document.getElementById('hero-next').innerHTML =
     `<b>${count} × ${pieceWeight}g</b> · ${isRetard ? 'cold retard' : 'same day'} · ${tempC}°C`;
 
@@ -1583,6 +1596,7 @@ ${foldTableRows}
   setupHeroObserver();
   setupFinaleObserver();
   setupReveals();
+  updateBake();
 }
 // ══ Cook Mode engine ═══════════════════════════════════════════════════════
 const STEP_STAGE = Object.fromEntries(Object.entries(STAGE_STEP).map(([s, id]) => [id, s]));
@@ -1687,6 +1701,7 @@ function cookNext() {
     const el = document.querySelector('#recipe .step[data-step="' + s.id + '"]');
     if (el) { el.classList.add('done'); const c = el.querySelector('.step-check'); if (c) c.textContent = '✓ done'; }
     burstDone();
+    updateBake();
   }
   if (cookIdx === cookSteps.length - 1) { closeCook(true); return; }
   cookGo(1);
@@ -1914,16 +1929,19 @@ suppressSave = false;
   if (reduce()) drawStatic(); else start();
 })();
 
-// ══ Living crumb — cross-section that morphs with hydration ══════════════════
+// ══ Dough-rise gauge — dough proofing in the tub, rising toward its target ═══
 (function () {
-  const canvas = document.getElementById('crumb');
-  const cap = document.getElementById('crumbCap');
+  const canvas = document.getElementById('rise');
+  const cap = document.getElementById('riseCap');
   if (!canvas || !canvas.getContext) return;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const reduce = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const rand = (a, b) => a + Math.random() * (b - a);
-  let W = 1, H = 1, dpr = 1, holes = [], cur = 0.5, target = 0.5, raf = 0;
+
+  let W = 1, H = 1, dpr = 1, raf = 0, running = false, onScreen = true, last = 0, t = 0;
+  const BASE = 0.36;
+  let level = BASE, target = 0.58, bubbles = [];
 
   function resize() {
     const r = canvas.getBoundingClientRect();
@@ -1932,73 +1950,75 @@ suppressSave = false;
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
-  function genHoles() {
-    holes = [];
-    const cols = Math.max(10, Math.round(W / 26)), rows = 3;
-    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-      if (Math.random() < 0.12) continue;
-      holes.push({ nx: (c + 0.5) / cols + rand(-0.03, 0.03), ny: (r + 0.5) / rows + rand(-0.06, 0.06),
-                   base: rand(0.5, 1), variance: rand(0.6, 1.5) });
-    }
+  function rrect(x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
   }
-  function slicePath(pad) {
-    const x = pad, y = pad, w = W - pad * 2, h = H - pad * 2, rr = h / 2;
-    ctx.beginPath();
-    ctx.moveTo(x + rr, y); ctx.lineTo(x + w - rr, y);
-    ctx.arc(x + w - rr, y + rr, rr, -Math.PI / 2, Math.PI / 2);
-    ctx.lineTo(x + rr, y + h); ctx.arc(x + rr, y + rr, rr, Math.PI / 2, -Math.PI / 2);
-    ctx.closePath();
+  function box() { const pad = 2; return { x: pad, y: pad, w: W - pad * 2, h: H - pad * 2 }; }
+  function surfaceY(cx, b) {
+    return b.y + b.h * (1 - level) + Math.sin(cx * 0.05 + t * 0.0016) * 1.7 + Math.sin(cx * 0.11 - t * 0.0022) * 1.0;
   }
-  function draw(openness) {
+  function draw() {
     ctx.clearRect(0, 0, W, H);
-    ctx.save(); slicePath(2);
-    const crust = ctx.createLinearGradient(0, 0, 0, H);
-    crust.addColorStop(0, '#F0C878'); crust.addColorStop(0.5, '#D89A4C'); crust.addColorStop(1, '#A9702F');
-    ctx.fillStyle = crust; ctx.fill(); ctx.restore();
-    const inset = 5.5;
-    ctx.save(); slicePath(inset); ctx.clip();
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#F4E2BA'); g.addColorStop(1, '#E7CF9C');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-    for (const ho of holes) {
-      const cx = ho.nx * W, cy = inset + ho.ny * (H - inset * 2);
-      const centre = 1 - Math.abs(ho.ny - 0.5) * 0.9;
-      const r = (1.2 + openness * 6.5 * ho.variance) * ho.base * (0.6 + 0.7 * centre);
-      if (r < 0.4) continue;
-      const rg = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-      rg.addColorStop(0, 'rgba(120,84,40,0.55)'); rg.addColorStop(0.7, 'rgba(150,110,60,0.3)');
-      rg.addColorStop(1, 'rgba(150,110,60,0)');
-      ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.2832); ctx.fill();
+    const b = box();
+    ctx.save(); rrect(b.x, b.y, b.w, b.h, 10); ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fill(); ctx.clip();
+    // dough body
+    ctx.beginPath(); ctx.moveTo(b.x, b.y + b.h);
+    for (let cx = b.x; cx <= b.x + b.w; cx += 6) ctx.lineTo(cx, surfaceY(cx, b));
+    ctx.lineTo(b.x + b.w, b.y + b.h); ctx.closePath();
+    const dg = ctx.createLinearGradient(0, b.y, 0, b.y + b.h);
+    dg.addColorStop(0, '#F2DEAB'); dg.addColorStop(1, '#E3C888');
+    ctx.fillStyle = dg; ctx.fill();
+    // rising bubbles inside the dough
+    for (const bb of bubbles) {
+      const by = b.y + b.h - bb.p * (b.h * level);
+      ctx.fillStyle = 'rgba(120,84,40,' + (0.16 * bb.a).toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(b.x + bb.x * b.w, by, bb.r, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = 'rgba(255,247,218,' + (0.14 * bb.a).toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(b.x + bb.x * b.w - bb.r * 0.3, by - bb.r * 0.3, bb.r * 0.5, 0, 6.2832); ctx.fill();
     }
+    // surface sheen
+    ctx.strokeStyle = 'rgba(255,247,218,0.55)'; ctx.lineWidth = 1.4; ctx.beginPath();
+    for (let cx = b.x; cx <= b.x + b.w; cx += 6) { const y = surfaceY(cx, b); cx === b.x ? ctx.moveTo(cx, y) : ctx.lineTo(cx, y); }
+    ctx.stroke();
     ctx.restore();
-    ctx.save(); slicePath(2); ctx.clip();
-    ctx.strokeStyle = 'rgba(255,242,205,0.45)'; ctx.lineWidth = 1.3;
-    ctx.beginPath(); ctx.moveTo(W * 0.16, 4.5); ctx.lineTo(W * 0.84, 4.5); ctx.stroke();
-    ctx.restore();
+    // container outline
+    ctx.save(); rrect(b.x + 0.5, b.y + 0.5, b.w - 1, b.h - 1, 10);
+    ctx.strokeStyle = 'rgba(247,236,228,0.4)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+    // target line (where it should reach)
+    const ty = b.y + b.h * (1 - target);
+    ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = 'rgba(247,236,228,0.6)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(b.x + 4, ty); ctx.lineTo(b.x + b.w - 4, ty); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
   }
-  function label(openness, hyd) {
-    if (!cap) return;
-    const kind = openness < 0.32 ? 'Tight, even crumb' : openness < 0.62 ? 'Balanced crumb' : 'Open, airy crumb';
-    cap.innerHTML = kind + ' &middot; <b>' + Math.round(hyd) + '% hydration</b>';
+  function newBubble() { return { x: rand(0.05, 0.95), p: 0, r: rand(1.0, 3.0), a: rand(0.5, 1), v: rand(0.06, 0.16) }; }
+  function step(dt) {
+    t += dt; level += (target - level) * 0.02;
+    if (bubbles.length < 18 && Math.random() < 0.3) bubbles.push(newBubble());
+    for (let i = bubbles.length - 1; i >= 0; i--) { bubbles[i].p += dt * 0.024 * bubbles[i].v; if (bubbles[i].p >= 1) bubbles.splice(i, 1); }
+    draw();
   }
-  function opennessFor(hyd) { return Math.max(0, Math.min(1, (hyd - 62) / 20)); }
-  function animate() {
-    cur += (target - cur) * 0.16; draw(cur);
-    if (Math.abs(target - cur) > 0.002) raf = requestAnimationFrame(animate);
-    else { cur = target; draw(cur); raf = 0; }
-  }
-  crumbSet = function (hyd) {
-    target = opennessFor(hyd); label(target, hyd);
-    if (reduce()) { cur = target; draw(cur); return; }
-    if (!raf) raf = requestAnimationFrame(animate);
+  function frame(now) { if (!running) return; const dt = Math.min(50, now - last || 16); last = now; step(dt); raf = requestAnimationFrame(frame); }
+  function start() { if (running || reduce() || !onScreen) return; running = true; last = performance.now(); raf = requestAnimationFrame(frame); }
+  function stop() { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; }
+
+  riseSet = function (isRetard) {
+    target = isRetard ? 0.58 : 0.80;
+    if (cap) cap.innerHTML = isRetard ? 'Bulk rise &middot; <b>aiming for +30–50%</b>' : 'Bulk rise &middot; <b>nearly doubling</b>';
+    if (reduce()) { level = target; draw(); }
   };
-  function redraw() { resize(); genHoles(); draw(cur); }
+  function redraw() { resize(); draw(); }
   window.addEventListener('resize', redraw, { passive: true });
   window.addEventListener('load', redraw, { passive: true });
-  resize(); genHoles();
-  const el = document.getElementById('hydration');
-  const hyd0 = (el && +el.value) || 72;
-  cur = target = opennessFor(hyd0); label(target, hyd0); draw(cur);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else if (onScreen) start(); });
+  resize();
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(es => es.forEach(en => { onScreen = en.isIntersecting; if (onScreen) start(); else stop(); }), { threshold: 0 }).observe(canvas);
+  }
+  riseSet(typeof method !== 'undefined' ? method === 'retard' : true);  // initial target + caption
+  level = reduce() ? target : BASE;
+  draw();
+  if (!reduce()) start();
 })();
 
 // ══ WebGL heat-haze — rising refractive shimmer over the header ══════════════
@@ -2087,8 +2107,8 @@ suppressSave = false;
   const reduce = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const warmth = document.getElementById('warmth');
   const loaf = document.querySelector ? document.querySelector('.loaf-wrap') : null;
-  const crumb = document.querySelector ? document.querySelector('.crumb-wrap') : null;
-  let tick = false;
+  const rise = document.querySelector ? document.querySelector('.rise-wrap') : null;
+  let tick = false, tiltX = 0, tiltY = 0;
   function apply() {
     tick = false;
     const y = window.scrollY || window.pageYOffset || 0;
@@ -2096,9 +2116,9 @@ suppressSave = false;
     const p = Math.max(0, Math.min(1, y / docH));
     if (warmth) warmth.style.opacity = (p * 0.9).toFixed(3);   // oven approaches as you descend
     if (!reduce()) {
-      const pr = Math.min(y, 420);
-      if (loaf) loaf.style.transform = 'translateY(' + (pr * 0.14).toFixed(1) + 'px)';
-      if (crumb) crumb.style.transform = 'translateY(' + (pr * 0.07).toFixed(1) + 'px)';
+      const pr = Math.min(y, 420), lx = tiltX * 9, ly = tiltY * 7;
+      if (loaf) loaf.style.transform = 'translate(' + lx.toFixed(1) + 'px,' + (pr * 0.14 + ly).toFixed(1) + 'px)';
+      if (rise) rise.style.transform = 'translate(' + (lx * 0.5).toFixed(1) + 'px,' + (pr * 0.07 + ly * 0.5).toFixed(1) + 'px)';
     }
     // Scroll-driven reveal (backs up the IntersectionObserver so content is never stuck hidden)
     if (typeof document.querySelectorAll === 'function') {
@@ -2111,6 +2131,22 @@ suppressSave = false;
   function onScroll() { if (tick) return; tick = true; requestAnimationFrame(apply); }
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll, { passive: true });
+
+  // Device-tilt parallax (phones): hero loaf + dough gauge drift as you tilt the device
+  function onOrient(e) {
+    if (reduce() || e.gamma == null) return;
+    const tx = Math.max(-1, Math.min(1, e.gamma / 28));                 // left / right
+    const ty = Math.max(-1, Math.min(1, ((e.beta || 45) - 45) / 28));   // front / back (comfortable hold ~45°)
+    tiltX += (tx - tiltX) * 0.18; tiltY += (ty - tiltY) * 0.18;
+    onScroll();
+  }
+  function enableTilt() { if (typeof window.DeviceOrientationEvent !== 'undefined') window.addEventListener('deviceorientation', onOrient, { passive: true }); }
+  const DOE = window.DeviceOrientationEvent;
+  if (DOE && typeof DOE.requestPermission === 'function') {
+    const ask = () => { DOE.requestPermission().then(s => { if (s === 'granted') enableTilt(); }).catch(() => {}); };
+    window.addEventListener('click', ask, { once: true });
+    window.addEventListener('touchend', ask, { once: true, passive: true });
+  } else { enableTilt(); }
   onScroll();
 })();
 </script>
