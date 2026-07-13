@@ -41,6 +41,14 @@
   .crumb-cap { margin-top: 8px; font-size: 0.8rem; color: var(--accent-soft-ink); font-weight: 500;
                line-height: 1.3; }
   .crumb-cap b { color: var(--accent-ink); font-weight: 700; }
+
+  /* Scroll cinematics — warmth-on-descent + staggered reveals */
+  .warmth { position: fixed; left: 0; right: 0; bottom: 0; height: 46vh; z-index: 90; pointer-events: none;
+            opacity: 0; will-change: opacity;
+            background: radial-gradient(120% 100% at 50% 128%, rgba(237,138,92,0.24), rgba(237,138,92,0) 70%); }
+  .reveal { opacity: 0; transform: translateY(18px);
+            transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
   .share-btn { position: absolute; top: 20px; right: 18px; z-index: 2; display: inline-flex; align-items: center; gap: 5px;
                font-family: inherit; font-size: 0.78rem; font-weight: 600; color: var(--accent-ink);
                background: rgba(247,236,228,0.10); border: 1px solid rgba(247,236,228,0.38);
@@ -1170,6 +1178,27 @@ function setupFinaleObserver() {
   window._finaleObs.observe(fin);
 }
 function popLoaf(el) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+let _revealObs = null, _revealSafety = 0;
+function revealAll() {
+  if (typeof document.querySelectorAll !== 'function') return;
+  document.querySelectorAll('#recipe .reveal:not(.in)').forEach(el => el.classList.add('in'));
+}
+function setupReveals() {
+  if (typeof reduceMotion === 'function' && reduceMotion()) return;
+  if (!('IntersectionObserver' in window) || typeof document.querySelectorAll !== 'function') return;
+  if (!_revealObs) _revealObs = new IntersectionObserver((entries, obs) => {
+    entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); obs.unobserve(en.target); } });
+  }, { threshold: 0.06, rootMargin: '0px 0px -7% 0px' });
+  document.querySelectorAll('#recipe .white-panel').forEach(el => {
+    if (el.dataset.rev) return;
+    el.dataset.rev = '1';
+    if (el.getBoundingClientRect().top > window.innerHeight * 0.9) { el.classList.add('reveal'); _revealObs.observe(el); }
+  });
+  // Safety net: content must never stay hidden if IO/scroll never fire (bg tab, headless, etc.)
+  clearTimeout(_revealSafety);
+  _revealSafety = setTimeout(revealAll, 1200);
+  if (typeof window.addEventListener === 'function') window.addEventListener('load', revealAll, { once: true });
+}
 function update() {
   savePrefs();
   const count = Math.max(1, +document.getElementById('count').value);
@@ -1559,6 +1588,7 @@ ${foldTableRows}
   setupStageObserver();
   setupHeroObserver();
   setupFinaleObserver();
+  setupReveals();
 }
 // ══ Cook Mode engine ═══════════════════════════════════════════════════════
 const STEP_STAGE = Object.fromEntries(Object.entries(STAGE_STEP).map(([s, id]) => [id, s]));
@@ -2056,7 +2086,43 @@ suppressSave = false;
   }
   if (reduce()) drawStatic(); else start();
 })();
+
+// ══ Scroll cinematics — warmth-on-descent + header parallax ══════════════════
+(function () {
+  if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') return;
+  const reduce = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const warmth = document.getElementById('warmth');
+  const loaf = document.querySelector ? document.querySelector('.loaf-wrap') : null;
+  const crumb = document.querySelector ? document.querySelector('.crumb-wrap') : null;
+  let tick = false;
+  function apply() {
+    tick = false;
+    const y = window.scrollY || window.pageYOffset || 0;
+    const docH = Math.max(1, (document.documentElement.scrollHeight - window.innerHeight));
+    const p = Math.max(0, Math.min(1, y / docH));
+    if (warmth) warmth.style.opacity = (p * 0.9).toFixed(3);   // oven approaches as you descend
+    if (!reduce()) {
+      const pr = Math.min(y, 420);
+      if (loaf) loaf.style.transform = 'translateY(' + (pr * 0.14).toFixed(1) + 'px)';
+      if (crumb) crumb.style.transform = 'translateY(' + (pr * 0.07).toFixed(1) + 'px)';
+    }
+    // Scroll-driven reveal (backs up the IntersectionObserver so content is never stuck hidden)
+    if (typeof document.querySelectorAll === 'function') {
+      const vh = window.innerHeight;
+      document.querySelectorAll('#recipe .reveal:not(.in)').forEach(el => {
+        if (el.getBoundingClientRect().top < vh * 0.92) el.classList.add('in');
+      });
+    }
+  }
+  function onScroll() { if (tick) return; tick = true; requestAnimationFrame(apply); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  onScroll();
+})();
 </script>
+
+<!-- ── Scroll cinematics: warmth glow that grows as you near the bake ─────── -->
+<div class="warmth" id="warmth" aria-hidden="true"></div>
 
 <!-- ── Cook Mode — guided one-step focus ─────────────────────────────────── -->
 <button class="cook-fab" id="cookFab" type="button" onclick="openCook()" aria-haspopup="dialog">
