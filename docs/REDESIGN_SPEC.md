@@ -229,16 +229,24 @@ is fine. "Pretty detailed" is the bar.
 > wheat/poppy palette and timeline step structure · a transformation hero whose loaf is
 > modelled on Paul's real baguettes. This is now the presumptive final direction.
 
-> If a second take is useful (Concept E), it's a **horizontal film-strip** framing of the
-> same six phases — the transformation laid out left-to-right as a scrubbable sequence
-> rather than a centered morph. Build only if the centered version leaves an itch.
+### Concept E — **THE STRIP** (built 2026-07-16)
+
+A **horizontal film-strip** framing of the same six phases: the whole metamorphosis laid
+out left-to-right so you see every stage at once, with a **playhead** that sweeps the
+strip (autoplay + scrub) and wakes each loaf as it passes. Same real-bake loaf renderer,
+palette, fonts, and buttons as D — it's a framing variant, not a different world. Use it
+to decide whether a **centered single-loaf morph (D)** or an **all-at-once contact-sheet
+(E)** is the stronger hero.
 
 ## 10. Next steps
 
 1. ~~Build the three previews + chooser page.~~ ✓ (A, B, C, index)
 2. ~~Round 1 review.~~ ✓ — feedback captured in §8.
-3. Build **Concept D — THE RISE** (§9): the dough→baguette transformation hero, on B's
-   palette/structure with A's wordmark. Add to the chooser.
-4. Review D; decide whether Concept E (film-strip) adds anything.
-5. Lock the synthesis direction, then write the full-build plan and port onto the
-   complete recipe engine from `baguette-v2.html`.
+3. ~~Build **Concept D — THE RISE**~~ ✓ centered transformation morph, loaf modelled on
+   Paul's real bakes, A's fonts + buttons.
+4. ~~Build **Concept E — THE STRIP**~~ ✓ horizontal film-strip variant of the same
+   transformation. Both in the chooser.
+5. **Decision gate:** pick D vs E (centered morph vs film-strip), or a hybrid, and lock the
+   synthesis direction.
+6. Write the full-build plan and port the chosen hero onto the complete recipe engine from
+   `baguette-v2.html`.

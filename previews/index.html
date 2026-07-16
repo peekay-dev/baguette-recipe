@@ -57,8 +57,13 @@
     radial-gradient(80% 70% at 30% 15%,#F4F1EA,#E4E1D8)}
   .d .letter{color:rgba(26,23,20,.55)}
   .d .lane{color:#C8892B}.d p{color:#5C554D}.d h2,.d .go{color:#1A1714}
-  .d .badge{position:absolute;top:16px;left:22px;font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;
+  .card .badge{position:absolute;top:16px;left:22px;font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;
     text-transform:uppercase;color:#D5402A;border:1px solid rgba(213,64,42,.4);padding:3px 8px;border-radius:20px}
+  /* E — THE STRIP (variant) */
+  .e{color:#1A1714}
+  .e .bgc{background:linear-gradient(90deg,#EEEAE0 0%,#E7D9B8 46%,#C98A32 100%)}
+  .e .letter{color:rgba(26,23,20,.55)}
+  .e .lane{color:#B06C1C}.e p{color:#5C554D}.e h2,.e .go{color:#1A1714}
 
   footer{max-width:1100px;margin:40px auto 0;color:var(--muted);font-size:.82rem;font-family:var(--mono)}
   @media (prefers-reduced-motion:reduce){.card,.card .bgc{transition:none}}
@@ -67,10 +72,11 @@
 <body>
   <header>
     <p class="tag">Baguette app · redesign · preview stage</p>
-    <h1>Four ways to make a baguette feel alive.</h1>
-    <p>Each is a working hero, not a mockup: move your cursor, watch it breathe. <b style="color:var(--ink)">D</b>
-      is the round-2 synthesis (A's wordmark + B's palette &amp; structure) with the dough→baguette
-      transformation you asked for. Pick a direction, or a hybrid. Plan lives in
+    <h1>Five ways to make a baguette feel alive.</h1>
+    <p>Each is a working hero, not a mockup: move your cursor, watch it breathe.
+      <b style="color:var(--ink)">D</b> and <b style="color:var(--ink)">E</b> are the round-2 synthesis
+      (A's fonts &amp; buttons + B's palette &amp; structure) built around the dough→baguette transformation,
+      with the loaf modelled on your real bakes. Pick a direction, or a hybrid. Plan lives in
       <a href="../docs/REDESIGN_SPEC.md">docs/REDESIGN_SPEC.md</a>.</p>
   </header>
 
@@ -80,6 +86,14 @@
       <div class="lane">dough → oven spring → baguette</div>
       <h2>The Rise</h2>
       <p>Scrub through the whole transformation: proof, shape, score, spring, bake. A's baguette wordmark on B's palette and step structure.</p>
+      <span class="go">Open preview →</span>
+    </a>
+
+    <a class="card e" href="e-strip.html">
+      <span class="bgc"></span><span class="letter">E</span><span class="badge">round 2 · variant</span>
+      <div class="lane">the transformation, laid out</div>
+      <h2>The Strip</h2>
+      <p>All six stages in one horizontal film-strip. A playhead sweeps across, waking each loaf from dough ball to blistered ear.</p>
       <span class="go">Open preview →</span>
     </a>
 
