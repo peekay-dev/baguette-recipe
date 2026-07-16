@@ -255,51 +255,48 @@
       return base*0.82*(1+noise(u,bumpBot)*(P.irr||0.9)) + bend(x,P);
     }
 
-    // One score = a leaning "eco-leaf" (sheared pointed leaf): fuller middle, pointed tips.
-    // These sit in an evenly spaced row with small gaps between them.
-    function drawEar(xc,yc,len,hMax,ang,open,b,sp){
-      const half=len/2, N=44;
-      const disc=x=>Math.max(0,1-(x/half)*(x/half));   // pointed-leaf profile
-      const xR=-half+len*clamp(sp,0.02,1);             // score reveals left -> right
-      const edge =(k,a,c)=>{for(let i=0;i<=N;i++){const x=a+(c-a)*i/N,y=k(x);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}};
-      const edgeR=(k,a,c)=>{for(let i=N;i>=0;i--){const x=a+(c-a)*i/N;ctx.lineTo(x,k(x));}};
-      const h=hMax*clamp((open-0.04)/0.96,0,1);
-      ctx.save(); ctx.translate(xc,yc); ctx.transform(1,ang,0,1,0,0); ctx.lineJoin='round'; ctx.lineCap='round';
-      if(h>=1){
-        const yRidge=x=>-h*disc(x), yBase=x=>-h*0.30*disc(x), yShelf=x=>h*0.32*disc(x);
-        // soft low shadow the leaf throws onto the crust below
-        ctx.beginPath(); edge(x=>yShelf(x),-half,xR); edgeR(x=>h*0.48*disc(x),-half,xR); ctx.closePath();
-        ctx.fillStyle='rgba(58,32,10,'+(0.08+0.10*open)+')'; ctx.fill();
+    // rounded-rectangle path (arcTo corners)
+    function rrect(x,y,w,h,r){
+      r=Math.min(r,Math.abs(w)/2,Math.abs(h)/2);
+      ctx.beginPath();
+      ctx.moveTo(x+r,y);
+      ctx.arcTo(x+w,y,x+w,y+h,r);
+      ctx.arcTo(x+w,y+h,x,y+h,r);
+      ctx.arcTo(x,y+h,x,y,r);
+      ctx.arcTo(x,y,x+w,y,r);
+      ctx.closePath();
+    }
+    // One score = a ROUNDED-CORNER PARALLELOGRAM (the eco-leaf): horizontal long edges,
+    // consistently-angled short edges (horizontal shear), rounded corners. Evenly spaced.
+    function drawEar(xc,yc,len,H,shear,open,b,sp){
+      const h=H*clamp((open-0.04)/0.96,0,1);
+      const w=len*clamp(sp,0.02,1);                    // reveal grows left -> right
+      const x0=-len/2, y0=-h/2, r=Math.min(len,H)*0.36;
+      ctx.save(); ctx.translate(xc,yc); ctx.transform(1,0,shear,1,0,0); ctx.lineJoin='round'; ctx.lineCap='round';
+      if(h>=2){
+        // soft drop shadow just under the score
+        rrect(x0, y0+h*0.42, w, h*0.5, r); ctx.fillStyle='rgba(58,32,10,'+(0.06+0.08*open)+')'; ctx.fill();
         // exposed opening — darker, crusty (not raw cream)
-        ctx.beginPath(); edge(x=>yBase(x),-half,xR); edgeR(x=>yShelf(x),-half,xR); ctx.closePath();
-        const cg=ctx.createLinearGradient(0,-h*0.30,0,h*0.32);
+        rrect(x0,y0,w,h,r);
+        const cg=ctx.createLinearGradient(0,y0,0,y0+h);
         cg.addColorStop(0,mix('#F0E2BE','#DDBA7C',b*0.7)); cg.addColorStop(1,mix('#D6C08E','#AE7B37',b*0.9));
         ctx.fillStyle=cg; ctx.fill();
-        // shadow where the lip overhangs the crumb (reads as a real curl)
-        ctx.save(); ctx.clip();
-        ctx.strokeStyle='rgba(54,30,8,'+(0.2*clamp(open,0,1))+')'; ctx.lineWidth=h*0.2; ctx.lineCap='round';
-        ctx.beginPath(); edge(x=>yBase(x)+h*0.06,-half,xR); ctx.stroke(); ctx.restore();
-        // curled lip — dark crispy ridge, golden face, deep shadow at the base
-        ctx.beginPath(); edge(x=>yRidge(x),-half,xR); edgeR(x=>yBase(x),-half,xR); ctx.closePath();
-        const lg=ctx.createLinearGradient(0,-h,0,-h*0.30);
-        lg.addColorStop(0,   mix('#E7D6AC','#894811',b));
-        lg.addColorStop(0.42,mix('#F2E6BC','#ECB756',b));
-        lg.addColorStop(1,   mix('#D9C39A','#59300B',b));
-        ctx.fillStyle=lg; ctx.fill();
-        // dark crispy edge on the very ridge
-        ctx.strokeStyle=mix('#C6B084','#46260A',b); ctx.lineWidth=1.3; ctx.beginPath(); edge(x=>yRidge(x),-half,xR); ctx.stroke();
-        // catch-light just below the ridge
-        ctx.strokeStyle='rgba(255,246,214,'+(0.22+0.36*b)+')'; ctx.lineWidth=1;
-        ctx.beginPath(); edge(x=>yRidge(x)+h*0.12*disc(x),-half,xR); ctx.stroke();
+        // curled lip band along the top long edge (clipped to the rounded parallelogram)
+        ctx.save(); rrect(x0,y0,w,h,r); ctx.clip();
+        const lg=ctx.createLinearGradient(0,y0,0,y0+h*0.46);
+        lg.addColorStop(0,mix('#E7D6AC','#894811',b)); lg.addColorStop(0.55,mix('#F2E6BC','#ECB756',b)); lg.addColorStop(1,mix('#D9C39A','#59300B',b));
+        ctx.fillStyle=lg; ctx.fillRect(x0-3,y0-3,w+6,h*0.46);
+        // shadow the lip casts onto the opening below it
+        ctx.fillStyle='rgba(54,30,8,'+(0.24*open)+')'; ctx.fillRect(x0-3,y0+h*0.40,w+6,h*0.09);
+        ctx.restore();
+        // crisp dark outline
+        rrect(x0,y0,w,h,r); ctx.strokeStyle=mix('#C6B084','#46260A',b); ctx.lineWidth=1.2; ctx.stroke();
       }
-      // feathered slash (raw), crossfading out as the ear opens
+      // feathered slash (raw), crossfading out as the score opens
       const fa=clamp(1-open/0.16,0,1);
       if(fa>0.02){
-        const wig=x=>Math.sin(x/half*Math.PI*1.1)*hMax*0.06;
-        ctx.strokeStyle='rgba(247,239,216,'+(0.4*fa)+')'; ctx.lineWidth=2.6;
-        ctx.beginPath(); edge(x=>wig(x)-1,-half,xR); ctx.stroke();
-        ctx.strokeStyle='rgba(120,96,58,'+(0.5*fa)+')'; ctx.lineWidth=1.4;
-        ctx.beginPath(); edge(x=>wig(x),-half,xR); ctx.stroke();
+        ctx.strokeStyle='rgba(247,239,216,'+(0.4*fa)+')'; ctx.lineWidth=2.4; ctx.beginPath(); ctx.moveTo(x0,-1); ctx.lineTo(x0+w,-1); ctx.stroke();
+        ctx.strokeStyle='rgba(120,96,58,'+(0.5*fa)+')'; ctx.lineWidth=1.3; ctx.beginPath(); ctx.moveTo(x0,0); ctx.lineTo(x0+w,0); ctx.stroke();
       }
       ctx.restore();
     }
@@ -400,15 +397,15 @@
       if(sp>0){
         // ~5 smaller ears, steeper diagonal, heavily overlapping down the whole length —
         // the classic baguette grigne (see reference photos), not a few big horizontal ears.
-        // five eco-leaf scores, evenly spaced with small gaps (shear -0.5 leans them)
+        // five rounded-parallelogram scores, evenly spaced with gaps; shear -0.6 = consistent lean
         const ears=[
-          {c:-0.56,len:0.22,yf:0.24,hf:0.46},
-          {c:-0.28,len:0.24,yf:0.22,hf:0.50},
-          {c: 0.00,len:0.24,yf:0.20,hf:0.52},
-          {c: 0.28,len:0.24,yf:0.22,hf:0.50},
-          {c: 0.56,len:0.22,yf:0.24,hf:0.46}
+          {c:-0.56,len:0.18,yf:0.32,hf:0.56},
+          {c:-0.28,len:0.19,yf:0.30,hf:0.60},
+          {c: 0.00,len:0.19,yf:0.28,hf:0.62},
+          {c: 0.28,len:0.19,yf:0.30,hf:0.60},
+          {c: 0.56,len:0.18,yf:0.32,hf:0.56}
         ];
-        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*E.hf, -0.5, open, b, sp); }
+        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*E.hf, -0.6, open, b, sp); }
       }
       ctx.restore(); // end loaf transform
 
