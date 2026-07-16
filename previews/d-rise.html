@@ -267,22 +267,23 @@
       const h=hMax*clamp((open-0.04)/0.96,0,1);
       ctx.save(); ctx.translate(xc,yc); ctx.rotate(ang); ctx.lineJoin='round'; ctx.lineCap='round';
       if(h>=1){
-        const yRidge=x=>-h*disc(x), yBase=x=>-h*0.34*disc(x), yShelf=x=>h*0.12*disc(x);
-        // stronger low shadow the curled ear throws onto the crust below
-        ctx.beginPath(); edge(x=>yShelf(x),-half,xR); edgeR(x=>h*0.32*disc(x),-half,xR); ctx.closePath();
-        ctx.fillStyle='rgba(58,32,10,'+(0.09+0.11*open)+')'; ctx.fill();
-        // wide pale exposed-crumb shelf
+        // fatter leaf: taller pale opening, giving each score a clear leaf/almond shape
+        const yRidge=x=>-h*disc(x), yBase=x=>-h*0.30*disc(x), yShelf=x=>h*0.32*disc(x);
+        // soft low shadow the leaf throws onto the crust below
+        ctx.beginPath(); edge(x=>yShelf(x),-half,xR); edgeR(x=>h*0.48*disc(x),-half,xR); ctx.closePath();
+        ctx.fillStyle='rgba(58,32,10,'+(0.08+0.10*open)+')'; ctx.fill();
+        // wide pale exposed-crumb leaf
         ctx.beginPath(); edge(x=>yBase(x),-half,xR); edgeR(x=>yShelf(x),-half,xR); ctx.closePath();
-        const cg=ctx.createLinearGradient(0,-h*0.34,0,h*0.14);
+        const cg=ctx.createLinearGradient(0,-h*0.30,0,h*0.32);
         cg.addColorStop(0,mix('#F6ECD2','#E6CD97',b*0.5)); cg.addColorStop(1,mix('#E4D3A4','#C89F5A',b*0.6));
         ctx.fillStyle=cg; ctx.fill();
-        // deep shadow where the lip overhangs the crumb (reads as a real curl)
+        // shadow where the lip overhangs the crumb (reads as a real curl)
         ctx.save(); ctx.clip();
-        ctx.strokeStyle='rgba(54,30,8,'+(0.24*clamp(open,0,1))+')'; ctx.lineWidth=h*0.22; ctx.lineCap='round';
-        ctx.beginPath(); edge(x=>yBase(x)+h*0.05,-half,xR); ctx.stroke(); ctx.restore();
+        ctx.strokeStyle='rgba(54,30,8,'+(0.2*clamp(open,0,1))+')'; ctx.lineWidth=h*0.2; ctx.lineCap='round';
+        ctx.beginPath(); edge(x=>yBase(x)+h*0.06,-half,xR); ctx.stroke(); ctx.restore();
         // curled lip — dark crispy ridge, golden face, deep shadow at the base
         ctx.beginPath(); edge(x=>yRidge(x),-half,xR); edgeR(x=>yBase(x),-half,xR); ctx.closePath();
-        const lg=ctx.createLinearGradient(0,-h,0,-h*0.34);
+        const lg=ctx.createLinearGradient(0,-h,0,-h*0.30);
         lg.addColorStop(0,   mix('#E7D6AC','#894811',b));
         lg.addColorStop(0.42,mix('#F2E6BC','#ECB756',b));
         lg.addColorStop(1,   mix('#D9C39A','#59300B',b));
@@ -406,13 +407,13 @@
         // ~5 smaller ears, steeper diagonal, heavily overlapping down the whole length —
         // the classic baguette grigne (see reference photos), not a few big horizontal ears.
         const ears=[
-          {c:-0.52,len:0.40,yf:0.30,hf:0.34},
-          {c:-0.30,len:0.45,yf:0.26,hf:0.38},
-          {c:-0.06,len:0.47,yf:0.24,hf:0.40},
-          {c: 0.17,len:0.45,yf:0.26,hf:0.38},
-          {c: 0.39,len:0.40,yf:0.30,hf:0.34}
+          {c:-0.56,len:0.42,yf:0.26,hf:0.46},
+          {c:-0.28,len:0.46,yf:0.22,hf:0.50},
+          {c: 0.00,len:0.48,yf:0.20,hf:0.52},
+          {c: 0.28,len:0.46,yf:0.22,hf:0.50},
+          {c: 0.56,len:0.42,yf:0.26,hf:0.46}
         ];
-        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*E.hf, -0.42, open, b, sp); }
+        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*E.hf, -0.40, open, b, sp); }
       }
       ctx.restore(); // end loaf transform
 
