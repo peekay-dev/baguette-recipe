@@ -255,53 +255,51 @@
       return base*0.82*(1+noise(u,bumpBot)*(P.irr||0.9)) + bend(x,P);
     }
 
-    // One score = one PARALLELOGRAM (per the shape reference): horizontal top/bottom edges,
-    // slanted ends (horizontal shear). Lined up in a row with gaps, the crust strips between
-    // scores run as straight, parallel, angled lines. Edges get a hand-drawn wobble.
-    function drawEar(xc,yc,len,H,shear,open,b,sp){
-      const half=len/2, N=22;
-      const xR=-half+len*clamp(sp,0.02,1);            // score reveals left -> right
-      const h=H*clamp((open-0.04)/0.96,0,1);
-      const seed=xc*0.021+len*7.3;                     // per-score wobble phase
-      const wob=(x,p)=>(Math.sin(x/half*1.9+seed+p)*0.03+Math.sin(x/half*4.3+seed*1.7+p)*0.018)*H;
-      const edge =(k)=>{for(let i=0;i<=N;i++){const x=-half+(xR+half)*i/N,y=k(x);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}};
-      const edgeR=(k)=>{for(let i=N;i>=0;i--){const x=-half+(xR+half)*i/N;ctx.lineTo(x,k(x));}};
-      ctx.save(); ctx.translate(xc,yc); ctx.transform(1,0,shear,1,0,0); ctx.lineJoin='round'; ctx.lineCap='round';
+    // One score = a leaning "eco-leaf" (sheared pointed leaf): fuller middle, pointed tips.
+    // These sit in an evenly spaced row with small gaps between them.
+    function drawEar(xc,yc,len,hMax,ang,open,b,sp){
+      const half=len/2, N=44;
+      const disc=x=>Math.max(0,1-(x/half)*(x/half));   // pointed-leaf profile
+      const xR=-half+len*clamp(sp,0.02,1);             // score reveals left -> right
+      const edge =(k,a,c)=>{for(let i=0;i<=N;i++){const x=a+(c-a)*i/N,y=k(x);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}};
+      const edgeR=(k,a,c)=>{for(let i=N;i>=0;i--){const x=a+(c-a)*i/N;ctx.lineTo(x,k(x));}};
+      const h=hMax*clamp((open-0.04)/0.96,0,1);
+      ctx.save(); ctx.translate(xc,yc); ctx.transform(1,ang,0,1,0,0); ctx.lineJoin='round'; ctx.lineCap='round';
       if(h>=1){
-        const yTop=x=>-h*0.5+wob(x,0);            // top edge = lip ridge (straight, wobbled)
-        const yLip=x=>-h*0.16+wob(x,0);           // bottom of the lip band
-        const yBot=x=>h*0.5+wob(x,0);             // bottom edge = shelf (parallel to top)
-        // soft shadow just under the parallelogram
-        ctx.beginPath(); edge(x=>yBot(x)); edgeR(x=>yBot(x)-h*0.18); ctx.closePath();
-        ctx.fillStyle='rgba(58,32,10,'+(0.07+0.10*open)+')'; ctx.fill();
-        // pale-but-crusty exposed opening (fills below the lip)
-        ctx.beginPath(); edge(x=>yLip(x)); edgeR(x=>yBot(x)); ctx.closePath();
-        const cg=ctx.createLinearGradient(0,-h*0.16,0,h*0.5);
+        const yRidge=x=>-h*disc(x), yBase=x=>-h*0.30*disc(x), yShelf=x=>h*0.32*disc(x);
+        // soft low shadow the leaf throws onto the crust below
+        ctx.beginPath(); edge(x=>yShelf(x),-half,xR); edgeR(x=>h*0.48*disc(x),-half,xR); ctx.closePath();
+        ctx.fillStyle='rgba(58,32,10,'+(0.08+0.10*open)+')'; ctx.fill();
+        // exposed opening — darker, crusty (not raw cream)
+        ctx.beginPath(); edge(x=>yBase(x),-half,xR); edgeR(x=>yShelf(x),-half,xR); ctx.closePath();
+        const cg=ctx.createLinearGradient(0,-h*0.30,0,h*0.32);
         cg.addColorStop(0,mix('#F0E2BE','#DDBA7C',b*0.7)); cg.addColorStop(1,mix('#D6C08E','#AE7B37',b*0.9));
         ctx.fillStyle=cg; ctx.fill();
-        // shadow the curled lip throws on the opening
+        // shadow where the lip overhangs the crumb (reads as a real curl)
         ctx.save(); ctx.clip();
-        ctx.strokeStyle='rgba(54,30,8,'+(0.2*clamp(open,0,1))+')'; ctx.lineWidth=h*0.16;
-        ctx.beginPath(); edge(x=>yLip(x)+h*0.05); ctx.stroke(); ctx.restore();
-        // curled lip band along the top — dark crispy ridge, golden face
-        ctx.beginPath(); edge(x=>yTop(x)); edgeR(x=>yLip(x)); ctx.closePath();
-        const lg=ctx.createLinearGradient(0,-h*0.5,0,-h*0.16);
+        ctx.strokeStyle='rgba(54,30,8,'+(0.2*clamp(open,0,1))+')'; ctx.lineWidth=h*0.2; ctx.lineCap='round';
+        ctx.beginPath(); edge(x=>yBase(x)+h*0.06,-half,xR); ctx.stroke(); ctx.restore();
+        // curled lip — dark crispy ridge, golden face, deep shadow at the base
+        ctx.beginPath(); edge(x=>yRidge(x),-half,xR); edgeR(x=>yBase(x),-half,xR); ctx.closePath();
+        const lg=ctx.createLinearGradient(0,-h,0,-h*0.30);
         lg.addColorStop(0,   mix('#E7D6AC','#894811',b));
-        lg.addColorStop(0.5, mix('#F2E6BC','#ECB756',b));
+        lg.addColorStop(0.42,mix('#F2E6BC','#ECB756',b));
         lg.addColorStop(1,   mix('#D9C39A','#59300B',b));
         ctx.fillStyle=lg; ctx.fill();
-        // dark crispy edge on the ridge + catch-light below it
-        ctx.strokeStyle=mix('#C6B084','#46260A',b); ctx.lineWidth=1.2; ctx.beginPath(); edge(x=>yTop(x)); ctx.stroke();
-        ctx.strokeStyle='rgba(255,246,214,'+(0.2+0.34*b)+')'; ctx.lineWidth=1; ctx.beginPath(); edge(x=>yTop(x)+h*0.08); ctx.stroke();
-        // faint outline to keep the parallelogram crisp
-        ctx.strokeStyle='rgba(70,42,16,0.25)'; ctx.lineWidth=1;
-        ctx.beginPath(); edge(x=>yTop(x)); edgeR(x=>yBot(x)); ctx.closePath(); ctx.stroke();
+        // dark crispy edge on the very ridge
+        ctx.strokeStyle=mix('#C6B084','#46260A',b); ctx.lineWidth=1.3; ctx.beginPath(); edge(x=>yRidge(x),-half,xR); ctx.stroke();
+        // catch-light just below the ridge
+        ctx.strokeStyle='rgba(255,246,214,'+(0.22+0.36*b)+')'; ctx.lineWidth=1;
+        ctx.beginPath(); edge(x=>yRidge(x)+h*0.12*disc(x),-half,xR); ctx.stroke();
       }
-      // feathered slash (raw), crossfading out as the score opens
+      // feathered slash (raw), crossfading out as the ear opens
       const fa=clamp(1-open/0.16,0,1);
       if(fa>0.02){
-        ctx.strokeStyle='rgba(247,239,216,'+(0.4*fa)+')'; ctx.lineWidth=2.6; ctx.beginPath(); edge(x=>wob(x,0)-1); ctx.stroke();
-        ctx.strokeStyle='rgba(120,96,58,'+(0.5*fa)+')'; ctx.lineWidth=1.4; ctx.beginPath(); edge(x=>wob(x,0)); ctx.stroke();
+        const wig=x=>Math.sin(x/half*Math.PI*1.1)*hMax*0.06;
+        ctx.strokeStyle='rgba(247,239,216,'+(0.4*fa)+')'; ctx.lineWidth=2.6;
+        ctx.beginPath(); edge(x=>wig(x)-1,-half,xR); ctx.stroke();
+        ctx.strokeStyle='rgba(120,96,58,'+(0.5*fa)+')'; ctx.lineWidth=1.4;
+        ctx.beginPath(); edge(x=>wig(x),-half,xR); ctx.stroke();
       }
       ctx.restore();
     }
@@ -402,15 +400,15 @@
       if(sp>0){
         // ~5 smaller ears, steeper diagonal, heavily overlapping down the whole length —
         // the classic baguette grigne (see reference photos), not a few big horizontal ears.
-        // five parallelograms lined up with gaps; horizontal shear -0.7 leans them up-right
+        // five eco-leaf scores, evenly spaced with small gaps (shear -0.5 leans them)
         const ears=[
-          {c:-0.52,len:0.22,yf:0.34,hf:0.58},
-          {c:-0.26,len:0.24,yf:0.32,hf:0.62},
-          {c: 0.00,len:0.24,yf:0.30,hf:0.64},
-          {c: 0.26,len:0.24,yf:0.32,hf:0.62},
-          {c: 0.52,len:0.22,yf:0.34,hf:0.58}
+          {c:-0.56,len:0.22,yf:0.24,hf:0.46},
+          {c:-0.28,len:0.24,yf:0.22,hf:0.50},
+          {c: 0.00,len:0.24,yf:0.20,hf:0.52},
+          {c: 0.28,len:0.24,yf:0.22,hf:0.50},
+          {c: 0.56,len:0.22,yf:0.24,hf:0.46}
         ];
-        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*E.hf, -0.7, open, b, sp); }
+        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*E.hf, -0.5, open, b, sp); }
       }
       ctx.restore(); // end loaf transform
 
