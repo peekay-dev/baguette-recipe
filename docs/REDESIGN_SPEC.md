@@ -229,14 +229,25 @@ is fine. "Pretty detailed" is the bar.
 > wheat/poppy palette and timeline step structure · a transformation hero whose loaf is
 > modelled on Paul's real baguettes. This is now the presumptive final direction.
 
-### Concept E — **THE STRIP** (built 2026-07-16)
+### Concept E — **THE STRIP** (built then dropped 2026-07-16)
 
-A **horizontal film-strip** framing of the same six phases: the whole metamorphosis laid
-out left-to-right so you see every stage at once, with a **playhead** that sweeps the
-strip (autoplay + scrub) and wakes each loaf as it passes. Same real-bake loaf renderer,
-palette, fonts, and buttons as D — it's a framing variant, not a different world. Use it
-to decide whether a **centered single-loaf morph (D)** or an **all-at-once contact-sheet
-(E)** is the stronger hero.
+A horizontal film-strip variant. **Rejected** by Paul ("don't really like the strip one").
+File removed. **D is the direction.**
+
+### Round 3 refinements to D (2026-07-16)
+
+- **Loaf modelled on Paul's raw + baked photos.** Organic irregular silhouette (low-freq
+  lump noise + a gentle bend) instead of the too-smooth geometric shape; **blunter ends**
+  (no longer super-pointy); a single feathered **score** while raw that opens *in place*
+  into **wide, low ears** that hug the crust. The raw slashes and baked ears now live in
+  the same spots (no "one line splits into three").
+- **Fonts = A/Ember** (Bodoni Moda + Hanken Grotesk), confirmed throughout.
+- **Recipe section = Ember's** vertical numbered-step structure (replacing B's grid),
+  synced + click-to-jump to the animation.
+- **Palette = D's** bone/wheat/poppy (kept per Paul).
+- **Gradient background + light/dark theme toggle** (Ember-style): light is a soft warm
+  radial; **dark is Ember's oven-glow** (ember bloom, charcoal). Persisted to
+  localStorage, respects `prefers-color-scheme`, and the bake-glow blend adapts per theme.
 
 ## 10. Next steps
 
@@ -244,9 +255,8 @@ to decide whether a **centered single-loaf morph (D)** or an **all-at-once conta
 2. ~~Round 1 review.~~ ✓ — feedback captured in §8.
 3. ~~Build **Concept D — THE RISE**~~ ✓ centered transformation morph, loaf modelled on
    Paul's real bakes, A's fonts + buttons.
-4. ~~Build **Concept E — THE STRIP**~~ ✓ horizontal film-strip variant of the same
-   transformation. Both in the chooser.
-5. **Decision gate:** pick D vs E (centered morph vs film-strip), or a hybrid, and lock the
-   synthesis direction.
-6. Write the full-build plan and port the chosen hero onto the complete recipe engine from
-   `baguette-v2.html`.
+4. ~~Build **Concept E — THE STRIP**~~ ✗ built then dropped (Paul didn't like it).
+5. ~~Round-3 refinements to D~~ ✓ real-bake loaf, Ember fonts + step structure, D palette,
+   gradient background + light/dark toggle.
+6. **Next:** any further loaf/animation polish Paul wants, then write the full-build plan
+   and port **D** onto the complete recipe engine from `baguette-v2.html`.

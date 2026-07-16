@@ -9,22 +9,44 @@
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,500;1,6..96,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#EDEBE4; --paper-2:#E4E1D8; --ink:#1A1714; --muted:#5C554D;
-    --wheat:#C8892B; --poppy:#D5402A; --line:#CFC9BC;
     --disp:'Bodoni Moda'; --serif:'Bodoni Moda'; --body:'Hanken Grotesk';
     --ease:cubic-bezier(.22,1,.36,1);
   }
+  /* light (default) */
+  :root,[data-theme="light"]{
+    --paper:#EDEBE4; --paper-2:#E4E1D8; --ink:#1A1714; --muted:#5C554D;
+    --wheat:#C8892B; --poppy:#D5402A; --line:#CFC9BC;
+    --btn2-bg:rgba(26,23,20,.05); --btn2-bg-h:rgba(26,23,20,.1); --btn2-bd:rgba(26,23,20,.22);
+    --grain-op:.5;
+    --grad:radial-gradient(125% 90% at 50% 6%, #F5F3EC 0%, #EDEBE4 44%, #E3DFD4 100%);
+  }
+  /* dark — Ember-style oven glow */
+  [data-theme="dark"]{
+    --paper:#151110; --paper-2:#1C1613; --ink:#F4E7D8; --muted:#B39A86;
+    --wheat:#E7AF52; --poppy:#FF7A2E; --line:rgba(216,154,74,.20);
+    --btn2-bg:rgba(244,231,216,.06); --btn2-bg-h:rgba(244,231,216,.12); --btn2-bd:rgba(216,154,74,.35);
+    --grain-op:.35;
+    --grad:radial-gradient(58% 44% at 50% 74%, rgba(255,122,46,.15), transparent 70%),
+           radial-gradient(120% 100% at 50% 120%, rgba(226,74,24,.22), transparent 62%),
+           linear-gradient(180deg,#181310 0%, #120E0C 58%, #0E0A09 100%);
+  }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
-  body{font-family:var(--body),system-ui,sans-serif;background:var(--paper);color:var(--ink);
-    -webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden}
-  body::before{content:"";position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.5;
+  body{font-family:var(--body),system-ui,sans-serif;background:var(--grad) fixed,var(--paper);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden;transition:color .4s var(--ease)}
+  body::before{content:"";position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:var(--grain-op);
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E");}
 
   .hero{min-height:100svh;display:flex;flex-direction:column;padding:clamp(18px,4vw,42px)}
   .topline{display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:.8rem;color:var(--muted)}
   .topline .mark{font-family:var(--body);font-weight:700;letter-spacing:.18em;font-size:.78rem;color:var(--ink);text-transform:uppercase}
   .topline .hyd{color:var(--wheat);font-weight:600;font-variant-numeric:tabular-nums}
+  .topright{display:flex;align-items:center;gap:14px}
+  .theme{width:38px;height:38px;border-radius:50%;border:1px solid var(--btn2-bd);background:var(--btn2-bg);
+    color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:background .2s,transform .2s,border-color .2s}
+  .theme:hover{background:var(--btn2-bg-h);transform:scale(1.06)}
+  .theme:focus-visible{outline:2px solid var(--wheat);outline-offset:2px}
+  .theme svg{width:17px;height:17px}
 
   .headline{text-align:center;margin:clamp(14px,3vw,26px) 0 6px}
   .headline .k{font-family:var(--disp),serif;font-weight:600;letter-spacing:-.015em;
@@ -63,8 +85,8 @@
   .btn-1{background:linear-gradient(180deg,#E4A64D,#B06C1C);color:#2A1804;
     box-shadow:0 8px 26px rgba(176,108,28,.34),inset 0 1px 0 rgba(255,255,255,.38)}
   .btn-1:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(176,108,28,.46),inset 0 1px 0 rgba(255,255,255,.38)}
-  .btn-2{background:rgba(26,23,20,.05);color:var(--ink);border-color:rgba(26,23,20,.22)}
-  .btn-2:hover{transform:translateY(-2px);background:rgba(26,23,20,.1)}
+  .btn-2{background:var(--btn2-bg);color:var(--ink);border-color:var(--btn2-bd)}
+  .btn-2:hover{transform:translateY(-2px);background:var(--btn2-bg-h)}
 
   /* below: six-phase breakdown (B-style cells, synced highlight) */
   .below{background:var(--paper-2);border-top:2px solid var(--ink);padding:clamp(46px,8vw,96px) clamp(20px,5vw,56px)}
@@ -72,26 +94,33 @@
   .below h2{font-family:var(--disp),serif;font-weight:600;font-size:clamp(2rem,5vw,3.4rem);
     line-height:1.0;letter-spacing:-.02em;max-width:20ch;text-wrap:balance}
   .below h2 em{font-style:italic;font-weight:600;color:var(--wheat)}
-  .phases{margin-top:44px;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;background:var(--line);border:2px solid var(--ink)}
-  .pcell{background:var(--paper);padding:20px 16px 22px;transition:background .3s var(--ease)}
-  .pcell.active{background:var(--ink);color:var(--paper)}
-  .pcell.active .pn,.pcell.active .pt{color:var(--wheat)}
-  .pcell.active p{color:rgba(237,235,228,.75)}
-  .pcell .pn{font-family:var(--serif),serif;font-style:italic;font-weight:600;font-size:1.7rem;color:var(--poppy);font-variant-numeric:tabular-nums}
-  .pcell h3{margin-top:6px;font-size:1rem;font-weight:700}
-  .pcell p{margin-top:5px;color:var(--muted);font-size:.84rem}
-  .pcell .pt{margin-top:12px;font-family:var(--body);font-weight:700;font-size:.85rem;color:var(--wheat);font-variant-numeric:tabular-nums}
+  /* Ember-style vertical step list */
+  .steps{margin-top:40px;display:grid;gap:0}
+  .step{display:grid;grid-template-columns:auto 1fr auto;gap:clamp(16px,3vw,34px);align-items:baseline;
+    padding:22px clamp(10px,2vw,20px);border-top:1px solid var(--line);cursor:pointer;transition:background .3s var(--ease)}
+  .step:last-child{border-bottom:1px solid var(--line)}
+  .step:hover{background:rgba(26,23,20,.03)}
+  .step.active{background:linear-gradient(90deg,rgba(200,137,43,.12),rgba(200,137,43,0) 80%)}
+  .step .n{font-family:var(--serif),serif;font-style:italic;font-weight:600;font-size:1.6rem;color:var(--poppy);
+    font-variant-numeric:tabular-nums;line-height:1}
+  .step .t{max-width:60ch}
+  .step .t h3{font-size:1.12rem;font-weight:700;color:var(--ink);transition:color .3s var(--ease)}
+  .step.active .t h3{color:var(--wheat)}
+  .step .t p{color:var(--muted);font-size:.94rem;margin-top:3px}
+  .step .time{font-variant-numeric:tabular-nums;color:var(--wheat);font-weight:700;white-space:nowrap;font-size:.9rem}
   .foot{margin-top:54px;text-align:center;color:var(--muted);font-size:.85rem}
   .foot a{color:var(--wheat)}
-  @media (max-width:900px){.phases{grid-template-columns:1fr 1fr 1fr}}
-  @media (max-width:540px){.phases{grid-template-columns:1fr 1fr}}
+  @media (max-width:520px){.step{grid-template-columns:auto 1fr;row-gap:4px}.step .time{grid-column:2}}
 </style>
 </head>
 <body>
   <section class="hero">
     <div class="topline">
       <span class="mark">Poolish&nbsp;·&nbsp;Perth</span>
-      <span>hydration <span class="hyd">75%</span></span>
+      <div class="topright">
+        <span>hydration <span class="hyd">75%</span></span>
+        <button class="theme" id="theme" aria-label="Switch colour theme" aria-pressed="false"></button>
+      </div>
     </div>
 
     <div class="headline">
@@ -125,15 +154,15 @@
   <section class="below">
     <div class="below-wrap">
       <h2>Six stages, one <em>living</em> dough.</h2>
-      <div class="phases" id="phases">
-        <div class="pcell" data-p="0"><div class="pn">01</div><h3>Proof</h3><p>A slack ball of poolish dough, breathing as wild-slow yeast gasses it up.</p><div class="pt">12–16 h</div></div>
-        <div class="pcell" data-p="1"><div class="pn">02</div><h3>Shape</h3><p>Pre-shaped, rested, then rolled out long under flat palms into a taut torpedo.</p><div class="pt">~20 min</div></div>
-        <div class="pcell" data-p="2"><div class="pn">03</div><h3>Score</h3><p>Overlapping slashes with a lame, shallow and confident along the spine.</p><div class="pt">seconds</div></div>
-        <div class="pcell" data-p="3"><div class="pn">04</div><h3>Oven spring</h3><p>Trapped gas expands violently in the heat. The scores burst open into a raised ear.</p><div class="pt">first 8 min</div></div>
-        <div class="pcell" data-p="4"><div class="pn">05</div><h3>Bake</h3><p>Sugars caramelise, the crust deepens amber, steam sets the shine.</p><div class="pt">22 min total</div></div>
-        <div class="pcell" data-p="5"><div class="pn">06</div><h3>Baguette</h3><p>Crackling crust, open crumb. It sings as it cools on the rack.</p><div class="pt">cool 30 min</div></div>
+      <div class="steps" id="phases">
+        <div class="step" data-p="0"><span class="n">01</span><div class="t"><h3>Proof</h3><p>A slack ball of poolish dough, breathing as wild-slow yeast gasses it up.</p></div><span class="time">12–16 h</span></div>
+        <div class="step" data-p="1"><span class="n">02</span><div class="t"><h3>Shape</h3><p>Pre-shaped, rested, then rolled out long under flat palms into a knobbly, floured torpedo.</p></div><span class="time">~20 min</span></div>
+        <div class="step" data-p="2"><span class="n">03</span><div class="t"><h3>Score</h3><p>One long, confident slash down the spine with a wet lame, feathering as the skin tears.</p></div><span class="time">seconds</span></div>
+        <div class="step" data-p="3"><span class="n">04</span><div class="t"><h3>Oven spring</h3><p>Trapped gas expands violently in the heat. The score bursts open into a raised ear.</p></div><span class="time">first 8 min</span></div>
+        <div class="step" data-p="4"><span class="n">05</span><div class="t"><h3>Bake</h3><p>Sugars caramelise, the crust deepens amber, the tips darken, steam sets the shine.</p></div><span class="time">22 min total</span></div>
+        <div class="step" data-p="5"><span class="n">06</span><div class="t"><h3>Baguette</h3><p>Crackling crust, open crumb. It sings as it cools on the rack.</p></div><span class="time">cool 30 min</span></div>
       </div>
-      <p class="foot">Preview <b>D &middot; THE RISE</b> &nbsp;·&nbsp; transformation hero (A's wordmark + B's system) &nbsp;·&nbsp; <a href="index.html">back to all previews</a></p>
+      <p class="foot">Preview <b>D &middot; THE RISE</b> &nbsp;·&nbsp; A's fonts &middot; Ember step structure &middot; D palette &nbsp;·&nbsp; <a href="index.html">back to all previews</a></p>
     </div>
   </section>
 
@@ -143,7 +172,20 @@
     const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
     const scrub=document.getElementById('scrub'), playBtn=document.getElementById('play'), ico=document.getElementById('ico');
     const ptagN=document.getElementById('ptag-n'), ptagT=document.getElementById('ptag-t');
-    const pcells=[...document.querySelectorAll('.pcell')];
+    const pcells=[...document.querySelectorAll('.step')];
+
+    // ---- theme (light default, Ember-style dark) ----
+    const rootEl=document.documentElement, themeBtn=document.getElementById('theme');
+    const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"/></svg>';
+    const MOON='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.9A8.5 8.5 0 1 1 11.1 3.2 6.8 6.8 0 0 0 21 12.9z"/></svg>';
+    let dark=false;
+    function applyTheme(m){ dark=(m==='dark'); rootEl.setAttribute('data-theme',m);
+      themeBtn.innerHTML=dark?SUN:MOON; themeBtn.setAttribute('aria-pressed',dark?'true':'false');
+      try{localStorage.setItem('d-theme',m)}catch(e){} }
+    themeBtn.addEventListener('click',()=>applyTheme(dark?'light':'dark'));
+    let savedT; try{savedT=localStorage.getItem('d-theme')}catch(e){}
+    applyTheme(savedT || (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+
     let W,H,DPR;
     function size(){DPR=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;
       cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
@@ -161,13 +203,13 @@
     //         ear 0..1, brown 0..1, flour 0..1, steam 0..1, glow 0..1
     // p = plumpness power, e = end exponent (0.5 round ball -> 1.0 pointed baguette tips)
     const KF=[
-      {t:0.00, L:82,  R:80, p:2.2, e:0.50, bulge:0,  ear:0, brown:0,    flour:1,  steam:0,   glow:0},
-      {t:0.16, L:84,  R:78, p:2.2, e:0.52, bulge:0,  ear:0, brown:0,    flour:1,  steam:0,   glow:0},
-      {t:0.32, L:250, R:47, p:2.3, e:0.90, bulge:0,  ear:0, brown:0.03, flour:.9, steam:0,   glow:0},
-      {t:0.44, L:256, R:47, p:2.3, e:0.95, bulge:2,  ear:0, brown:0.05, flour:.8, steam:0,   glow:.05},
-      {t:0.64, L:300, R:58, p:2.3, e:1.00, bulge:18, ear:1, brown:0.26, flour:.6, steam:.35, glow:.55},
-      {t:0.84, L:314, R:60, p:2.3, e:1.00, bulge:22, ear:1, brown:0.90, flour:.5, steam:1,   glow:1},
-      {t:1.00, L:314, R:60, p:2.3, e:1.00, bulge:22, ear:1, brown:1,    flour:.48,steam:.9,  glow:.85}
+      {t:0.00, L:82,  R:80, p:2.2, e:0.50, bulge:0,  ear:0, brown:0,    flour:1,  steam:0,   glow:0,  irr:0.6},
+      {t:0.16, L:84,  R:78, p:2.2, e:0.52, bulge:0,  ear:0, brown:0,    flour:1,  steam:0,   glow:0,  irr:0.7},
+      {t:0.32, L:252, R:49, p:2.4, e:0.74, bulge:0,  ear:0, brown:0.02, flour:.98,steam:0,   glow:0,  irr:0.85},
+      {t:0.44, L:258, R:49, p:2.4, e:0.76, bulge:2,  ear:0, brown:0.04, flour:.94,steam:0,   glow:.05,irr:0.85},
+      {t:0.64, L:302, R:58, p:2.4, e:0.80, bulge:16, ear:1, brown:0.24, flour:.64,steam:.35, glow:.55,irr:0.7},
+      {t:0.84, L:316, R:60, p:2.4, e:0.82, bulge:20, ear:1, brown:0.90, flour:.5, steam:1,   glow:1,  irr:0.55},
+      {t:1.00, L:316, R:60, p:2.4, e:0.82, bulge:20, ear:1, brown:1,    flour:.48,steam:.9,  glow:.85,irr:0.52}
     ];
     function paramsAt(t){
       t=clamp(t,0,1);
@@ -175,11 +217,11 @@
       const a=KF[i], b=KF[Math.min(i+1,KF.length-1)];
       const span=Math.max(1e-4,b.t-a.t); const k=smooth(clamp((t-a.t)/span,0,1));
       const o={};
-      for(const key of ['L','R','p','e','bulge','ear','brown','flour','steam','glow']) o[key]=lerp(a[key],b[key],k);
+      for(const key of ['L','R','p','e','bulge','ear','brown','flour','steam','glow','irr']) o[key]=lerp(a[key],b[key],k);
       return o;
     }
     // score reveal + phase label
-    function scoreProg(t){return clamp((t-0.44)/0.10,0,1);}          // draws during "Score"
+    function scoreProg(t){return clamp((t-0.33)/0.10,0,1);}          // draws during "Score"
     const PHASES=[['01','Proof',0.16],['02','Shape',0.32],['03','Score',0.46],['04','Oven spring',0.64],['05','Bake',0.84],['06','Baguette',1.01]];
     function phaseIndex(t){for(let i=0;i<PHASES.length;i++) if(t<PHASES[i][2]) return i; return 5;}
 
@@ -189,48 +231,67 @@
     // steam particles
     let steam=[];
 
+    // organic irregularity: low-frequency lumps on each edge + a gentle bend of the whole
+    // loaf. Seeded once (deterministic) so the shape is lumpy like real dough, not jittery.
+    const bumpTop=[[2.7,0.028,1.1],[5.3,0.015,4.2],[1.6,0.022,0.4],[8.7,0.009,2.7]];
+    const bumpBot=[[2.2,0.026,2.3],[4.7,0.017,0.6],[1.3,0.024,3.6],[7.9,0.010,5.1]];
+    const bendC  =[[1.0,0.024,0.8],[2.3,0.012,3.1]];
+    function noise(u,arr){let s=0;for(const f of arr)s+=f[1]*Math.sin(f[0]*u*Math.PI+f[2]);return s;}
+
     // top-surface y at loaf-local x. e (end exponent) points the tips like a real baguette.
     function prof(x,P){ return P.R*Math.pow(clamp(1-Math.pow(Math.abs(x)/P.L,P.p),0,1), P.e); }
+    function bend(x,P){ const u=clamp(x/P.L,-1,1); return noise(u,bendC)*P.R*(P.irr||0.9); }
     function topY(x,P){
+      const u=clamp(x/P.L,-1,1), base=prof(x,P);
       const bg=P.bulge*Math.exp(-Math.pow(x/(P.L*0.62),2));
-      return -(prof(x,P)+bg);
+      return -(base*(1+noise(u,bumpTop)*(P.irr||0.9))+bg) + bend(x,P);
     }
-    function botY(x,P){ return prof(x,P)*0.82; }
+    function botY(x,P){
+      const u=clamp(x/P.L,-1,1), base=prof(x,P);
+      return base*0.82*(1+noise(u,bumpBot)*(P.irr||0.9)) + bend(x,P);
+    }
 
-    // one dramatic ear (grigne): a low curled lip lying along the loaf, a thin pale
-    // crumb shelf beneath it, and a soft cast shadow. Modelled on real baguette bakes.
+    // One score = one element through the whole run: a feathered slash while raw that opens
+    // in place into a WIDE, low ear hugging the crust. Several overlap to read as one grigne,
+    // so the raw slashes and the baked ears live in exactly the same spots (no splitting).
     function drawEar(xc,yc,len,hMax,ang,open,b,sp){
-      const half=len/2, h=Math.max(1,hMax*open), N=30;
+      const half=len/2, N=36;
       const disc=x=>Math.sqrt(Math.max(0,1-(x/half)*(x/half)));
-      const edge=(k)=>{for(let i=0;i<=N;i++){const x=-half+len*i/N,y=k(x);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}};
-      const edgeR=(k)=>{for(let i=N;i>=0;i--){const x=-half+len*i/N;ctx.lineTo(x,k(x));}};
+      const xR=-half+len*clamp(sp,0.02,1);            // score reveals left -> right
+      const edge =(k,a,c)=>{for(let i=0;i<=N;i++){const x=a+(c-a)*i/N,y=k(x);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}};
+      const edgeR=(k,a,c)=>{for(let i=N;i>=0;i--){const x=a+(c-a)*i/N;ctx.lineTo(x,k(x));}};
+      const h=hMax*clamp((open-0.04)/0.96,0,1);
       ctx.save(); ctx.translate(xc,yc); ctx.rotate(ang); ctx.lineJoin='round'; ctx.lineCap='round';
-      if(open<0.09){                                   // fresh lame cut, drawing on
-        const x1=lerp(-half,half,clamp(sp,0,1));
-        ctx.strokeStyle='rgba(70,45,20,0.55)'; ctx.lineWidth=1.6;
-        ctx.beginPath(); ctx.moveTo(-half,0); ctx.lineTo(x1,0); ctx.stroke(); ctx.restore(); return;
+      if(h>=1){
+        const yRidge=x=>-h*disc(x), yBase=x=>-h*0.34*disc(x), yShelf=x=>h*0.10*disc(x);
+        // soft low shadow so the ear reads attached, not a floating gap
+        ctx.beginPath(); edge(x=>yShelf(x),-half,xR); edgeR(x=>h*0.26*disc(x),-half,xR); ctx.closePath();
+        ctx.fillStyle='rgba(70,44,18,'+(0.07+0.1*open)+')'; ctx.fill();
+        // wide pale exposed-crumb shelf
+        ctx.beginPath(); edge(x=>yBase(x),-half,xR); edgeR(x=>yShelf(x),-half,xR); ctx.closePath();
+        const cg=ctx.createLinearGradient(0,-h*0.34,0,h*0.12);
+        cg.addColorStop(0,mix('#F7EED6','#ECD5A2',b*0.5)); cg.addColorStop(1,mix('#E7D7AC','#CFA968',b*0.6));
+        ctx.fillStyle=cg; ctx.fill();
+        // curled lip — its base blends toward the crust colour so it fuses with the loaf
+        ctx.beginPath(); edge(x=>yRidge(x),-half,xR); edgeR(x=>yBase(x),-half,xR); ctx.closePath();
+        const lg=ctx.createLinearGradient(0,-h,0,-h*0.34);
+        lg.addColorStop(0,mix('#F1E7C6','#EAB65C',b)); lg.addColorStop(1,mix('#E1CEA2','#8A4E16',b));
+        ctx.fillStyle=lg; ctx.fill();
+        ctx.strokeStyle='rgba(255,248,224,'+(0.16+0.4*b)+')'; ctx.lineWidth=1; ctx.beginPath(); edge(x=>yRidge(x),-half,xR); ctx.stroke();
       }
-      const yRidge=x=>-h*disc(x);          // top of the curled lip
-      const yBase =x=>-h*0.30*disc(x);     // where the lip meets the crumb
-      const yShelf=x=>-h*0.02*disc(x);     // lower edge of the pale shelf
-      // 1) soft shadow the lip throws just below the opening
-      ctx.beginPath(); edge(x=>yShelf(x)); edgeR(x=>h*0.16*disc(x)+0.5); ctx.closePath();
-      ctx.fillStyle='rgba(58,32,10,0.26)'; ctx.fill();
-      // 2) pale exposed-crumb shelf (thin)
-      ctx.beginPath(); edge(x=>yBase(x)); edgeR(x=>yShelf(x)); ctx.closePath();
-      const cg=ctx.createLinearGradient(0,-h*0.30,0,0);
-      cg.addColorStop(0,mix('#F7EDD4','#ECD5A2',b*0.5));
-      cg.addColorStop(1,mix('#E9D6A8','#CFA968',b*0.6));
-      ctx.fillStyle=cg; ctx.fill();
-      // 3) the curled, browned lip
-      ctx.beginPath(); edge(x=>yRidge(x)); edgeR(x=>yBase(x)); ctx.closePath();
-      const lg=ctx.createLinearGradient(0,-h,0,-h*0.30);
-      lg.addColorStop(0,mix('#F1D189','#E7AF52',b));
-      lg.addColorStop(1,mix('#BC8130','#743E0D',b));
-      ctx.fillStyle=lg; ctx.fill();
-      // 4) bright caught-light edge on the ridge
-      ctx.strokeStyle='rgba(255,244,212,'+(0.3+0.4*b)+')'; ctx.lineWidth=1.2;
-      ctx.beginPath(); edge(x=>yRidge(x)); ctx.stroke();
+      // feathered slash (raw), crossfading out as the ear opens
+      const fa=clamp(1-open/0.16,0,1);
+      if(fa>0.02){
+        const wig=x=>Math.sin(x/half*Math.PI*1.1)*hMax*0.06;
+        ctx.strokeStyle='rgba(247,239,216,'+(0.4*fa)+')'; ctx.lineWidth=2.6;
+        ctx.beginPath(); edge(x=>wig(x)-1,-half,xR); ctx.stroke();
+        ctx.strokeStyle='rgba(120,96,58,'+(0.5*fa)+')'; ctx.lineWidth=1.4;
+        ctx.beginPath(); edge(x=>wig(x),-half,xR); ctx.stroke();
+        ctx.strokeStyle='rgba(122,94,54,'+(0.42*fa)+')'; ctx.lineWidth=0.9;
+        const span=xR+half, ticks=Math.max(3,Math.floor(span/(len*0.11)));
+        for(let k=0;k<ticks;k++){const x=-half+span*(k+0.5)/ticks, side=k%2?1:-1, y=wig(x);
+          ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-len*0.03, y+side*Math.max(2.4,hMax*0.4)); ctx.stroke();}
+      }
       ctx.restore();
     }
 
@@ -244,13 +305,21 @@
       const breathe = (t<0.30 && !reduce) ? 1+0.02*Math.sin(now*0.004) : 1;
       const cy=cyBase - P.bulge*s*0.18;
 
-      // --- bake glow (A move) ---
+      // --- bake glow (A move): additive ember on dark, warm multiply on light ---
       if(P.glow>0.01){
-        ctx.save(); ctx.globalCompositeOperation='multiply';
-        const g=ctx.createRadialGradient(cx,cy,0,cx,cy,P.L*s*1.7);
-        g.addColorStop(0,`rgba(226,140,40,${0.16*P.glow})`);
-        g.addColorStop(.5,`rgba(213,64,42,${0.08*P.glow})`);
-        g.addColorStop(1,'rgba(213,64,42,0)');
+        ctx.save();
+        const g=ctx.createRadialGradient(cx,cy,0,cx,cy,P.L*s*1.8);
+        if(dark){
+          ctx.globalCompositeOperation='lighter';
+          g.addColorStop(0,`rgba(255,140,56,${0.24*P.glow})`);
+          g.addColorStop(.5,`rgba(226,74,24,${0.10*P.glow})`);
+          g.addColorStop(1,'rgba(226,74,24,0)');
+        } else {
+          ctx.globalCompositeOperation='multiply';
+          g.addColorStop(0,`rgba(226,140,40,${0.16*P.glow})`);
+          g.addColorStop(.5,`rgba(213,64,42,${0.08*P.glow})`);
+          g.addColorStop(1,'rgba(213,64,42,0)');
+        }
         ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.restore();
       }
 
@@ -265,7 +334,7 @@
       ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(0,0,shW,0,7); ctx.fill(); ctx.restore();
 
       // --- loaf body path ---
-      const M=96;
+      const M=170;
       ctx.beginPath();
       for(let i=0;i<=M;i++){const x=-P.L+(2*P.L)*i/M; const y=topY(x,P); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
       for(let i=M;i>=0;i--){const x=-P.L+(2*P.L)*i/M; ctx.lineTo(x,botY(x,P));}
@@ -274,9 +343,9 @@
       // crust gradient (dough -> amber). top lighter, bottom shadowed.
       const b=P.brown;
       const gr=ctx.createLinearGradient(0,-(P.R+P.bulge),0,P.R);
-      gr.addColorStop(0,  mix('#F0E6CE','#F0C265',b));
-      gr.addColorStop(0.42,mix('#E6D4AC','#CE8B2E',b));
-      gr.addColorStop(1,  mix('#CFBB8C','#6E3E14',b));
+      gr.addColorStop(0,  mix('#F5EEDC','#F0C265',b));
+      gr.addColorStop(0.42,mix('#EADFC2','#CE8B2E',b));
+      gr.addColorStop(1,  mix('#D8C7A0','#6E3E14',b));
       ctx.fillStyle=gr; ctx.fill();
       // rim definition
       ctx.lineWidth=1.4; ctx.strokeStyle=mix('#C9B488','#5A300F',b); ctx.stroke();
@@ -298,19 +367,16 @@
       if(P.flour>0.02){
         for(const f of flecks){
           const x=f.u*P.L*0.97, yt=topY(x,P), yb=botY(x,P), y=lerp(yt,yb,f.v);
-          ctx.fillStyle='rgba(250,247,239,'+(0.5*P.flour*f.a)+')';
+          ctx.fillStyle='rgba(250,247,239,'+(0.62*P.flour*f.a)+')';
           ctx.beginPath(); ctx.arc(x,y,f.r,0,7); ctx.fill();
         }
       }
 
-      // --- scores bloom into dramatic ears (grigne), modelled on real bakes ---
+      // --- score: overlapping feathered slashes that open in place into wide ears ---
       const sp=scoreProg(t), open=P.ear;
       if(sp>0){
-        const ears=[{c:-0.34,len:0.50,yf:0.50},{c:0.00,len:0.52,yf:0.44},{c:0.34,len:0.50,yf:0.50}];
-        for(const E of ears){
-          const xc=E.c*P.L;
-          drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*0.62, -0.24, open, b, sp);
-        }
+        const ears=[{c:-0.28,len:0.70,yf:0.50},{c:0.05,len:0.72,yf:0.44},{c:0.36,len:0.68,yf:0.50}];
+        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*0.46, -0.15, open, b, sp); }
       }
       ctx.restore(); // end loaf transform
 
