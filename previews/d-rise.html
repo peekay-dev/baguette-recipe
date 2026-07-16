@@ -259,13 +259,15 @@
     // in place into a WIDE, low ear hugging the crust. Several overlap to read as one grigne,
     // so the raw slashes and the baked ears live in exactly the same spots (no splitting).
     function drawEar(xc,yc,len,hMax,ang,open,b,sp){
-      const half=len/2, N=36;
-      const disc=x=>Math.sqrt(Math.max(0,1-(x/half)*(x/half)));
+      const half=len/2, N=44;
+      // pointed-leaf profile (fuller middle, pointed tips). Combined with the shear below
+      // this gives each score the leaning "parallelogram leaf" shape (eco-leaf reference).
+      const disc=x=>Math.max(0,1-(x/half)*(x/half));
       const xR=-half+len*clamp(sp,0.02,1);            // score reveals left -> right
       const edge =(k,a,c)=>{for(let i=0;i<=N;i++){const x=a+(c-a)*i/N,y=k(x);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}};
       const edgeR=(k,a,c)=>{for(let i=N;i>=0;i--){const x=a+(c-a)*i/N;ctx.lineTo(x,k(x));}};
       const h=hMax*clamp((open-0.04)/0.96,0,1);
-      ctx.save(); ctx.translate(xc,yc); ctx.rotate(ang); ctx.lineJoin='round'; ctx.lineCap='round';
+      ctx.save(); ctx.translate(xc,yc); ctx.transform(1,ang,0,1,0,0); ctx.lineJoin='round'; ctx.lineCap='round';
       if(h>=1){
         // fatter leaf: taller pale opening, giving each score a clear leaf/almond shape
         const yRidge=x=>-h*disc(x), yBase=x=>-h*0.30*disc(x), yShelf=x=>h*0.32*disc(x);
@@ -406,14 +408,15 @@
       if(sp>0){
         // ~5 smaller ears, steeper diagonal, heavily overlapping down the whole length —
         // the classic baguette grigne (see reference photos), not a few big horizontal ears.
+        // shear (not rotate) gives the leaning parallelogram-leaf; -0.5 ≈ a 27° lean
         const ears=[
-          {c:-0.56,len:0.42,yf:0.26,hf:0.46},
-          {c:-0.28,len:0.46,yf:0.22,hf:0.50},
-          {c: 0.00,len:0.48,yf:0.20,hf:0.52},
-          {c: 0.28,len:0.46,yf:0.22,hf:0.50},
-          {c: 0.56,len:0.42,yf:0.26,hf:0.46}
+          {c:-0.58,len:0.38,yf:0.24,hf:0.46},
+          {c:-0.29,len:0.40,yf:0.20,hf:0.50},
+          {c: 0.00,len:0.42,yf:0.18,hf:0.52},
+          {c: 0.29,len:0.40,yf:0.20,hf:0.50},
+          {c: 0.58,len:0.38,yf:0.24,hf:0.46}
         ];
-        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*E.hf, -0.40, open, b, sp); }
+        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*E.hf, -0.5, open, b, sp); }
       }
       ctx.restore(); // end loaf transform
 
