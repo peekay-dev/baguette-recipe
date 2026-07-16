@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baguette redesign — preview chooser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0C0D0C;--ink:#EDEAE3;--muted:#8C8880;--line:rgba(237,234,227,.14);
+    --ease:cubic-bezier(.22,1,.36,1);--body:'Hanken Grotesk';--mono:'Martian Mono'}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body),system-ui,sans-serif;background:var(--bg);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.6;min-height:100svh;
+    padding:clamp(28px,5vw,72px) clamp(20px,5vw,72px)}
+  header{max-width:1100px;margin:0 auto 44px}
+  .tag{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.02;letter-spacing:-.02em;margin:.4em 0 .3em;max-width:20ch;text-wrap:balance}
+  header p{color:var(--muted);max-width:62ch;text-wrap:pretty}
+  header p a{color:var(--ink)}
+
+  .grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .card{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:340px;
+    border:1px solid var(--line);border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;
+    padding:26px;isolation:isolate;transition:transform .4s var(--ease),border-color .4s}
+  .card:hover{transform:translateY(-6px);border-color:rgba(237,234,227,.4)}
+  .card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  .card .bgc{position:absolute;inset:0;z-index:-1;transition:transform .6s var(--ease)}
+  .card:hover .bgc{transform:scale(1.05)}
+  .letter{position:absolute;top:18px;right:22px;font-family:var(--mono);font-size:.8rem;letter-spacing:.1em;color:rgba(255,255,255,.7)}
+  .card h2{font-size:1.5rem;letter-spacing:-.01em}
+  .card .lane{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;opacity:.85}
+  .card p{font-size:.9rem;margin-top:8px;max-width:34ch}
+  .card .go{margin-top:16px;font-weight:600;font-size:.9rem;display:inline-flex;align-items:center;gap:6px}
+
+  /* A — EMBER */
+  .a .bgc{background:
+    radial-gradient(60% 50% at 50% 78%,rgba(255,122,46,.5),transparent 70%),
+    radial-gradient(120% 90% at 50% 120%,rgba(226,74,24,.55),transparent 60%),
+    linear-gradient(160deg,#1a1512,#0e0b0a)}
+  .a h2,.a .go{color:#FFDCB0}.a .lane{color:#F2B37D}.a p{color:#D8B9A0}
+  /* B — FLOUR */
+  .b{color:#1A1714}
+  .b .bgc{background:radial-gradient(80% 70% at 30% 20%,#F6F4EE,#E4E1D8)}
+  .b .letter{color:rgba(26,23,20,.55)}
+  .b .lane{color:#C8892B}.b p{color:#5C554D}.b h2,.b .go{color:#1A1714}
+  /* C — STARTER */
+  .c .bgc{background:
+    radial-gradient(70% 60% at 60% 80%,rgba(242,179,61,.4),transparent 70%),
+    linear-gradient(160deg,#12150F,#0a0d0b)}
+  .c h2,.c .go{color:#EAF0E6}.c .lane{color:#39C6A8}.c p{color:#8FA090}
+  /* D — THE RISE (synthesis) */
+  .d{color:#1A1714}
+  .d .bgc{background:
+    radial-gradient(60% 80% at 50% 108%,rgba(200,137,43,.55),transparent 60%),
+    radial-gradient(80% 70% at 30% 15%,#F4F1EA,#E4E1D8)}
+  .d .letter{color:rgba(26,23,20,.55)}
+  .d .lane{color:#C8892B}.d p{color:#5C554D}.d h2,.d .go{color:#1A1714}
+  .d .badge{position:absolute;top:16px;left:22px;font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;
+    text-transform:uppercase;color:#D5402A;border:1px solid rgba(213,64,42,.4);padding:3px 8px;border-radius:20px}
+
+  footer{max-width:1100px;margin:40px auto 0;color:var(--muted);font-size:.82rem;font-family:var(--mono)}
+  @media (prefers-reduced-motion:reduce){.card,.card .bgc{transition:none}}
+</style>
+</head>
+<body>
+  <header>
+    <p class="tag">Baguette app · redesign · preview stage</p>
+    <h1>Four ways to make a baguette feel alive.</h1>
+    <p>Each is a working hero, not a mockup: move your cursor, watch it breathe. <b style="color:var(--ink)">D</b>
+      is the round-2 synthesis (A's wordmark + B's palette &amp; structure) with the dough→baguette
+      transformation you asked for. Pick a direction, or a hybrid. Plan lives in
+      <a href="../docs/REDESIGN_SPEC.md">docs/REDESIGN_SPEC.md</a>.</p>
+  </header>
+
+  <main class="grid">
+    <a class="card d" href="d-rise.html">
+      <span class="bgc"></span><span class="letter">D</span><span class="badge">round 2 · synthesis</span>
+      <div class="lane">dough → oven spring → baguette</div>
+      <h2>The Rise</h2>
+      <p>Scrub through the whole transformation: proof, shape, score, spring, bake. A's baguette wordmark on B's palette and step structure.</p>
+      <span class="go">Open preview →</span>
+    </a>
+
+    <a class="card a" href="a-ember.html">
+      <span class="bgc"></span><span class="letter">A</span>
+      <div class="lane">cinematic dark oven</div>
+      <h2>Ember</h2>
+      <p>A glowing loaf in a dark oven, ember and steam rising. The hungriest, most premium read.</p>
+      <span class="go">Open preview →</span>
+    </a>
+
+    <a class="card b" href="b-flour.html">
+      <span class="bgc"></span><span class="letter">B</span>
+      <div class="lane">kinetic type + flour</div>
+      <h2>Flour</h2>
+      <p>Giant poster type on paper, with flour dust you kick up as you move. Tactile and playful.</p>
+      <span class="go">Open preview →</span>
+    </a>
+
+    <a class="card c" href="c-starter.html">
+      <span class="bgc"></span><span class="letter">C</span>
+      <div class="lane">living fermentation</div>
+      <h2>Starter</h2>
+      <p>A poolish visibly bubbling beside a live instrument readout. The most original, tightest to your method.</p>
+      <span class="go">Open preview →</span>
+    </a>
+  </main>
+
+  <footer>// open each, then tell me which direction (or which pieces of which) to build out.</footer>
+</body>
+</html>

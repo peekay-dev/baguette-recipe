@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLOUR — Baguette redesign preview B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;600;700;800;900&family=Spectral:ital,wght@1,400;1,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEBE4;         /* neutral bone, low chroma (not warm cream) */
+    --paper-2:#E4E1D8;
+    --ink:#1A1714;           /* near-black */
+    --muted:#5C554D;
+    --wheat:#C8892B;         /* toasted wheat accent */
+    --poppy:#D5402A;         /* scoring-red micro accent */
+    --line:#CFC9BC;
+    --disp:'Big Shoulders Display';
+    --body:'Hanken Grotesk';
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body),system-ui,sans-serif;background:var(--paper);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden}
+
+  /* subtle paper grain */
+  body::before{content:"";position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E");}
+
+  .hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+    padding:clamp(20px,5vw,60px);overflow:hidden;isolation:isolate}
+  #flour-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+
+  .topline{display:flex;justify-content:space-between;align-items:center;gap:16px;
+    font-size:.82rem;color:var(--muted);letter-spacing:.02em;position:relative;z-index:4}
+  .topline .mark{font-family:var(--disp);font-weight:800;letter-spacing:.04em;font-size:1.1rem;color:var(--ink);text-transform:uppercase}
+  .topline .hyd{font-variant-numeric:tabular-nums;color:var(--wheat);font-weight:600}
+
+  .wordmark{position:relative;z-index:2;margin:auto 0;text-align:center;line-height:.82}
+  .wordmark .row{display:block;font-family:var(--disp);font-weight:900;text-transform:uppercase;
+    letter-spacing:-.005em;font-size:clamp(3.5rem,22vw,15rem);color:var(--ink)}
+  .wordmark .row.thin{font-weight:600;color:var(--muted)}
+  .wordmark .row .flourword{position:relative;color:var(--wheat)}
+  /* the dusted headline: type carries a faint flour bloom */
+  .wordmark .row span.ch{display:inline-block;transform:translateY(.5em);opacity:0;
+    animation:drop .8s var(--ease) forwards}
+  @keyframes drop{to{transform:none;opacity:1}}
+
+  .tagwrap{position:relative;z-index:2;max-width:52ch;margin:0 auto;text-align:center}
+  .tag{font-family:'Spectral',Georgia,serif;font-style:italic;font-size:clamp(1.1rem,2.4vw,1.6rem);
+    color:var(--ink);text-wrap:balance}
+  .tag .u{color:var(--poppy)}
+  .sub{margin-top:14px;color:var(--muted);font-size:clamp(.95rem,1.5vw,1.05rem);text-wrap:pretty}
+
+  .cta-row{position:relative;z-index:4;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+  .btn{font-family:var(--body);font-weight:700;font-size:.95rem;padding:14px 26px;border-radius:4px;cursor:pointer;
+    min-height:48px;display:inline-flex;align-items:center;gap:8px;border:2px solid var(--ink);transition:transform .25s var(--ease),background .25s,color .25s}
+  .btn-1{background:var(--ink);color:var(--paper)}
+  .btn-1:hover{transform:translateY(-2px);background:var(--wheat);border-color:var(--wheat);color:var(--ink)}
+  .btn-2{background:transparent;color:var(--ink)}
+  .btn-2:hover{transform:translateY(-2px);background:var(--ink);color:var(--paper)}
+  .hint{position:relative;z-index:4;text-align:center;margin-top:22px;font-size:.76rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted)}
+  .hint b{color:var(--wheat)}
+
+  /* ── fold below: a horizontal ferment timeline (no numbered markers) ── */
+  .below{background:var(--paper-2);border-top:2px solid var(--ink);padding:clamp(50px,9vw,110px) clamp(20px,5vw,60px)}
+  .below-wrap{max-width:1080px;margin:0 auto}
+  .below h2{font-family:var(--disp);font-weight:800;text-transform:uppercase;font-size:clamp(2rem,6vw,4rem);
+    line-height:.92;letter-spacing:-.01em;max-width:18ch}
+  .below h2 em{font-family:'Spectral',serif;font-style:italic;font-weight:400;text-transform:none;color:var(--wheat)}
+  .timeline{margin-top:52px;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--line);border:2px solid var(--ink)}
+  .cell{background:var(--paper);padding:22px 20px 26px}
+  .cell .clock{font-family:var(--disp);font-weight:800;font-size:1.5rem;color:var(--poppy);font-variant-numeric:tabular-nums}
+  .cell h3{margin-top:8px;font-size:1.05rem;font-weight:700}
+  .cell p{margin-top:6px;color:var(--muted);font-size:.9rem}
+  .cell .bar{height:6px;margin-top:16px;background:linear-gradient(90deg,var(--wheat),var(--poppy));transform-origin:left;transform:scaleX(var(--f,.3))}
+  .foot{margin-top:60px;text-align:center;color:var(--muted);font-size:.85rem}
+  .foot a{color:var(--wheat)}
+
+  @media (max-width:720px){ .timeline{grid-template-columns:1fr 1fr} }
+  @media (max-width:420px){ .timeline{grid-template-columns:1fr} }
+
+  @media (prefers-reduced-motion:reduce){
+    .wordmark .row span.ch{animation:none;transform:none;opacity:1}
+  }
+</style>
+</head>
+<body>
+  <section class="hero">
+    <canvas id="flour-canvas" aria-hidden="true"></canvas>
+    <div class="topline">
+      <span class="mark">Poolish&nbsp;·&nbsp;Perth</span>
+      <span>hydration <span class="hyd">75%</span></span>
+    </div>
+
+    <h1 class="wordmark" aria-label="Flour, water, time. Baguette.">
+      <span class="row thin" data-w="FLOUR"></span>
+      <span class="row" data-w="BAGUETTE"></span>
+    </h1>
+
+    <div class="tagwrap">
+      <p class="tag">Three ingredients, one <span class="u">variable</span>: your kitchen.</p>
+      <p class="sub">A poolish-method baguette that reads the room temperature and reschedules
+        every rest so the dough is ready exactly when it says.</p>
+      <div class="cta-row">
+        <button class="btn btn-1">Bake one →</button>
+        <button class="btn btn-2">The method</button>
+      </div>
+      <p class="hint">move your cursor to <b>kick up the flour</b></p>
+    </div>
+  </section>
+
+  <section class="below">
+    <div class="below-wrap">
+      <h2>Flour and water learn to <em>hold air.</em></h2>
+      <div class="timeline">
+        <div class="cell"><div class="clock">12h</div><h3>Poolish</h3><p>Overnight pre-ferment. Domed, bubbling, tangy: the whole flavour bank.</p><div class="bar" style="--f:.35"></div></div>
+        <div class="cell"><div class="clock">3h</div><h3>Bulk</h3><p>Coil folds, no kneading. The clock scales to your room temp.</p><div class="bar" style="--f:.6"></div></div>
+        <div class="cell"><div class="clock">1h</div><h3>Shape</h3><p>Roll to length, rest in the couche until the snap-back forgets itself.</p><div class="bar" style="--f:.8"></div></div>
+        <div class="cell"><div class="clock">22m</div><h3>Bake</h3><p>Score, steam, spring. Amber crust, wide-open crumb.</p><div class="bar" style="--f:1"></div></div>
+      </div>
+      <p class="foot">Preview <b>B &middot; FLOUR</b> &nbsp;·&nbsp; kinetic-type direction &nbsp;·&nbsp; <a href="index.html">back to all previews</a></p>
+    </div>
+  </section>
+
+<script>
+  /* split wordmark rows into animated letters */
+  document.querySelectorAll('.wordmark .row').forEach((row,ri)=>{
+    const w=row.dataset.w; row.textContent='';
+    [...w].forEach((ch,i)=>{
+      const s=document.createElement('span'); s.className='ch'; s.textContent=ch;
+      s.style.animationDelay=(0.2+ri*0.35+i*0.045)+'s';
+      row.appendChild(s);
+    });
+  });
+
+  /* ── flour dust field: gentle sifting motes + cursor puffs ── */
+  (function(){
+    const c=document.getElementById('flour-canvas'), x=c.getContext('2d');
+    const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    let W,H,DPR,motes=[],raf=0,running=true;
+    function size(){DPR=Math.min(devicePixelRatio||1,2);W=c.clientWidth;H=c.clientHeight;
+      c.width=W*DPR;c.height=H*DPR;x.setTransform(DPR,0,0,DPR,0,0);}
+    function mote(sift){return{x:Math.random()*W,y:sift?-10:Math.random()*H,
+      vx:(Math.random()-.5)*.25,vy:Math.random()*.35+.12,
+      r:Math.random()*1.8+.5,a:Math.random()*.5+.25,life:0,max:9999};}
+    const BASE=reduce?0:Math.min(140,Math.round(W/10));
+    for(let i=0;i<BASE;i++)motes.push(mote(false));
+
+    function puff(px,py){
+      const n=10;
+      for(let i=0;i<n;i++){
+        const ang=Math.random()*Math.PI*2, sp=Math.random()*2.4+.6;
+        motes.push({x:px,y:py,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp-.6,
+          r:Math.random()*2.6+1,a:.8,life:0,max:60+Math.random()*40});
+      }
+      if(motes.length>420)motes.splice(0,motes.length-420);
+    }
+    let lastX=0,lastY=0;
+    if(!reduce)addEventListener('pointermove',e=>{
+      const dx=e.clientX-lastX, dy=e.clientY-lastY;
+      if(dx*dx+dy*dy>90){puff(e.clientX,e.clientY);lastX=e.clientX;lastY=e.clientY;}
+    },{passive:true});
+
+    function frame(){
+      x.clearRect(0,0,W,H);
+      for(let i=motes.length-1;i>=0;i--){
+        const m=motes[i]; m.life++;
+        m.x+=m.vx; m.y+=m.vy; m.vy+=0.004; m.vx*=.99;
+        let a=m.a;
+        if(m.max<9999){a=m.a*(1-m.life/m.max); if(m.life>=m.max){motes.splice(i,1);continue;}}
+        x.beginPath();
+        x.fillStyle='rgba(250,248,242,'+a+')';
+        x.arc(m.x,m.y,m.r,0,7); x.fill();
+        // faint warm core so it reads as flour, not snow
+        x.beginPath(); x.fillStyle='rgba(200,137,43,'+(a*.15)+')'; x.arc(m.x,m.y,m.r*.5,0,7); x.fill();
+        if(m.max===9999&&m.y>H+12){m.y=-8;m.x=Math.random()*W;}
+      }
+      if(running)raf=requestAnimationFrame(frame);
+    }
+    function start(){size(); if(!reduce){running=true;if(!raf)frame();} else {frame();cancelAnimationFrame(raf);raf=0;}}
+    addEventListener('resize',size);
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden){running=false;cancelAnimationFrame(raf);raf=0;}
+      else if(!reduce){running=true;if(!raf)frame();}
+    });
+    start();
+  })();
+</script>
+</body>
+</html>
