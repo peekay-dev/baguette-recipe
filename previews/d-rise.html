@@ -260,9 +260,12 @@
     // so the raw slashes and the baked ears live in exactly the same spots (no splitting).
     function drawEar(xc,yc,len,hMax,ang,open,b,sp){
       const half=len/2, N=44;
-      // pointed-leaf profile (fuller middle, pointed tips). Combined with the shear below
-      // this gives each score the leaning "parallelogram leaf" shape (eco-leaf reference).
-      const disc=x=>Math.max(0,1-(x/half)*(x/half));
+      // straight-sided profile: full height across the middle so the long edges are STRAIGHT
+      // lines, then a linear taper to pointed tips. With the shear below this is a leaning
+      // parallelogram-leaf; the straight sides make the crust strips between scores run as
+      // straight, parallel, angled lines (like the reference bakes).
+      const TAP=0.5;
+      const disc=x=>{const a=Math.abs(x)/half; return a<=TAP?1:Math.max(0,1-(a-TAP)/(1-TAP));};
       const xR=-half+len*clamp(sp,0.02,1);            // score reveals left -> right
       const edge =(k,a,c)=>{for(let i=0;i<=N;i++){const x=a+(c-a)*i/N,y=k(x);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}};
       const edgeR=(k,a,c)=>{for(let i=N;i>=0;i--){const x=a+(c-a)*i/N;ctx.lineTo(x,k(x));}};
@@ -277,7 +280,7 @@
         // wide pale exposed-crumb leaf
         ctx.beginPath(); edge(x=>yBase(x),-half,xR); edgeR(x=>yShelf(x),-half,xR); ctx.closePath();
         const cg=ctx.createLinearGradient(0,-h*0.30,0,h*0.32);
-        cg.addColorStop(0,mix('#F6ECD2','#E6CD97',b*0.5)); cg.addColorStop(1,mix('#E4D3A4','#C89F5A',b*0.6));
+        cg.addColorStop(0,mix('#F0E2BE','#DDBA7C',b*0.7)); cg.addColorStop(1,mix('#D6C08E','#AE7B37',b*0.88));
         ctx.fillStyle=cg; ctx.fill();
         // shadow where the lip overhangs the crumb (reads as a real curl)
         ctx.save(); ctx.clip();
