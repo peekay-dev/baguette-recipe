@@ -205,11 +205,11 @@
     const KF=[
       {t:0.00, L:82,  R:80, p:2.2, e:0.50, bulge:0,  ear:0, brown:0,    flour:1,  steam:0,   glow:0,  irr:0.6},
       {t:0.16, L:84,  R:78, p:2.2, e:0.52, bulge:0,  ear:0, brown:0,    flour:1,  steam:0,   glow:0,  irr:0.7},
-      {t:0.32, L:252, R:49, p:2.4, e:0.74, bulge:0,  ear:0, brown:0.02, flour:.98,steam:0,   glow:0,  irr:0.85},
-      {t:0.44, L:258, R:49, p:2.4, e:0.76, bulge:2,  ear:0, brown:0.04, flour:.94,steam:0,   glow:.05,irr:0.85},
-      {t:0.64, L:302, R:58, p:2.4, e:0.80, bulge:16, ear:1, brown:0.24, flour:.64,steam:.35, glow:.55,irr:0.7},
-      {t:0.84, L:316, R:60, p:2.4, e:0.82, bulge:20, ear:1, brown:0.90, flour:.5, steam:1,   glow:1,  irr:0.55},
-      {t:1.00, L:316, R:60, p:2.4, e:0.82, bulge:20, ear:1, brown:1,    flour:.48,steam:.9,  glow:.85,irr:0.52}
+      {t:0.32, L:246, R:54, p:2.7, e:0.56, bulge:0,  ear:0, brown:0.02, flour:.98,steam:0,   glow:0,  irr:0.85},
+      {t:0.44, L:252, R:54, p:2.7, e:0.58, bulge:2,  ear:0, brown:0.04, flour:.94,steam:0,   glow:.05,irr:0.85},
+      {t:0.64, L:292, R:62, p:2.7, e:0.60, bulge:12, ear:1, brown:0.24, flour:.64,steam:.35, glow:.55,irr:0.7},
+      {t:0.84, L:306, R:64, p:2.7, e:0.62, bulge:14, ear:1, brown:0.90, flour:.5, steam:1,   glow:1,  irr:0.55},
+      {t:1.00, L:306, R:64, p:2.7, e:0.62, bulge:14, ear:1, brown:1,    flour:.48,steam:.9,  glow:.85,irr:0.52}
     ];
     function paramsAt(t){
       t=clamp(t,0,1);
@@ -270,7 +270,7 @@
         const yRidge=x=>-h*disc(x), yBase=x=>-h*0.34*disc(x), yShelf=x=>h*0.12*disc(x);
         // stronger low shadow the curled ear throws onto the crust below
         ctx.beginPath(); edge(x=>yShelf(x),-half,xR); edgeR(x=>h*0.32*disc(x),-half,xR); ctx.closePath();
-        ctx.fillStyle='rgba(58,32,10,'+(0.14+0.16*open)+')'; ctx.fill();
+        ctx.fillStyle='rgba(58,32,10,'+(0.09+0.11*open)+')'; ctx.fill();
         // wide pale exposed-crumb shelf
         ctx.beginPath(); edge(x=>yBase(x),-half,xR); edgeR(x=>yShelf(x),-half,xR); ctx.closePath();
         const cg=ctx.createLinearGradient(0,-h*0.34,0,h*0.14);
@@ -278,7 +278,7 @@
         ctx.fillStyle=cg; ctx.fill();
         // deep shadow where the lip overhangs the crumb (reads as a real curl)
         ctx.save(); ctx.clip();
-        ctx.strokeStyle='rgba(54,30,8,'+(0.34*clamp(open,0,1))+')'; ctx.lineWidth=h*0.24; ctx.lineCap='round';
+        ctx.strokeStyle='rgba(54,30,8,'+(0.24*clamp(open,0,1))+')'; ctx.lineWidth=h*0.22; ctx.lineCap='round';
         ctx.beginPath(); edge(x=>yBase(x)+h*0.05,-half,xR); ctx.stroke(); ctx.restore();
         // curled lip — dark crispy ridge, golden face, deep shadow at the base
         ctx.beginPath(); edge(x=>yRidge(x),-half,xR); edgeR(x=>yBase(x),-half,xR); ctx.closePath();
@@ -403,8 +403,16 @@
       // --- score: overlapping feathered slashes that open in place into wide ears ---
       const sp=scoreProg(t), open=P.ear;
       if(sp>0){
-        const ears=[{c:-0.28,len:0.70,yf:0.50},{c:0.05,len:0.72,yf:0.44},{c:0.36,len:0.68,yf:0.50}];
-        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*0.53, -0.15, open, b, sp); }
+        // ~5 smaller ears, steeper diagonal, heavily overlapping down the whole length —
+        // the classic baguette grigne (see reference photos), not a few big horizontal ears.
+        const ears=[
+          {c:-0.52,len:0.40,yf:0.30,hf:0.34},
+          {c:-0.30,len:0.45,yf:0.26,hf:0.38},
+          {c:-0.06,len:0.47,yf:0.24,hf:0.40},
+          {c: 0.17,len:0.45,yf:0.26,hf:0.38},
+          {c: 0.39,len:0.40,yf:0.30,hf:0.34}
+        ];
+        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*E.hf, -0.42, open, b, sp); }
       }
       ctx.restore(); // end loaf transform
 
