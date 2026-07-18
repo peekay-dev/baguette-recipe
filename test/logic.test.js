@@ -1,23 +1,28 @@
 // Pure-logic tests for the flour-profile cascade. Run: node test/logic.test.js
-// Loads the <script> from baguette-v2.html into a stubbed DOM and exercises the
+// Loads the <script> from baguette.html into a stubbed DOM and exercises the
 // pure functions (eff, sourceOf, buildFolds). CommonJS on purpose: non-strict
 // eval lets the script's top-level function declarations leak into scope.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-const html = fs.readFileSync(path.join(__dirname, '..', 'baguette-v2.html'), 'utf8');
-const js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+const html = fs.readFileSync(path.join(__dirname, '..', 'baguette.html'), 'utf8');
+// baguette.html has a small inline theme-preset <script> before the main one;
+// pick the largest script block rather than the first match.
+const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
+const js = scripts.reduce((a, b) => b.length > a.length ? b : a);
 
 const vals = { count:'4', weight:'250', hydration:'70', ambientTemp:'18', poolishPct:'30',
                flourA:'mb', flourB:'wholemeal', blend:'85', pctA:'85', pctB:'15', foldCount:'2' };
 const stub = id => ({ get value(){ return vals[id]; }, set value(v){ vals[id] = String(v); },
   set innerHTML(v){}, classList:{ toggle(){}, add(){}, remove(){}, contains(){ return false; } },
-  textContent:'', dataset:{}, max:'6', min:'1', style:{}, querySelector(){ return { textContent:'' }; } });
-global.document = { getElementById: stub, querySelectorAll: () => [] };
+  textContent:'', dataset:{}, max:'6', min:'1', style:{}, querySelector(){ return { textContent:'' }; },
+  addEventListener(){}, setAttribute(){}, getAttribute(){ return null; } });
+global.document = { getElementById: stub, querySelectorAll: () => [],
+  documentElement: { setAttribute(){}, getAttribute(){ return null; }, style: { setProperty(){} } } };
 global.localStorage = { getItem: () => null, setItem: () => {} };
 global.window = {};
-global.location = { hash: '', href: 'file:///baguette-v2.html', pathname: '/baguette-v2.html', origin: 'null' };
+global.location = { hash: '', href: 'file:///baguette.html', pathname: '/baguette.html', origin: 'null' };
 global.history = { replaceState() {} };
 if (typeof btoa === 'undefined') {
   global.btoa = s => Buffer.from(s, 'binary').toString('base64');

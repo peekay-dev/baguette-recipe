@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STARTER — Baguette redesign preview C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400&family=Martian+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0B0D0C;          /* near-black, faint green */
+    --void-2:#10130F;
+    --ink:#EAF0E6;
+    --muted:#8FA090;
+    --amber:#F2B33D;         /* live CO2 / ferment gold */
+    --amber-deep:#D98A1F;
+    --teal:#39C6A8;          /* instrument accent */
+    --line:rgba(57,198,168,.18);
+    --grid:rgba(143,160,144,.08);
+    --disp:'Familjen Grotesk';
+    --mono:'Martian Mono';
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--disp),system-ui,sans-serif;background:var(--void);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden}
+
+  .hero{position:relative;min-height:100svh;display:grid;
+    grid-template-columns:1.15fr .85fr;overflow:hidden;isolation:isolate}
+  /* faint lab grid */
+  .hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:44px 44px;mask:radial-gradient(120% 90% at 50% 40%,#000 40%,transparent 85%)}
+
+  /* left: the living jar */
+  .jar{position:relative;z-index:2;display:grid;place-items:center;padding:clamp(24px,4vw,56px)}
+  #ferment{width:100%;height:100%;position:absolute;inset:0}
+  .jar-copy{position:relative;z-index:3;align-self:end;justify-self:start;max-width:34ch}
+  .status{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;color:var(--teal);
+    display:inline-flex;align-items:center;gap:8px;text-transform:uppercase}
+  .status .live{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:blink 2s ease-in-out infinite}
+  h1{font-family:var(--disp);font-weight:600;font-size:clamp(2.6rem,6.4vw,5rem);line-height:.94;
+    letter-spacing:-.025em;margin:.35em 0 .35em;text-wrap:balance}
+  h1 em{font-style:italic;font-weight:400;color:var(--amber)}
+  .lede{color:var(--muted);font-size:clamp(1rem,1.5vw,1.12rem);text-wrap:pretty}
+  .lede b{color:var(--ink);font-weight:600}
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+  .btn{font-family:var(--disp);font-weight:600;font-size:.95rem;padding:13px 24px;border-radius:8px;cursor:pointer;
+    min-height:48px;display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;transition:transform .25s var(--ease),background .25s,box-shadow .25s}
+  .btn-1{background:var(--amber);color:#231603;box-shadow:0 6px 24px rgba(242,179,61,.28)}
+  .btn-1:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(242,179,61,.42)}
+  .btn-2{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn-2:hover{transform:translateY(-2px);border-color:var(--teal)}
+
+  /* right: instrument readout */
+  .panel{position:relative;z-index:2;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent);
+    border-left:1px solid var(--line);padding:clamp(24px,3.5vw,48px);display:flex;flex-direction:column;gap:22px;
+    font-family:var(--mono)}
+  .panel .ph{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .readout{display:grid;gap:2px}
+  .readout .val{font-size:clamp(2.2rem,4vw,3.2rem);font-weight:500;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+  .readout .val .unit{font-size:.4em;color:var(--muted);margin-left:.3em}
+  .readout .k{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:22px 0}
+  .metric .m-k{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .metric .m-v{font-size:1.3rem;color:var(--ink);margin-top:4px;font-variant-numeric:tabular-nums}
+  .metric .m-v.amber{color:var(--amber)}
+  .activity .track{height:10px;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:10px;background:rgba(0,0,0,.3)}
+  .activity .fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--amber-deep),var(--amber));box-shadow:0 0 14px rgba(242,179,61,.5);transition:transform .6s var(--ease)}
+  .activity .lbl{display:flex;justify-content:space-between;font-size:.66rem;color:var(--muted);margin-top:8px;letter-spacing:.06em;text-transform:uppercase}
+  .log{font-size:.68rem;color:var(--muted);line-height:1.9;letter-spacing:.02em}
+  .log b{color:var(--teal);font-weight:400}
+
+  /* fold below */
+  .below{position:relative;z-index:2;background:var(--void-2);border-top:1px solid var(--line);
+    padding:clamp(50px,9vw,110px) clamp(20px,5vw,56px)}
+  .below-wrap{max-width:1000px;margin:0 auto}
+  .below h2{font-family:var(--disp);font-weight:600;font-size:clamp(2rem,5vw,3.4rem);line-height:1;
+    letter-spacing:-.02em;max-width:16ch;text-wrap:balance}
+  .below h2 em{font-style:italic;font-weight:400;color:var(--teal)}
+  .phases{margin-top:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line)}
+  .phase{background:var(--void-2);padding:24px 22px}
+  .phase .pk{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--amber)}
+  .phase h3{margin-top:10px;font-size:1.1rem;font-weight:600}
+  .phase p{margin-top:6px;color:var(--muted);font-size:.9rem}
+  .phase .t{margin-top:14px;font-family:var(--mono);font-size:.8rem;color:var(--teal)}
+  .foot{margin-top:56px;text-align:center;color:var(--muted);font-size:.85rem;font-family:var(--mono)}
+  .foot a{color:var(--teal)}
+
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+
+  @media (max-width:860px){
+    .hero{grid-template-columns:1fr;grid-template-rows:1fr auto}
+    .jar{min-height:64svh}
+    .panel{border-left:none;border-top:1px solid var(--line)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .status .live{animation:none}
+  }
+</style>
+</head>
+<body>
+  <section class="hero">
+    <div class="jar">
+      <canvas id="ferment" aria-hidden="true"></canvas>
+      <div class="jar-copy">
+        <span class="status"><span class="live"></span>Poolish · active fermentation</span>
+        <h1>The dough is <em>alive.</em></h1>
+        <p class="lede">Watch the pre-ferment breathe. Every bubble is <b>CO₂</b> from wild-slow
+          yeast, and its pace sets your entire schedule.</p>
+        <div class="cta-row">
+          <button class="btn btn-1">Start a batch →</button>
+          <button class="btn btn-2">How it works</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel" aria-label="Live fermentation readout">
+      <div class="ph">// live_readout</div>
+      <div class="readout">
+        <span class="k">Fermentation elapsed</span>
+        <span class="val" id="elapsed">11:42<span class="unit">h:m</span></span>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="m-k">Dough temp</div><div class="m-v" id="temp">22.4°C</div></div>
+        <div class="metric"><div class="m-k">Hydration</div><div class="m-v amber">100%</div></div>
+        <div class="metric"><div class="m-k">Rise vs start</div><div class="m-v" id="rise">+184%</div></div>
+        <div class="metric"><div class="m-k">Bubbles/min</div><div class="m-v" id="bpm">— </div></div>
+      </div>
+      <div class="activity">
+        <div class="m-k" style="color:var(--muted)">Yeast activity</div>
+        <div class="track"><div class="fill" id="fill"></div></div>
+        <div class="lbl"><span>dormant</span><span id="stage">peak &amp; domed</span><span>collapse</span></div>
+      </div>
+      <div class="log" id="log"></div>
+    </aside>
+  </section>
+
+  <section class="below">
+    <div class="below-wrap">
+      <h2>Fermentation is the <em>whole</em> recipe. The rest is timing.</h2>
+      <div class="phases">
+        <div class="phase"><div class="pk">stage / pre-ferment</div><h3>Build the poolish</h3><p>100% hydration, a pinch of yeast. It doubles, domes, then just begins to recede. That inflection is go-time.</p><div class="t">12–16 h</div></div>
+        <div class="phase"><div class="pk">stage / bulk</div><h3>Fold &amp; ferment</h3><p>Mix, then coil-fold. Warmer room, faster clock. The app rescales every rest to your dough temp.</p><div class="t">~3 h</div></div>
+        <div class="phase"><div class="pk">stage / proof</div><h3>Shape &amp; rest</h3><p>Roll, couche, détente. The gluten releases its tension so the loaf holds full length.</p><div class="t">45–75 m</div></div>
+        <div class="phase"><div class="pk">stage / bake</div><h3>Score &amp; spring</h3><p>Steam-shocked into a hot oven. Trapped CO₂ expands in one last violent rise.</p><div class="t">22 m</div></div>
+      </div>
+      <p class="foot">preview <b>C · STARTER</b> · living-fermentation direction · <a href="index.html">back to all previews</a></p>
+    </div>
+  </section>
+
+<script>
+  /* ── living poolish: rising CO2 bubbles with soft metaball glow ── */
+  (function(){
+    const c=document.getElementById('ferment'), x=c.getContext('2d');
+    const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    let W,H,DPR,bubbles=[],raf=0,running=true,born=0;
+    function size(){DPR=Math.min(devicePixelRatio||1,2);W=c.clientWidth;H=c.clientHeight;
+      c.width=W*DPR;c.height=H*DPR;x.setTransform(DPR,0,0,DPR,0,0);}
+    function bub(){return{x:W*(0.12+Math.random()*0.76),y:H+Math.random()*30,
+      r:Math.random()*Math.random()*26+4,vy:-(Math.random()*.5+.2),wob:Math.random()*6.28,
+      wsp:(Math.random()*.02+.008),amp:Math.random()*14+4};}
+    const N=reduce?14:34;
+    for(let i=0;i<N;i++){const b=bub();b.y=Math.random()*H;bubbles.push(b);}
+    let t=0;
+    function frame(){
+      t+=0.016;
+      x.clearRect(0,0,W,H);
+      // jar medium: warm poolish glow pooling at the base
+      const g=x.createLinearGradient(0,0,0,H);
+      g.addColorStop(0,'rgba(20,24,18,0)');g.addColorStop(.6,'rgba(60,42,14,.18)');g.addColorStop(1,'rgba(120,80,20,.30)');
+      x.fillStyle=g;x.fillRect(0,0,W,H);
+      x.globalCompositeOperation='lighter';
+      for(const b of bubbles){
+        b.wob+=b.wsp; b.y+=b.vy; b.vy-=0.0006;
+        const bx=b.x+Math.sin(b.wob)*b.amp;
+        const grd=x.createRadialGradient(bx,b.y,0,bx,b.y,b.r);
+        grd.addColorStop(0,'rgba(242,179,61,.55)');
+        grd.addColorStop(.6,'rgba(217,138,31,.20)');
+        grd.addColorStop(1,'rgba(217,138,31,0)');
+        x.fillStyle=grd;x.beginPath();x.arc(bx,b.y,b.r,0,7);x.fill();
+        // bright rim highlight
+        x.strokeStyle='rgba(255,224,150,.10)';x.lineWidth=1;x.beginPath();x.arc(bx,b.y,b.r*.86,0,7);x.stroke();
+        if(b.y< -b.r){Object.assign(b,bub());born++;}
+      }
+      x.globalCompositeOperation='source-over';
+      if(running)raf=requestAnimationFrame(frame);
+    }
+    function start(){size();if(!reduce){running=true;if(!raf)frame();}else{frame();cancelAnimationFrame(raf);raf=0;}}
+    addEventListener('resize',size);
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden){running=false;cancelAnimationFrame(raf);raf=0;}
+      else if(!reduce){running=true;if(!raf)frame();}
+    });
+    start();
+
+    /* ── live instrument readout ── */
+    const $=id=>document.getElementById(id);
+    let mins=11*60+42, rise=184, activity=0.82, lastBorn=0, tick=0;
+    const logs=['nucleation steady','gluten net gassing','dome holding','aroma: lactic, nutty','peak approaching'];
+    function pad(n){return String(n).padStart(2,'0');}
+    function upd(){
+      mins+=1; if(mins>16*60)mins=11*60+42;
+      $('elapsed').innerHTML=Math.floor(mins/60)+':'+pad(mins%60)+'<span class="unit">h:m</span>';
+      const temp=(22.4+Math.sin(t*0.3)*0.3).toFixed(1);
+      $('temp').textContent=temp+'°C';
+      rise+=Math.round((Math.random()*2)); if(rise>240)rise=180;
+      $('rise').textContent='+'+rise+'%';
+      const bpm=Math.max(0,born-lastBorn); lastBorn=born;
+      $('bpm').textContent=Math.round(18+bpm*4+Math.random()*4);
+      activity=0.72+Math.sin(t*0.12)*0.14;
+      $('fill').style.transform='scaleX('+activity.toFixed(3)+')';
+      tick++;
+      if(tick%4===0){
+        const el=$('log');
+        const line='<div>'+pad(Math.floor(mins/60))+':'+pad(mins%60)+' <b>›</b> '+logs[Math.floor(Math.random()*logs.length)]+'</div>';
+        el.insertAdjacentHTML('afterbegin',line);
+        while(el.children.length>4)el.removeChild(el.lastChild);
+      }
+    }
+    upd();upd();upd();upd();
+    if(!reduce)setInterval(()=>{if(!document.hidden)upd();},1600);
+  })();
+</script>
+</body>
+</html>

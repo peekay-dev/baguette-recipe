@@ -3,256 +3,722 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Perth Baguettes — Poolish Method</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Poolish Baguettes — The Loaf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,500;1,6..96,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #f5f0ea; --white: #fff; --accent: #8b7355; --text: #3a3530; --muted: #9a9185; --border: #ddd5ca; --highlight: rgba(139,115,85,0.06); --done: #ccc5bb; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', -apple-system, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); max-width: 680px; margin: 0 auto; padding: 0 0 60px; line-height: 1.65; font-size: 15px; }
-  h1 { font-family: 'DM Serif Display', Georgia, serif; font-size: 2.2em; font-weight: 400; letter-spacing: -0.5px; margin-bottom: 0; }
-  h2 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.1em; font-weight: 400; margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); letter-spacing: 0.3px; color: var(--accent); }
-  h3 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.05em; font-weight: 400; margin: 16px 0 6px; color: var(--accent); letter-spacing: 0.3px; }
-  .subtitle { color: var(--muted); margin-bottom: 20px; font-size: 0.88em; letter-spacing: 2px; text-transform: uppercase; font-weight: 400; }
-  .header-row { padding: 32px 20px 0; }
-  .controls { padding: 0; margin: 0 20px 12px; }
-  .control-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 10px; }
-  .control-row:last-child { margin-bottom: 0; }
-  .field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
-  .field label { font-size: 0.7em; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-  select, input[type=number], input[type=time] { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 16px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: transparent; width: 100%; height: 44px; line-height: 1.2; color: var(--text); }
-  input[type=number], input[type=time] { -webkit-appearance: none; appearance: none; }
-  select:focus, input:focus { outline: none; border-color: var(--accent); }
-  /* Force number input spinners to show on mobile — stepper only */
-  .stepper input[type=number]::-webkit-inner-spin-button,
-  .stepper input[type=number]::-webkit-outer-spin-button {
-    opacity: 1;
-    height: 44px;
+  :root, [data-theme="light"] {
+    --bg: #EDEBE4; --surface: #E4E1D8; --ink: #1A1714; --muted: #5C554D;
+    --line: #CFC9BC; --accent: #C8892B; --accent-ink: #2A1804;
+    --accent-soft: rgba(26,23,20,.06); --accent-soft-ink: #5C4A2E;
+    --poppy: #D5402A; --btn2-bd: rgba(26,23,20,.22);
+    --bar-bg: #F7F1E2; --bar-ink: #2A1804; --bar-line: rgba(42,24,4,.18);
+    --bar-shadow: rgba(26,23,20,.35);
+    --disp: 'Bodoni Moda'; --body: 'Hanken Grotesk';
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
-  /* Hide spinners on plain % fields so they match select height */
-  .num-field input[type=number] { -moz-appearance: textfield; }
-  .num-field input[type=number]::-webkit-inner-spin-button,
-  .num-field input[type=number]::-webkit-outer-spin-button { display: none; }
-  .toggle { display: flex; gap: 0; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
-  .toggle button { flex: 1; padding: 8px 14px; border: none; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.85em; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.2s; min-height: 44px; letter-spacing: 0.3px; white-space: nowrap; -webkit-appearance: none; }
-  .toggle button.active { background: var(--accent); color: var(--bg); }
-  .blend-row { display: flex; gap: 6px; align-items: center; }
-  .blend-input { width: 52px; text-align: center; font-family: 'Inter', sans-serif; font-weight: 400; font-size: 0.88em; padding: 6px 2px; border: 1px solid var(--border); border-radius: 4px; background: transparent; color: var(--accent); min-height: 36px; }
-  .blend-input:focus { outline: none; border-color: var(--accent); }
+  [data-theme="dark"] {
+    --bg: #151110; --surface: #1C1613; --ink: #F4E7D8; --muted: #B39A86;
+    --line: rgba(216,154,74,.20); --accent: #E7AF52; --accent-ink: #2A1804;
+    --accent-soft: rgba(244,231,216,.08); --accent-soft-ink: #E7C088;
+    --poppy: #FF7A2E; --btn2-bd: rgba(216,154,74,.35);
+    --bar-bg: #4A3826; --bar-ink: #F4E7D8; --bar-line: rgba(244,231,216,.16);
+    --bar-shadow: rgba(0,0,0,.5);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--body), system-ui, sans-serif; font-size: 15px; line-height: 1.65;
+         background: var(--bg); color: var(--ink); max-width: 680px; margin: 0 auto;
+         padding: 0 0 60px; -webkit-font-smoothing: antialiased;
+         transition: background .4s var(--ease), color .4s var(--ease); }
+
+  /* ── Hero (photo, no canvas art) ───────────────────────────────────── */
+  .hero { padding: clamp(18px,5vw,28px) 20px 22px; }
+  .topline { display: flex; justify-content: space-between; align-items: center; gap: 12px;
+             font-size: 0.8rem; color: var(--muted); flex-wrap: wrap; }
+  .topline .mark { font-family: var(--body); font-weight: 700; letter-spacing: 0.14em;
+                    font-size: 0.72rem; color: var(--ink); text-transform: uppercase; }
+  .topline .hyd { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .topright { display: flex; align-items: center; gap: 10px; }
+  .share-btn { display: inline-flex; align-items: center; gap: 5px;
+               font-family: inherit; font-size: 0.76rem; font-weight: 600; color: var(--ink);
+               background: var(--accent-soft); border: 1px solid var(--btn2-bd);
+               border-radius: 20px; padding: 7px 13px; cursor: pointer; min-height: 36px;
+               -webkit-tap-highlight-color: transparent; transition: background 0.2s, border-color 0.2s; }
+  .share-btn:hover { background: rgba(26,23,20,.1); }
+  .share-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .share-btn.copied { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .theme { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--btn2-bd);
+           background: var(--accent-soft); color: var(--ink); cursor: pointer; display: grid;
+           place-items: center; flex-shrink: 0; -webkit-tap-highlight-color: transparent;
+           transition: background .2s, transform .2s; }
+  .theme:hover { background: rgba(26,23,20,.1); transform: scale(1.06); }
+  .theme:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .theme svg { width: 16px; height: 16px; }
+
+  .headline { margin: clamp(16px,4vw,26px) 0 0; }
+  .headline h1 { font-family: var(--disp), Georgia, serif; font-weight: 600; letter-spacing: -0.015em;
+                 font-size: clamp(1.9rem, 7vw, 2.6rem); line-height: 1.0; color: var(--ink); text-wrap: balance; }
+  .headline h1 em { font-style: italic; font-weight: 600; color: var(--accent); }
+  .headline .s { margin-top: 8px; color: var(--muted); font-size: 0.92rem; text-wrap: pretty; }
+  .headline .s b { color: var(--ink); font-weight: 700; }
+
+  .photo { position: relative; width: 100%; margin-top: 18px; aspect-ratio: 16/10; border-radius: 20px;
+           overflow: hidden; box-shadow: 0 20px 40px -18px rgba(26,23,20,.35), 0 6px 16px rgba(26,23,20,.14);
+           border: 1px solid var(--line); }
+  .photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 32%; display: block; }
+  .photo::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+                  border-radius: inherit; pointer-events: none; }
+
+  .cta-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .btn { font-family: var(--body); font-weight: 600; font-size: 0.92rem; padding: 13px 22px; border-radius: 100px;
+         cursor: pointer; min-height: 46px; flex: 1; display: inline-flex; align-items: center; justify-content: center;
+         gap: 8px; border: 1px solid transparent; -webkit-tap-highlight-color: transparent;
+         transition: transform .3s var(--ease), box-shadow .3s var(--ease), background .3s; }
+  .btn-1 { background: linear-gradient(180deg,#E4A64D,#B06C1C); color: #2A1804;
+           box-shadow: 0 8px 22px rgba(176,108,28,.32), inset 0 1px 0 rgba(255,255,255,.35); }
+  .btn-1:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(176,108,28,.42), inset 0 1px 0 rgba(255,255,255,.35); }
+  .btn-2 { background: var(--accent-soft); color: var(--ink); border-color: var(--btn2-bd); }
+  .btn-2:hover { transform: translateY(-2px); background: rgba(26,23,20,.1); }
+
+  /* Loaf bakes as you complete steps (--bake 0→1 deepens the crust) */
+  .finale-loaf { transition: filter 0.7s var(--ease);
+    filter: saturate(calc(1 + var(--bake, 0) * 0.55))
+            brightness(calc(1 - var(--bake, 0) * 0.13))
+            contrast(calc(1 + var(--bake, 0) * 0.12)); }
+
+  /* Scroll cinematics — warmth-on-descent + staggered reveals */
+  .warmth { position: fixed; left: 0; right: 0; bottom: 0; height: 46vh; z-index: 90; pointer-events: none;
+            opacity: 0; will-change: opacity;
+            background: radial-gradient(120% 100% at 50% 128%, rgba(200,137,43,0.20), rgba(200,137,43,0) 70%); }
+  .reveal { opacity: 0; transform: translateY(18px);
+            transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ── Stage nav (sticky, below the hero) ───────────────────────────── */
+  /* Theme-aware bg: bright warm cream in light mode reads as a lifted "dusted
+     flour" strip; a muted mocha in dark mode gives the same lift without the
+     glare a bright strip would have against a near-black page. A drop-shadow
+     (not an outline) keeps the loaf legible where its own lighter gold tones
+     would otherwise get close to the bg's lightness. */
+  .stages-bar { background: var(--bar-bg); padding: 10px 0 12px;
+                position: sticky; top: 0; z-index: 100; border-radius: 18px;
+                box-shadow: 0 6px 18px -10px var(--bar-shadow); }
+  .stages { display: flex; gap: 4px; padding: 0 16px; align-items: center; }
+  .bar-loaf { width: 44px; height: 28px; flex-shrink: 0; opacity: 0;
+              filter: drop-shadow(0 2px 3px rgba(42,24,4,.32));
+              transition: opacity 0.35s ease-out, transform 0.35s ease-out; transform: scale(0.7); }
+  .bar-loaf.bar-loaf-visible { opacity: 1; transform: scale(1); }
+  .bar-spacer { width: 44px; flex-shrink: 0; }
+  .bar-steam { fill: none; stroke: var(--bar-ink); stroke-width: 1.6; stroke-linecap: round;
+               opacity: 0; animation: steam var(--st,4s) ease-out var(--sdl,0.8s) infinite; }
+  @media (max-width: 359px) { .bar-loaf, .bar-spacer { display: none; } }
+  .stage { flex: 1; font-size: 0.68rem; font-weight: 600; padding: 10px 4px;
+           border-radius: 20px; white-space: nowrap; text-align: center; border: 1px solid var(--bar-line);
+           color: var(--bar-ink); opacity: 0.55; cursor: pointer;
+           -webkit-tap-highlight-color: transparent;
+           transition: opacity 0.2s, background 0.2s, color 0.2s; }
+  .stage:hover { opacity: 0.8; }
+  .stage.done { opacity: 0.75; }
+  .stage.now { background: var(--accent); color: var(--accent-ink); opacity: 1;
+               border-color: var(--accent); }
+
+  .ear     { transform-box: fill-box; transform-origin: 8% 80%;
+             transform: rotate(10deg) scale(0.2);
+             animation: scoreopen 0.6s var(--ease) var(--sd, 1s) forwards; }
+
+  /* Mini loaf handoff: scales up from nothing on first reveal */
+  @keyframes loafenter { 0% { opacity: 0; transform: scale(0.5); } 60% { transform: scale(1.12); } 100% { opacity: 1; transform: scale(1); } }
+  .bar-loaf-enter { animation: loafenter 0.45s var(--ease) both; }
+
+  /* Finale — end-of-recipe celebration beat (visible by default; motion only enhances) */
+  .finale { text-align: center; padding: 30px 20px 14px; border-top: 1px solid var(--line); margin-top: 8px; }
+  .finale-loaf { width: 128px; height: auto; display: block; margin: 0 auto 6px;
+                 cursor: pointer; -webkit-tap-highlight-color: transparent; transform-origin: center bottom; }
+  .finale-steam { fill: none; stroke: rgba(178,110,44,0.5); stroke-width: 2; stroke-linecap: round;
+                  opacity: 0; animation: steam var(--st,4.6s) ease-out var(--sdl,0.8s) infinite; }
+  .finale-breathe { transform-box: fill-box; transform-origin: center; animation: breathe 5s var(--ease) infinite; }
+  .finale-title { font-family: var(--disp), Georgia, serif; font-size: 1.7rem; color: var(--accent);
+                  font-weight: 400; letter-spacing: -0.01em; line-height: 1.1; margin: 0; text-wrap: balance; }
+  .finale-note { margin: 8px auto 0; max-width: 34ch; font-size: 0.9rem; color: var(--ink); opacity: 0.72;
+                 line-height: 1.5; text-wrap: pretty; }
+  .finale-in .finale-loaf { animation: finalepop 0.7s var(--ease); }
+  .finale-in .finale-title { animation: finalerise 0.55s var(--ease) 0.12s both; }
+  .finale-in .finale-note { animation: finalerise 0.55s var(--ease) 0.24s both; }
+  .finale-loaf.pop { animation: finalepop 0.7s var(--ease); }
+
+  /* ── Controls ────────────────────────────────────────────────────────── */
+  .controls { padding: 16px; margin: 16px 20px; background: var(--surface); border-radius: 14px; }
+  .group-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); margin: 14px 0 6px; }
+  .group-label:first-child { margin-top: 0; }
+  .control-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; margin-bottom: 10px; }
+  .control-row:last-child { margin-bottom: 0; }
+  .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+  .adv-times .field { min-width: calc(50% - 5px); }
+  .control-row.adv-times { align-items: flex-start; }
+  .field label { font-size: 0.68rem; font-weight: 600; color: var(--muted);
+                 text-transform: uppercase; letter-spacing: 0.08em;
+                 display: flex; align-items: center; gap: 4px; flex-wrap: wrap; min-height: 22px; }
+  .field label .src { padding: 2px 6px; font-size: 0.63rem; }
+
+  /* Select */
+  select { font-family: var(--body), system-ui; font-size: 15px; padding: 9px 28px 9px 10px;
+           border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg);
+           width: 100%; height: 44px; color: var(--ink); appearance: none; -webkit-appearance: none;
+           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235C554D' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+           background-repeat: no-repeat; background-position: right 10px center; }
+  select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,137,43,0.18); }
+
+  /* Number / time inputs */
+  input[type=number], input[type=time] { font-family: var(--body), system-ui; font-size: 15px;
+    padding: 9px 10px; border: 1.5px solid var(--line); border-radius: 10px;
+    background: var(--bg); width: 100%; height: 44px; color: var(--ink);
+    -webkit-appearance: none; appearance: none; }
+  input[type=number]:focus, input[type=time]:focus { outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(200,137,43,0.18); }
   input[type=range] { flex: 1; accent-color: var(--accent); min-height: 44px; }
+
+  /* Stepper */
+  .stepper { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .stepper input[type=number] { border: none; border-radius: 0; text-align: center;
+    -moz-appearance: textfield; padding: 8px 2px; box-shadow: none; height: 44px; }
+  .stepper input::-webkit-outer-spin-button,
+  .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper button { width: 40px; min-height: 44px; border: none; background: transparent;
+    color: var(--accent); font-size: 1.15rem; cursor: pointer; flex-shrink: 0;
+    font-family: var(--body); transition: background 0.12s; }
+  .stepper button:hover { background: var(--accent-soft); }
+  .stepper button:active { background: var(--line); }
+
+  /* Toggle group */
+  .toggle { display: flex; gap: 3px; padding: 3px; background: var(--bg); border-radius: 12px;
+            border: 1.5px solid var(--line); }
+  .toggle button { flex: 1; padding: 8px 10px; border: none; font-family: var(--body), system-ui;
+    font-weight: 600; font-size: 0.83rem; cursor: pointer; background: transparent;
+    color: var(--muted); transition: background 0.15s var(--ease), color 0.15s;
+    min-height: 44px; border-radius: 9px; white-space: nowrap; -webkit-appearance: none; }
+  .toggle button.active { background: var(--accent); color: var(--accent-ink); }
+  .toggle button:not(.active):hover { background: var(--accent-soft); color: var(--ink); }
+
+  /* Blend */
+  .blend-input { width: 52px; text-align: center; font-family: var(--body); font-size: 0.88rem;
+    padding: 6px 2px; border: 1.5px solid var(--line); border-radius: 8px;
+    background: var(--bg); color: var(--accent); min-height: 36px; }
+  .blend-input:focus { outline: none; border-color: var(--accent); }
   .num-field { max-width: 76px; flex: 0 0 76px; }
-  .stepper { display: flex; align-items: center; gap: 0px; border: 1px solid var(--border); border-radius: 4px; overflow:hidden; }
-  .stepper input[type=number] { border: none; border-radius: 0; text-align: center; -moz-appearance: textfield; padding: 8px 2px; }
-  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .stepper button { width: 38px; min-height: 44px; border: none; background: var(--highlight); color: var(--accent); font-size: 1.2em; cursor: pointer; flex-shrink:0; font-family: 'Inter', sans-serif ;}
+
+  /* Source pill */
+  .src { font-size: 0.66rem; font-weight: 600; color: var(--accent-soft-ink);
+         background: var(--accent-soft); padding: 6px 10px; border-radius: 10px;
+         cursor: pointer; white-space: nowrap; display: inline-block; }
+
+  /* Advanced toggle */
+  .adv-toggle { cursor: pointer; user-select: none; display: flex; align-items: center;
+    justify-content: space-between; font-size: 0.82rem; font-weight: 600;
+    color: var(--accent-soft-ink); background: var(--accent-soft); border-radius: 10px;
+    padding: 12px 14px; margin-top: 14px;
+    -webkit-tap-highlight-color: transparent; min-height: 44px; }
+  .adv-toggle .chev, .tip .chev { color: var(--accent-soft-ink); font-size: 0.75rem;
+                      transition: transform 0.22s var(--ease); display: inline-block; flex-shrink: 0; }
+  .adv-toggle.open .chev, .tip.open .chev { transform: rotate(180deg); }
+  .blend-add { display: inline-block; background: none; border: none; color: var(--accent);
+               font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+               padding: 4px 2px; margin: 2px 0 8px; -webkit-tap-highlight-color: transparent; }
+  .blend-add:hover { text-decoration: underline; }
+  .blend-add:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .field[hidden] { display: none; }
+
+  /* Collapsibles — grid-template-rows (no layout-property animation) */
+  .collapsible-grid { display: grid; grid-template-rows: 0fr;
+                      transition: grid-template-rows 0.25s var(--ease); }
+  .collapsible-grid.open { grid-template-rows: 1fr; }
+  .collapsible-inner { overflow: hidden; }
+
+  /* Schedule collapsible header */
+  .collapsible-header { display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+  .collapsible-header::after { content: '▾'; font-size: 0.8rem; color: var(--accent);
+    transition: transform 0.22s var(--ease); display: inline-block; }
+  .collapsible-header.open::after { transform: rotate(180deg); }
+
+  /* ── Content ─────────────────────────────────────────────────────────── */
   .content { padding: 0 20px; }
-  .white-panel { background: var(--white); border-radius: 8px; padding: 20px; margin-bottom: 12px; }
-  table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 0.9em; }
+  .white-panel { background: var(--surface); border-radius: 14px; padding: 20px; margin-bottom: 12px; }
+  h2 { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 1.1rem;
+       margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line);
+       letter-spacing: 0.01em; color: var(--accent); }
+  h3 { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 1.05rem;
+       margin: 16px 0 6px; color: var(--accent); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 0.9rem; }
   th, td { text-align: left; padding: 4px 0; border: none; }
-  th { font-size: 0.65em; font-weight: 500; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  th { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--muted);
+       letter-spacing: 0.08em; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
   th:last-child, td.amt { text-align: right; }
   td { border-bottom: 1px solid rgba(0,0,0,0.04); }
-  td.amt { font-weight: 500; font-size: 1.05em; font-variant-numeric: tabular-nums; color: var(--text); text-align: right; }
-  .step { margin-bottom: 4px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04); transition: opacity 0.3s; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  td.amt { font-weight: 600; font-size: 1.05rem; font-variant-numeric: tabular-nums;
+           color: var(--ink); text-align: right; }
+
+  /* Steps */
+  .step { margin-bottom: 4px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04);
+          scroll-margin-top: 48px;
+          transition: opacity 0.2s; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .step:last-child { border-bottom: none; }
-  .step.done { opacity: 0.3; }
+  .step.done { opacity: 0.35; }
   .step.done .step-title { text-decoration: line-through; }
   .step-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-  .step-num { font-family: 'DM Serif Display', Georgia, serif; font-size: 1em; color: var(--accent); margin-right: 8px; }
-  .step-title { font-weight: 400; }
-  .step-time { font-size: 0.8em; color: var(--muted); }
-  .step-check { font-size: 0.7em; color: var(--muted); letter-spacing: 0.5px; }
+  .step-num { font-family: var(--disp), Georgia, serif; font-size: 1rem; color: var(--accent);
+              margin-right: 8px; }
+  .step-title { font-weight: 600; }
+  .step-time { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .step-check { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.05em; }
   .step.done .step-check { color: var(--accent); }
   .step p { margin: 3px 0; }
-  .tip { background: var(--highlight); padding: 0; margin: 6px 0; border-radius: 4px; font-size: 0.88em; overflow: hidden; }
-  .tip-toggle { display: flex; align-items: center; padding: 6px 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; gap: 5px; font-weight: 400; font-size: 0.8em; color: var(--muted); letter-spacing: 0.3px; }
-  .tip-toggle::before { content: '+'; font-size: 1.1em; color: var(--accent); display: inline-block; }
-  .tip.open .tip-toggle::before { content: '−'; }
-  .tip-hint { color: var(--muted); font-style: italic; }
-  .tip.open .tip-hint { display: none; }
-  .tip-body { padding: 0 10px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; color: var(--text); }
-  .tip.open .tip-body { max-height: 300px; padding: 0 10px 8px; }
-  .shaping-gif { width: 100%; border-radius: 4px; margin: 8px 0 2px; display: block; }
-  .gif-caption { font-size: 0.75em; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 6px; }
-  .temp { font-weight: 500; }
-  .collapsible-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
-  .collapsible-header::after { content: '+'; font-size: 1.1em; color: var(--accent); }
-  .collapsible-header.open::after { content: '−'; }
-  .collapsible-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-  .collapsible-body.open { max-height: 800px; }
-  .sched-day { font-size: 0.72em; color: var(--muted); font-weight: 400; }
-  .schedule { display: grid; grid-template-columns: auto 1fr; gap: 1px 16px; font-size: 0.9em; padding-top: 8px; }
-  .schedule .time { font-weight: 500; white-space: nowrap; color: var(--accent); }
-  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; font-size: 0.85em; }
-  .compare > div { padding: 10px; border-radius: 4px; border: 1px solid var(--border); }
-  .compare > div:last-child { background: var(--highlight); }
-  .compare h4 { font-size: 0.75em; font-weight: 500; margin-bottom: 4px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* Tips — collapsible (recipe steps) */
+  .tip { background: var(--accent-soft); border-radius: 10px; margin: 6px 0; font-size: 0.88rem; }
+  .tip-toggle { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer;
+    -webkit-tap-highlight-color: transparent; user-select: none; gap: 6px;
+    font-weight: 600; font-size: 0.88rem; color: var(--accent-soft-ink); min-height: 44px; }
+  .tip-hint { color: var(--accent-soft-ink); font-size: 0.9em; font-weight: 400; opacity: 0.8; }
+  .tip-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.22s var(--ease); }
+  .tip.open .tip-body { grid-template-rows: 1fr; }
+  .tip-body-inner { overflow: hidden; padding: 0 12px; color: var(--ink); }
+  .tip.open .tip-body-inner { padding-bottom: 10px; }
+  .tip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .adv-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  /* Shaping GIFs */
+  .shaping-gif { width: 100%; border-radius: 8px; margin: 8px 0 2px; display: block; }
+  .gif-caption { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.04em; margin-bottom: 6px; }
+
+  /* Misc */
+  .temp { font-weight: 600; }
+  .sched-day { font-size: 0.72rem; color: var(--muted); }
+  .schedule { display: grid; grid-template-columns: auto 1fr; gap: 1px 16px;
+              font-size: 0.9rem; padding-top: 8px; }
+  .schedule .time { font-weight: 600; white-space: nowrap; color: var(--accent);
+                    font-variant-numeric: tabular-nums; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; font-size: 0.85rem; }
+  .compare > div { padding: 10px; border-radius: 10px; border: 1px solid var(--line); }
+  .compare > div:last-child { background: var(--accent-soft); }
+  .compare h4 { font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; color: var(--accent);
+                text-transform: uppercase; letter-spacing: 0.08em; }
   .compare ul { padding-left: 16px; margin: 0; }
   .compare li { margin-bottom: 1px; }
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 200; justify-content: center; align-items: center; padding: 20px; }
+  .formula-meta { font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    z-index: 200; justify-content: center; align-items: center; padding: 20px; }
   .modal-overlay.open { display: flex; }
-  .modal { background: #fff; border-radius: 8px; padding: 20px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
-  .modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none; font-size: 1.3em; cursor: pointer; color: var(--muted); }
-  .info-btn { background: none; border: 1px solid var(--border); border-radius: 50%; width: 18px; height: 18px; font-size: 0.6em; cursor: pointer; color: var(--accent); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; vertical-align: middle; margin-left: 4px; padding: 0; line-height: 1; }
+  .modal { background: var(--bg); border-radius: 14px; padding: 20px; max-width: 500px;
+           width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
+  .modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none;
+    font-size: 1.3em; cursor: pointer; color: var(--muted); }
+  .info-btn { background: var(--accent-soft); border: none; border-radius: 50%; width: 22px;
+    height: 22px; font-size: 0.65em; cursor: pointer; color: var(--accent-soft-ink);
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    vertical-align: middle; margin-left: 4px; padding: 0; line-height: 0; }
   .method-row { display: flex; gap: 8px; align-items: end; flex: 1; min-width: 0; }
-  .meta { font-size: 0.78em; color: var(--muted); margin-top: 3px; }
-  .formula-meta { font-size: 0.82em; color: var(--muted); letter-spacing: 0.3px; }
+  .meta { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+
+  /* ── Keyframes ───────────────────────────────────────────────────────── */
+  @keyframes ovenrise { from { transform: scale(0.86, 0.72); } to { transform: scale(1, 1); } }
+  @keyframes breathe  { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+  @keyframes scoreopen { from { transform: rotate(10deg) scale(0.2); } to { transform: rotate(-18deg) scale(1); } }
+  @keyframes ovenglow { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+  @keyframes steam    { 0% { opacity: 0; transform: translateY(5px); } 25% { opacity: 0.88; } 100% { opacity: 0; transform: translateY(-32px); } }
+  @keyframes finalepop  { 0% { transform: translateY(6px) scale(0.84); } 55% { transform: translateY(0) scale(1.05); } 100% { transform: translateY(0) scale(1); } }
+  @keyframes finalerise { from { transform: translateY(10px); } to { transform: translateY(0); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    .ear { transform: rotate(-18deg) scale(1); }
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────────────── */
   @media (max-width: 600px) {
-    /* .num-field { max-width: 100%; flex: 1; } */
-    .header-row { padding: 24px 16px 0; }
-    .controls { padding: 12px 16px; }
-    .content { padding: 0 16px; }
-    td.amt { font-size: 1.1em; }
+    .hero { padding: 16px 16px 18px; }
+    .cta-row { flex-direction: column; }
+    .btn { width: 100%; }
+    .controls { margin: 12px 12px; padding: 14px; }
+    .content { padding: 0 12px; }
+    td.amt { font-size: 1.1rem; }
     .compare { grid-template-columns: 1fr; }
-    .white-panel { padding: 16px; }
+    .white-panel { padding: 14px; }
     .control-row { flex-wrap: wrap; gap: 8px; }
     .control-row .field { min-width: calc(50% - 4px); }
+    .control-row.adv-times .field:not(:first-child) { min-width: 100%; }
     .control-row .num-field { min-width: 0; flex: 0 0 72px; max-width: 72px; }
     .method-row { flex-wrap: wrap; }
     .method-row .field { min-width: 100%; }
-    .blend-row { flex-wrap: nowrap; }
-    .toggle button { padding: 8px 6px; font-size: 0.78em; letter-spacing: 0; white-space: normal; line-height: 1.2; }
+    .toggle button { padding: 8px 6px; font-size: 0.78rem; white-space: normal; line-height: 1.2; }
+    .control-row.stack { flex-direction: column; align-items: stretch; }
+  }
+
+  /* ══ Cook Mode — guided one-step focus (Baker's Companion) ═══════════════ */
+  :root { --z-fab: 120; --z-cook: 150; --z-modal: 200; }
+
+  /* Spring progress underline on the sticky stage strip */
+  .stage-track { height: 2px; margin: 9px 16px 0; border-radius: 2px;
+                 background: rgba(42,24,4,0.18); }
+  .stage-track-fill { display: block; height: 100%; border-radius: 2px; background: var(--accent-ink);
+                      transform-origin: left center; transform: scaleX(0);
+                      transition: transform 0.5s var(--ease); }
+
+  /* Floating entry pill — label morphs to the current stage */
+  .cook-fab { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+    z-index: var(--z-fab); display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--body); font-weight: 600; font-size: 0.9rem; color: var(--accent-ink);
+    background: linear-gradient(180deg,#E4A64D,#B06C1C); border: none; border-radius: 26px; padding: 12px 20px 12px 15px;
+    box-shadow: 0 8px 22px -8px rgba(176,108,28,.5), 0 2px 6px rgba(0,0,0,0.12);
+    cursor: pointer; min-height: 50px; max-width: calc(100vw - 28px);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease), opacity 0.28s var(--ease); }
+  .cook-fab:hover { transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 12px 28px -8px rgba(176,108,28,.58), 0 3px 9px rgba(0,0,0,0.14); }
+  .cook-fab:active { transform: translateX(-50%) translateY(0); }
+  .cook-fab:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .cook-fab .cf-play { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%;
+    background: rgba(42,24,4,0.15); flex-shrink: 0; }
+  .cook-fab .cf-play svg { width: 9px; height: 11px; display: block; }
+  .cook-fab .cf-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cook-fab .cf-label b { font-weight: 700; }
+  .cook-fab.hidden { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(24px); }
+  @keyframes cf-swap { from { opacity: 0.15; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+  .cook-fab .cf-label.swap { animation: cf-swap 0.32s var(--ease); }
+
+  /* Full-screen guided overlay */
+  .cook { position: fixed; inset: 0; z-index: var(--z-cook); display: none; flex-direction: column;
+    background: var(--bg);
+    background-image: radial-gradient(130% 55% at 50% -8%, var(--accent-soft) 0%, rgba(246,231,225,0) 58%);
+    color: var(--ink); }
+  .cook.open { display: flex; }
+  .cook::before { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(120% 44% at 50% -6%, rgba(216,154,76,0.18), rgba(216,154,76,0) 60%);
+    animation: ovenglow 6.5s ease-in-out infinite; }
+  .cook-top, .cook-progress, .cook-scroll, .cook-nav { position: relative; z-index: 1; }
+  .cook-top { display: flex; align-items: center; gap: 12px; padding: 14px 18px 8px;
+    padding-top: max(14px, env(safe-area-inset-top)); }
+  .cook-exit { font-family: var(--body); font-weight: 600; font-size: 0.85rem; color: var(--accent);
+    background: none; border: none; cursor: pointer; padding: 8px; margin: -8px 0 -8px -8px; min-height: 40px;
+    -webkit-tap-highlight-color: transparent; display: inline-flex; align-items: center; gap: 5px; }
+  .cook-stage-name { font-family: var(--disp), Georgia, serif; font-size: 1.05rem; color: var(--accent);
+    flex: 1; min-width: 0; text-align: center; letter-spacing: 0.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cook-count { font-size: 0.75rem; font-weight: 700; color: var(--accent-soft-ink);
+    font-variant-numeric: tabular-nums; background: var(--accent-soft); padding: 6px 11px; border-radius: 20px;
+    flex-shrink: 0; }
+  .cook-exit:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+  .cook-progress { height: 3px; margin: 2px 18px 4px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .cook-progress-fill { display: block; height: 100%; background: var(--accent); border-radius: 3px;
+    transform-origin: left center; transform: scaleX(0); transition: transform 0.55s var(--ease); }
+
+  .cook-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+  .cook-card { max-width: 640px; margin: 0 auto; padding: 10px 22px 34px; view-transition-name: cook-card; }
+  .cook-num { font-family: var(--disp), Georgia, serif; font-size: 2.9rem; line-height: 1;
+    color: var(--accent); opacity: 0.32; letter-spacing: -0.02em; }
+  .cook-title { font-family: var(--disp), Georgia, serif; font-weight: 400; font-size: 1.85rem; line-height: 1.12;
+    color: var(--ink); margin: 2px 0 8px; letter-spacing: -0.01em; text-wrap: balance; }
+  .cook-time { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600;
+    color: var(--accent-soft-ink); background: var(--accent-soft); padding: 6px 12px; border-radius: 20px;
+    font-variant-numeric: tabular-nums; margin-bottom: 16px; }
+  .cook-body { font-size: 1.02rem; line-height: 1.72; }
+  .cook-body > p:first-child { margin-top: 0; }
+  .cook-body p { margin: 11px 0; }
+  .cook-body table { font-size: 0.95rem; }
+  .cook-body .shaping-gif { border-radius: 10px; }
+  .cook-body .tip { font-size: 0.94rem; }
+  .cook-hint-empty { color: var(--muted); font-style: italic; }
+
+  .cook-nav { display: flex; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--bg);
+    padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .cook-btn { font-family: var(--body); font-weight: 600; font-size: 0.95rem; cursor: pointer; border-radius: 12px;
+    min-height: 52px; padding: 0 18px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink);
+    -webkit-tap-highlight-color: transparent; display: inline-flex; align-items: center; justify-content: center;
+    gap: 7px; transition: background 0.15s, border-color 0.15s, transform 0.1s var(--ease); }
+  .cook-btn:active { transform: scale(0.98); }
+  .cook-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .cook-prev { flex: 0 0 auto; min-width: 60px; color: var(--accent-soft-ink); }
+  .cook-prev:disabled { opacity: 0.32; cursor: default; }
+  .cook-next { flex: 1; background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .cook-next.is-done { background: var(--accent-soft); color: var(--accent-soft-ink); border-color: transparent; }
+  .cook-next.is-finish { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  /* View Transitions: morph step ⇄ card on enter/exit, slide between steps */
+  @media (prefers-reduced-motion: no-preference) {
+    ::view-transition-old(cook-card), ::view-transition-new(cook-card) {
+      animation-duration: 0.4s; animation-timing-function: var(--ease); }
+    .cook-dir-next::view-transition-old(cook-card) { animation-name: cook-out-left; }
+    .cook-dir-next::view-transition-new(cook-card) { animation-name: cook-in-right; }
+    .cook-dir-prev::view-transition-old(cook-card) { animation-name: cook-out-right; }
+    .cook-dir-prev::view-transition-new(cook-card) { animation-name: cook-in-left; }
+  }
+  @keyframes cook-out-left  { to   { transform: translateX(-26px); opacity: 0; } }
+  @keyframes cook-in-right  { from { transform: translateX(26px);  opacity: 0; } }
+  @keyframes cook-out-right { to   { transform: translateX(26px);  opacity: 0; } }
+  @keyframes cook-in-left   { from { transform: translateX(-26px); opacity: 0; } }
+
+  @media (max-width: 600px) {
+    .cook-card { padding: 8px 16px 30px; }
+    .cook-title { font-size: 1.6rem; }
+    .cook-num { font-size: 2.5rem; }
+    .cook-body { font-size: 1rem; }
   }
 </style>
 </head>
 <body>
-<div class="header-row">
-  <h1>Perth Poolish Baguettes</h1>
-  <p class="subtitle" id="subtitle">Hand-mixed · cold-retarded · season-adjusted</p>
-  <p style="color:var(--muted);font-size:0.78em;letter-spacing:1px">by Paul</p>
+<script>
+  try {
+    var _t = localStorage.getItem('baguette_theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', _t);
+  } catch(e) {}
+</script>
+
+<!-- ── Photo hero (real bake, no canvas art) ────────────────────────────── -->
+<section class="hero">
+  <div class="topline">
+    <span class="mark">Poolish</span>
+    <div class="topright">
+      <span>hydration <span class="hyd" id="hero-hyd">72</span>%</span>
+      <button class="share-btn" type="button" onclick="shareRecipe(this)" aria-label="Copy a shareable link to this recipe">↗ Share</button>
+      <button class="theme" id="themeBtn" type="button" aria-label="Switch colour theme" aria-pressed="false"></button>
+    </div>
+  </div>
+  <div class="headline">
+    <h1>Poolish <em>Baguettes</em></h1>
+    <p class="s"><span id="hero-flour">Miller &amp; Baker · Yitpi</span> · <span id="hero-next"><b>4 × 250g</b> · cold retard · 18°C</span></p>
+  </div>
+  <div class="photo">
+    <img src="images/baguette-hero.jpg" alt="Three baked poolish sourdough baguettes cooling on a wire rack, showing open ears and a deep amber crust">
+  </div>
+  <div class="cta-row">
+    <button class="btn btn-1" type="button" onclick="openCook()">Cook along →</button>
+    <button class="btn btn-2" type="button" onclick="document.getElementById('recipe').scrollIntoView({behavior:'smooth'})">See the method</button>
+  </div>
+</section>
+<div class="stages-bar">
+  <div class="stages">
+    <svg class="bar-loaf" viewBox="0 0 50 32" aria-hidden="true">
+      <defs>
+        <linearGradient id="minicrust" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#EDC584"/>
+          <stop offset="0.6" stop-color="#D89A4C"/>
+          <stop offset="1" stop-color="#B26E2C"/>
+        </linearGradient>
+      </defs>
+      <path class="bar-steam" style="--st:4.0s;--sdl:0.8s" d="M20 16 q-4,-7 0,-14"/>
+      <path class="bar-steam" style="--st:4.8s;--sdl:2.0s" d="M29 14 q4,-7 0,-14"/>
+      <path class="bar-steam" style="--st:4.3s;--sdl:3.1s" d="M25 15 q-3,-6 0,-12"/>
+      <g transform="translate(25 23) rotate(-22)">
+        <path fill="url(#minicrust)" d="M-18 0 C-14,-6,14,-6,18 0 C14,6,-14,6,-18 0 Z"/>
+        <line x1="-9" y1="-3" x2="-2" y2="-5" stroke="#A9702F" stroke-width="1.1" stroke-linecap="round"/>
+        <line x1="2" y1="-3" x2="9" y2="-5" stroke="#A9702F" stroke-width="1.1" stroke-linecap="round"/>
+      </g>
+    </svg>
+    <span class="stage" id="st-poolish" onclick="tapStage('poolish')">Poolish</span>
+    <span class="stage" id="st-mix" onclick="tapStage('mix')">Mix</span>
+    <span class="stage" id="st-bulk" onclick="tapStage('bulk')">Bulk</span>
+    <span class="stage" id="st-retard" onclick="tapStage('retard')">Retard</span>
+    <span class="stage" id="st-shape" onclick="tapStage('shape')">Shape</span>
+    <span class="stage" id="st-bake" onclick="tapStage('bake')">Bake</span>
+    <div class="bar-spacer" aria-hidden="true"></div>
+  </div>
+  <div class="stage-track" aria-hidden="true"><span class="stage-track-fill" id="stageFill"></span></div>
 </div>
-<div class="controls white-panel">
+
+
+<!-- ── Controls ──────────────────────────────────────────────────────────── -->
+<div class="controls">
+  <div class="group-label">Batch</div>
   <div class="control-row">
     <div class="field">
-      <label>Season</label>
-      <div class="toggle" id="seasonToggle">
-        <button class="active" data-v="summer" onclick="setSeason('summer')">Summer</button>
-        <button data-v="winter" onclick="setSeason('winter')">Winter</button>
+      <label for="count">Quantity</label>
+      <div class="stepper">
+        <button onclick="step('count',-1)" aria-label="Decrease quantity">−</button>
+        <input type="number" id="count" value="4" min="1" max="50" onchange="update()">
+        <button onclick="step('count', 1)" aria-label="Increase quantity">+</button>
       </div>
     </div>
-    <div class="method-row">
-      <div class="field">
-        <label>Method <button class="info-btn" onclick="event.stopPropagation();document.getElementById('compareModal').classList.add('open')" title="Compare methods">?</button></label>
-        <div class="toggle" id="methodToggle">
-          <button class="active" data-v="retard" onclick="setMethod('retard')">Cold Retard</button>
-          <button data-v="sameday" onclick="setMethod('sameday')">Same Day</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Bowl</label>
-        <div class="toggle" id="bowlToggle">
-          <button class="active" data-v="60" onclick="setTemperTau(60)">Metal</button>
-          <button data-v="90" onclick="setTemperTau(90)">Glass</button>
-          <button data-v="111" onclick="setTemperTau(111)">Plastic tub</button>
-        </div>
+    <div class="field">
+      <label for="weight">Weight each (g)</label>
+      <div class="stepper">
+        <button onclick="step('weight',-1)" aria-label="Decrease weight">−</button>
+        <input type="number" id="weight" value="250" min="150" max="500" onchange="update()">
+        <button onclick="step('weight', 1)" aria-label="Increase weight">+</button>
       </div>
     </div>
   </div>
+
+  <div class="group-label">Dough</div>
   <div class="control-row">
     <div class="field">
-      <label>Quantity</label>
-       <div class="stepper">
-        <button onclick="step('count',-1)">-</button>
-        <input type="number" id="count" value="4", min="1", max="50" onchange="update()">
-        <button onclick="step('count', 1)">+</button>
-       </div>
-    </div>
-    <div class="field">
-      <label>Weight each (g)</label>
-        <div class="stepper">
-          <button onclick="step('weight',-1)">-</button>
-          <input type="number" id="weight" value="250", min="150", max="500", onchange="update()">
-          <button onclick="step('weight', 1)">+</button>
-        </div>
-    </div>
-    <div class="field">
-      <label>Hydration %</label>
-      <div class="stepper">
-        <button onclick="step('hydration',-1)">-</button>
-        <input type="number" id="hydration" value="70", min="50", max="100", onchange="update()">
-        <button onclick="step('hydration', 1)">+</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Room Temp (°C)</label>
-      <div class="stepper">
-        <button onclick="step('ambientTemp',-1)">-</button>
-        <input type="number" id="ambientTemp" value="18" min="10" max="35" onchange="update()">
-        <button onclick="step('ambientTemp', 1)">+</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Poolish %</label>
-      <div class="stepper">
-        <button onclick="step('poolishPct',-1)">-</button>
-        <input type="number" id="poolishPct" value="30", min="20", max="40", onchange="update()">
-        <button onclick="step('poolishPct', 1)">+</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Folds</label>
-      <div class="stepper">
-        <button onclick="stepFold(-1)">-</button>
-        <input type="number" id="foldCount" value="4" min="1" max="6" onchange="stepFold(0)">
-        <button onclick="stepFold(1)">+</button>
-      </div>
-    </div>
-  </div>
-  <div class="control-row">
-    <div class="field">
-      <label>Flour A</label>
+      <label for="flourA">Flour A</label>
       <select id="flourA" onchange="onFlourChange()">
         <option value="mb">Miller &amp; Baker Plain Flour</option>
         <option value="pizzeria">Caputo Pizzeria Blue (12.5%)</option>
         <option value="nuvola">Caputo Nuvola (13%)</option>
-        <option value="doppia">Caputo 00 AP (11.5%)</option>
         <option value="bread">Strong Bread (12–13%)</option>
         <option value="wholemeal">Wholemeal Wheat</option>
-        <option value="spelt">White Spelt</option>
       </select>
     </div>
-    <div class="field num-field">
+    <div class="field num-field" id="pctAField" hidden>
       <label>%</label>
-      <input type="number" id="pctA" value="85" min="0" max="100" onchange="syncBlend('a')" style="text-align:center">
+      <input type="number" id="pctA" value="100" min="0" max="100" onchange="syncBlend('a')" style="text-align:center">
+    </div>
+  </div>
+  <button type="button" id="blendToggle" class="blend-add" onclick="toggleBlendMode()">+ Blend a second flour</button>
+  <div id="blendGroup" hidden>
+    <div class="control-row">
+      <div class="field">
+        <label for="flourB">Flour B</label>
+        <select id="flourB" onchange="onFlourChange()">
+          <option value="mb" selected>Miller &amp; Baker Plain Flour</option>
+          <option value="pizzeria">Caputo Pizzeria Blue (12.5%)</option>
+          <option value="nuvola">Caputo Nuvola (13%)</option>
+          <option value="bread">Strong Bread (12–13%)</option>
+          <option value="wholemeal">Wholemeal Wheat</option>
+        </select>
+      </div>
+      <div class="field num-field">
+        <label>%</label>
+        <input type="number" id="pctB" value="0" min="0" max="100" onchange="syncBlend('b')" style="text-align:center">
+      </div>
+    </div>
+    <div class="control-row" style="flex-direction:column;gap:4px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:0.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Flour blend</span>
+        <span id="blend-label" style="font-size:0.72rem;color:var(--muted);font-variant-numeric:tabular-nums">100% A / 0% B</span>
+      </div>
+      <input type="range" id="blend" min="0" max="100" value="100" oninput="syncBlend('slider')" style="width:100%">
     </div>
   </div>
   <div class="control-row">
     <div class="field">
-      <label>Flour B</label>
-      <select id="flourB" onchange="onFlourChange()">
-        <option value="mb">Miller &amp; Baker Plain Flour</option>
-        <option value="pizzeria">Caputo Pizzeria Blue (12.5%)</option>
-        <option value="nuvola">Caputo Nuvola (13%)</option>
-        <option value="doppia">Caputo 00 AP (11.5%)</option>
-        <option value="bread">Strong Bread (12–13%)</option>
-        <option value="wholemeal" selected>Wholemeal Wheat</option>
-        <option value="spelt">White Spelt</option>
-      </select>
+      <label for="hydration">Hydration % <button class="info-btn" onclick="event.stopPropagation();openInfo('hydration')" aria-label="Why this hydration?">?</button> <span class="src" id="src-hydration" onclick="resetOverride('hydration')"></span></label>
+      <div class="stepper">
+        <button onclick="stepOverride('hydration',-1,50,100)" aria-label="Decrease hydration">−</button>
+        <input type="number" id="hydration" value="72" min="50" max="100" onchange="setOverrideInput('hydration')">
+        <button onclick="stepOverride('hydration',1,50,100)" aria-label="Increase hydration">+</button>
+      </div>
     </div>
-    <div class="field num-field">
-      <label>%</label>
-      <input type="number" id="pctB" value="15" min="0" max="100" onchange="syncBlend('b')" style="text-align:center">
+    <div class="field" style="flex:0 0 124px;min-width:0;width:124px">
+      <label for="poolishPct">Poolish % <button class="info-btn" onclick="event.stopPropagation();openInfo('poolish')" aria-label="Why 30% poolish?">?</button></label>
+      <div class="stepper">
+        <button onclick="step('poolishPct',-1)" aria-label="Decrease poolish percentage">−</button>
+        <input type="number" id="poolishPct" value="30" min="20" max="40" onchange="update()">
+        <button onclick="step('poolishPct', 1)" aria-label="Increase poolish percentage">+</button>
+      </div>
     </div>
   </div>
+
+  <div class="group-label">Environment</div>
   <div class="control-row">
-    <input type="range" id="blend" min="0" max="100" value="85" oninput="syncBlend('slider')" style="width:100%">
+    <div class="field">
+      <label for="ambientTemp">Room Temp (°C)</label>
+      <div class="stepper">
+        <button onclick="step('ambientTemp',-1)" aria-label="Decrease room temperature">−</button>
+        <input type="number" id="ambientTemp" value="18" min="10" max="35" onchange="update()">
+        <button onclick="step('ambientTemp', 1)" aria-label="Increase room temperature">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Method <button class="info-btn" onclick="event.stopPropagation();document.getElementById('compareModal').classList.add('open')" title="Compare methods">?</button></label>
+      <div class="toggle" id="methodToggle">
+        <button class="active" data-v="retard" onclick="setMethod('retard')">Cold Retard</button>
+        <button data-v="sameday" onclick="setMethod('sameday')">Same Day</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Advanced · flour tuning ────────────────────────────── -->
+  <div class="adv-toggle" id="advToggle" role="button" tabindex="0" onclick="toggleAdvanced(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAdvanced(this)}">
+    <span>Advanced · flour tuning</span><span class="chev">▾</span>
+  </div>
+  <div class="collapsible-grid" id="advBody">
+    <div class="collapsible-inner">
+      <div class="control-row" style="padding-top:12px">
+        <div class="field">
+          <label>Bowl <span style="font-size:0.72em;font-weight:400;color:var(--muted);margin-left:4px">τ water cooling</span> <button class="info-btn" onclick="event.stopPropagation();openInfo('tau')" aria-label="What is τ?">?</button></label>
+          <div class="toggle" id="bowlToggle">
+            <button class="active" data-v="60" onclick="setTemperTau(60)">Metal</button>
+            <button data-v="90" onclick="setTemperTau(90)">Glass</button>
+            <button data-v="111" onclick="setTemperTau(111)">Plastic tub</button>
+          </div>
+        </div>
+      </div>
+      <div class="control-row adv-times">
+        <div class="field">
+          <label for="foldCount">Folds <button class="info-btn" onclick="event.stopPropagation();openInfo('folds')" aria-label="Why does fold count vary?">?</button> <span class="src" id="src-folds" onclick="onFlourChange()"></span></label>
+          <div class="stepper">
+            <button onclick="stepFold(-1)">−</button>
+            <input type="number" id="foldCount" value="4" min="1" max="6" onchange="stepFold(0)">
+            <button onclick="stepFold(1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="fermentolyse">Pre-mix rest (min) <button class="info-btn" onclick="event.stopPropagation();openInfo('fermentolyse')" aria-label="Why this fermentolyse time?">?</button> <span class="src" id="src-fermentolyse" onclick="resetOverride('fermentolyse')"></span></label>
+          <div class="stepper">
+            <button onclick="stepOverride('fermentolyse',-5,30,90)">−</button>
+            <input type="number" id="fermentolyse" value="45" min="30" max="90" step="5" onchange="setOverrideInput('fermentolyse')">
+            <button onclick="stepOverride('fermentolyse',5,30,90)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="detente">Minimum bench rest (min) <button class="info-btn" onclick="event.stopPropagation();openInfo('detente')" aria-label="Why the bench-rest minimum?">?</button> <span class="src" id="src-detente" onclick="resetOverride('detente')"></span></label>
+          <div class="stepper">
+            <button onclick="stepOverride('detente',-5,15,45)">−</button>
+            <input type="number" id="detente" value="20" min="15" max="45" step="5" onchange="setOverrideInput('detente')">
+            <button onclick="stepOverride('detente',5,15,45)">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="control-row stack">
+        <div class="field">
+          <label>Development <button class="info-btn" onclick="event.stopPropagation();openInfo('develop')" aria-label="Development styles info">?</button> <span class="src" id="src-develop" onclick="resetOverride('develop')"></span></label>
+          <div class="toggle" id="developToggle">
+            <button data-v="gentle" onclick="setDevelop('gentle')">Gentle</button>
+            <button data-v="standard" onclick="setDevelop('standard')">Standard</button>
+            <button data-v="intensive" onclick="setDevelop('intensive')">Intensive</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Diastatic malt <button class="info-btn" onclick="event.stopPropagation();openInfo('malt')" aria-label="Why diastatic malt?">?</button> <span class="src" id="src-malt" onclick="resetOverride('malt')"></span></label>
+          <div class="toggle" id="maltToggle">
+            <button data-v="0" onclick="setMalt(0)">Off</button>
+            <button data-v="0.25" onclick="setMalt(0.25)">0.25%</button>
+            <button data-v="0.5" onclick="setMalt(0.5)">0.5%</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
 <div class="content" id="recipe"></div>
+
 <script>
-let season = 'summer', method = 'retard', temperTau = 60;
-let foldOverride = null; // null = use dominant flour's default fold sequence
+let method = 'retard', temperTau = 60;
+let foldOverride = null;
+let userOverride = {};
 const doneSteps = new Set();
 let scheduleOpen = false;
+let currentStage = null;
+const STAGES = ['poolish', 'mix', 'bulk', 'retard', 'shape', 'bake'];
+const STAGE_STEP = { poolish: 's1', mix: 's2', bulk: 's4', retard: 's5', shape: 's6', bake: 's8' };
 let poolishStartValue = '21:00';
 const BASSINAGE_PCT = 0.03, SALT_PCT = 0.018;
-const DDT = 24; // Desired Dough Temperature (°C) — Hamelman standard for poolish baguette
+const DDT = 24;
 const YEAST_PCT = 0.0033;
-const POOLISH_YEAST_PCT = 0.002; // base (summer); multiplied by season
-const FRIDGE_TEMP = 3;    // °C — dough core temp out of fridge
-const TEMPER_TARGET = 10; // °C — target core temp before dividing
-const TAU_DIVIDED = 30;   // min — Newton's law τ for divided rounds on bench
-const TAU_SHAPED = 20;    // min — Newton's law τ for shaped baguettes in couche
-const FRICTION = 2;       // °C — heat from hand mixing
+const POOLISH_YEAST_PCT = 0.002;
+const FRIDGE_TEMP = 3;
+const TEMPER_TARGET = 10;
+const TAU_DIVIDED = 30;
+const TAU_SHAPED = 20;
+const FRICTION = 2;
 
 function fmt(absMin) {
   const norm = ((absMin % 1440) + 1440) % 1440;
@@ -269,43 +735,140 @@ function fmtSched(absMin) {
 }
 function setPoolishStart(val) { poolishStartValue = val; update(); }
 
-const S = {
-  summer: {
-    fridgeNote: 'Dough warms fast — get it into the fridge promptly after bulk.',
-    samedayNote: 'In summer heat, watch the proof carefully — it can run away from you.',
-    poolishOffsetHrs: 12
+const POOLISH_OFFSET_HRS = 12;
+
+// ── Flour-profile architecture ─────────────────────────────────────────────
+const GLOBAL = { hydration: 72, fermentolyse: 45, detente: 20, bakeC: 240, develop: 'standard', malt: 0 };
+const CONTINUOUS = ['hydration', 'fermentolyse', 'detente', 'bakeC'];
+
+const flourInfo = {
+  mb: {
+    name: 'Miller & Baker Plain Flour', hydAdj: +5, folds: ['cf','cf'],
+    props: { strength: 5, extensibility: 2, activity: 5, absorption: 5 },
+    rx: { hydration: 75, fermentolyse: 60, develop: 'gentle', detente: 28, bakeC: 245, malt: 0 }
   },
-  winter: {
-    fridgeNote: 'Cold dough takes longer to wake up — give extra proof time after shaping.',
-    samedayNote: 'Winter dough is sluggish — don\'t rush the proof. It may need the full time.',
-    poolishOffsetHrs: 12
+  pizzeria: {
+    name: 'Caputo Pizzeria Blue', hydAdj: 0, folds: ['sf','sf','cf','cf'],
+    props: { strength: 2, extensibility: 5, activity: 1, absorption: 2 },
+    rx: { hydration: 65, develop: 'intensive', malt: 0.5 }
+  },
+  nuvola: {
+    name: 'Caputo Nuvola', hydAdj: +2, folds: ['sf','cf','cf'],
+    props: { strength: 3, extensibility: 4, activity: 2, absorption: 3 },
+    rx: {}
+  },
+  bread: {
+    name: 'Strong Bread Flour', hydAdj: 0, folds: ['sf','cf','cf'],
+    props: { strength: 4, extensibility: 3, activity: 3, absorption: 3 },
+    rx: {}
+  },
+  wholemeal: {
+    name: 'Wholemeal Wheat', hydAdj: +3, folds: ['sf','cf','cf'],
+    props: { strength: 3, extensibility: 2, activity: 4, absorption: 5 },
+    rx: { hydration: 76 }
   }
 };
 
-// folds: default fold sequence for this flour ('sf' = stretch & fold, 'cf' = coil fold).
-// Strong/elastic flours need fewer folds (structure is already there); weak/extensible
-// flours need more folds to build a backbone. Dominant flour in the blend wins.
-const flourInfo = {
-  mb: { name: 'Miller & Baker Plain Flour', hydAdj: +5, folds: ['cf','cf'] },
-  pizzeria: { name: 'Caputo Pizzeria Blue', hydAdj: 0, folds: ['sf','sf','cf','cf'] },
-  nuvola: { name: 'Caputo Nuvola', hydAdj: +2, folds: ['sf','cf','cf'] },
-  doppia: { name: 'Caputo 00 AP', hydAdj: -2, folds: ['sf','sf','cf','cf'] },
-  bread: { name: 'Strong Bread Flour', hydAdj: 0, folds: ['sf','cf','cf'] },
-  wholemeal: { name: 'Wholemeal Wheat', hydAdj: +3, folds: ['sf','cf','cf'] },
-  spelt: { name: 'White Spelt', hydAdj: -3, folds: ['sf','cf'] }
-};
+function eff(key, ctx) {
+  if (ctx.override && ctx.override[key] != null) return ctx.override[key];
+  const a = flourInfo[ctx.fA].rx[key], b = flourInfo[ctx.fB].rx[key];
+  if (CONTINUOUS.includes(key)) {
+    const va = a != null ? a : GLOBAL[key], vb = b != null ? b : GLOBAL[key];
+    return (va * ctx.blendA + vb * (100 - ctx.blendA)) / 100;
+  }
+  const dom = ctx.blendA >= (100 - ctx.blendA) ? a : b;
+  return dom != null ? dom : GLOBAL[key];
+}
 
-function setSeason(s) {
-  season = s;
-  document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === s));
-  update();
+function sourceOf(key, ctx) {
+  if (ctx.override && ctx.override[key] != null) return 'custom';
+  const a = flourInfo[ctx.fA].rx[key], b = flourInfo[ctx.fB].rx[key];
+  if (a == null && b == null) return 'default';
+  if (ctx.fA === ctx.fB || ctx.blendA === 100) return flourInfo[ctx.fA].name;
+  if (ctx.blendA === 0) return flourInfo[ctx.fB].name;
+  return CONTINUOUS.includes(key)
+    ? `blend of ${flourInfo[ctx.fA].name} + ${flourInfo[ctx.fB].name}`
+    : flourInfo[ctx.blendA >= 50 ? ctx.fA : ctx.fB].name;
+}
+
+function tapStage(name) {
+  currentStage = name;
+  updateStageStrip();
+  const el = document.querySelector('[data-step="' + STAGE_STEP[name] + '"]');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+const STAGE_LABEL = { poolish: 'Poolish', mix: 'Mix & Rest', bulk: 'Bulk Ferment',
+                      retard: 'Cold Retard', shape: 'Shape', bake: 'Bake' };
+function visibleStages() { return STAGES.filter(s => s !== 'retard' || method === 'retard'); }
+function updateStageStrip() {
+  const idx = currentStage ? STAGES.indexOf(currentStage) : -1;
+  STAGES.forEach((s, i) => {
+    const el = document.getElementById('st-' + s);
+    if (!el) return;
+    el.classList.toggle('done', i < idx);
+    el.classList.toggle('now', i === idx);
+  });
+  // Spring progress underline (fraction of visible stages completed)
+  const vis = visibleStages();
+  const done = currentStage ? vis.filter(s => STAGES.indexOf(s) <= idx).length : 0;
+  const fill = document.getElementById('stageFill');
+  if (fill) fill.style.transform = 'scaleX(' + (done / vis.length).toFixed(4) + ')';
+  updateCookFab();
+}
+function updateCookFab() {
+  const lbl = document.getElementById('cookFabLabel');
+  if (!lbl) return;
+  const next = currentStage ? '<b>' + (STAGE_LABEL[currentStage] || '') + '</b>' : 'Cook along';
+  if (lbl.innerHTML !== next) {
+    lbl.innerHTML = next;
+    lbl.classList.remove('swap'); void lbl.offsetWidth; lbl.classList.add('swap');
+  }
+}
+function setupHeroObserver() {
+  // The photo hero has no large loaf icon to hand off from, so the mini
+  // stages-bar loaf is simply always shown.
+  if (typeof document.querySelector !== 'function') return;
+  const loaf = document.querySelector('.bar-loaf');
+  if (loaf) loaf.classList.add('bar-loaf-visible');
+}
+
+// Scrollspy: on each scroll, the current stage is the last observed step whose
+// top has passed under the sticky bar. Deterministic in both directions and for
+// manual scrolling — unlike enter-only IntersectionObserver, which missed short
+// sections (notably "mix") when they never crossed the trigger band.
+let _stageEls = [];
+let _spyTick = false;
+function computeStage() {
+  _spyTick = false;
+  if (!_stageEls.length) return;
+  const line = 120; // px below viewport top (clears the sticky stage bar)
+  let active = null;
+  for (const { stage, el } of _stageEls) {
+    if (el.getBoundingClientRect().top - line <= 0) active = stage; else break;
+  }
+  if (active !== currentStage) { currentStage = active; updateStageStrip(); }
+}
+function onScrollSpy() {
+  if (_spyTick) return;
+  _spyTick = true;
+  requestAnimationFrame(computeStage);
+}
+function setupStageObserver() {
+  if (typeof window === 'undefined' || typeof window.addEventListener !== 'function'
+      || typeof document.querySelector !== 'function') return;
+  _stageEls = Object.entries(STAGE_STEP)
+    .map(([stage, id]) => ({ stage, el: document.querySelector('[data-step="' + id + '"]') }))
+    .filter(x => x.el);
+  if (!window._scrollSpyBound) {
+    window.addEventListener('scroll', onScrollSpy, { passive: true });
+    window.addEventListener('resize', onScrollSpy, { passive: true });
+    window._scrollSpyBound = true;
+  }
+  computeStage();
 }
 function setMethod(m) {
   method = m;
   document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === m));
-  document.getElementById('subtitle').textContent = m === 'retard'
-    ? 'Hand-mixed · cold-retarded · season-adjusted'
-    : 'Hand-mixed · same-day bake · season-adjusted';
   update();
 }
 function setTemperTau(v) {
@@ -314,56 +877,98 @@ function setTemperTau(v) {
   update();
 }
 
+function collectState() {
+  return {
+    method, temperTau, poolishStartValue, foldOverride, userOverride,
+    count: document.getElementById('count').value,
+    weight: document.getElementById('weight').value,
+    hydration: document.getElementById('hydration').value,
+    flourA: document.getElementById('flourA').value,
+    flourB: document.getElementById('flourB').value,
+    pctA: document.getElementById('pctA').value,
+    ambientTemp: document.getElementById('ambientTemp').value,
+    poolishPct: document.getElementById('poolishPct').value
+  };
+}
+let suppressSave = false;
 function savePrefs() {
-  try {
-    localStorage.setItem('baguette_prefs', JSON.stringify({
-      season, method, temperTau, poolishStartValue, foldOverride,
-      count: document.getElementById('count').value,
-      weight: document.getElementById('weight').value,
-      hydration: document.getElementById('hydration').value,
-      flourA: document.getElementById('flourA').value,
-      flourB: document.getElementById('flourB').value,
-      pctA: document.getElementById('pctA').value,
-      ambientTemp: document.getElementById('ambientTemp').value,
-      poolishPct: document.getElementById('poolishPct').value
-    }));
-  } catch(e) {}
+  if (suppressSave) return;
+  try { localStorage.setItem('baguette_prefs', JSON.stringify(collectState())); } catch(e) {}
 }
 
+function applyState(p) {
+  if (!p) return;
+  if (p.count)   document.getElementById('count').value = p.count;
+  if (p.weight)  document.getElementById('weight').value = p.weight;
+  if (p.hydration) document.getElementById('hydration').value = p.hydration;
+  if (p.flourA)  document.getElementById('flourA').value = p.flourA;
+  if (p.flourB)  document.getElementById('flourB').value = p.flourB;
+  if (p.pctA != null) {
+    document.getElementById('pctA').value = p.pctA;
+    document.getElementById('pctB').value = 100 - p.pctA;
+    document.getElementById('blend').value = p.pctA;
+  }
+  if (p.poolishStartValue) poolishStartValue = p.poolishStartValue;
+  if (p.foldOverride != null) foldOverride = p.foldOverride;
+  if (p.userOverride && typeof p.userOverride === 'object') userOverride = p.userOverride;
+  if (p.ambientTemp != null) document.getElementById('ambientTemp').value = p.ambientTemp;
+  if (p.poolishPct != null) document.getElementById('poolishPct').value = p.poolishPct;
+  if (p.temperTau != null) {
+    temperTau = p.temperTau;
+    document.querySelectorAll('#bowlToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === temperTau));
+  }
+  if (p.method) {
+    method = p.method;
+    document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === method));
+  }
+}
 function loadPrefs() {
   try {
     const p = JSON.parse(localStorage.getItem('baguette_prefs') || 'null');
-    if (!p) return;
-    if (p.count)   document.getElementById('count').value = p.count;
-    if (p.weight)  document.getElementById('weight').value = p.weight;
-    if (p.hydration) document.getElementById('hydration').value = p.hydration;
-    if (p.flourA)  document.getElementById('flourA').value = p.flourA;
-    if (p.flourB)  document.getElementById('flourB').value = p.flourB;
-    if (p.pctA != null) {
-      document.getElementById('pctA').value = p.pctA;
-      document.getElementById('pctB').value = 100 - p.pctA;
-      document.getElementById('blend').value = p.pctA;
-    }
-    if (p.poolishStartValue) poolishStartValue = p.poolishStartValue;
-    if (p.foldOverride != null) foldOverride = p.foldOverride;
-    if (p.ambientTemp != null) document.getElementById('ambientTemp').value = p.ambientTemp;
-    if (p.poolishPct != null) document.getElementById('poolishPct').value = p.poolishPct;
-    if (p.season) { season = p.season; document.querySelectorAll('#seasonToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === season)); }
-    if (p.temperTau != null) { temperTau = p.temperTau; document.querySelectorAll('#bowlToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === temperTau)); }
-    if (p.method) {
-      method = p.method;
-      document.querySelectorAll('#methodToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === method));
-      document.getElementById('subtitle').textContent = method === 'retard'
-        ? 'Hand-mixed · cold-retarded · season-adjusted'
-        : 'Hand-mixed · same-day bake · season-adjusted';
-    }
+    if (p) applyState(p);
   } catch(e) {}
+}
+// ── Shareable URL: encode/decode the same state object into the location hash ──
+function encodeState(obj) {
+  const json = JSON.stringify(Object.assign({ v: 1 }, obj));
+  return btoa(unescape(encodeURIComponent(json))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function decodeState(str) {
+  if (!str) return null;
+  try {
+    let b = str.replace(/-/g, '+').replace(/_/g, '/');
+    while (b.length % 4) b += '=';
+    const obj = JSON.parse(decodeURIComponent(escape(atob(b))));
+    return (obj && typeof obj === 'object') ? obj : null;
+  } catch(e) { return null; }
+}
+function hashParam(k) {
+  try { return new URLSearchParams(location.hash.replace(/^#/, '')).get(k); } catch(e) { return null; }
+}
+function fallbackCopy(text, done) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    const ok = document.execCommand('copy'); document.body.removeChild(ta);
+    ok ? done() : prompt('Copy this link:', text);
+  } catch(e) { prompt('Copy this link:', text); }
+}
+function shareRecipe(btn) {
+  const link = location.href.split('#')[0] + '#r=' + encodeState(collectState());
+  const orig = btn.textContent;
+  const done = () => {
+    btn.textContent = 'Link copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(done).catch(() => fallbackCopy(link, done));
+  } else { fallbackCopy(link, done); }
 }
 function r(v) { return Math.round(v); }
 
 function solveStageDuration(anchor, anchorTemp, tau, T_start, T_amb) {
-  // Solve t = anchor × 2^((anchorTemp − T_mean(t)) / 10) by fixed-point iteration,
-  // where T_mean is the time-averaged dough temp under Newton's law cooling.
+  // Solve t = anchor × 2^((anchorTemp − T_mean(t)) / 10) by fixed-point iteration.
   let t = anchor;
   for (let i = 0; i < 10; i++) {
     const T_mean = (T_start === T_amb)
@@ -375,8 +980,52 @@ function solveStageDuration(anchor, anchorTemp, tau, T_start, T_amb) {
 }
 
 function tip(text, hint) {
-  return `<div class="tip" onclick="event.stopPropagation();this.classList.toggle('open')"><div class="tip-toggle"><span class="tip-hint">${hint || ''}</span></div><div class="tip-body">${text}</div></div>`;
+  return `<div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}"><div class="tip-toggle"><span class="tip-hint">${hint || ''}</span><span class="chev">▾</span></div><div class="tip-body"><div class="tip-body-inner">${text}</div></div></div>`;
 }
+
+const INFO = {
+  hydration: {
+    title: 'Why this hydration?',
+    body: 'Miller &amp; Baker absorbs more water (75%), Caputo Pizzeria less (65%), most others sit at 72%. Your blend lands in between. Wetter dough → more open crumb, harder to shape. Drier → easier to handle, tighter crumb.'
+  },
+  poolish: {
+    title: 'Why 30% poolish?',
+    body: '30% pre-fermented flour balances flavour complexity against structure. Below 20%: too little poolish acid to develop character. Above 40%: excess acid degrades gluten. 30% is Hamelman\'s baguette baseline: a one-day poolish at room temp delivers complex flavour without weakening the final dough.'
+  },
+  tau: {
+    title: 'What is τ (tau)?',
+    body: 'τ is the Newton\'s-law cooling time constant for your container, measuring how fast the dough core reaches ambient temperature. Lower τ = faster. Formula for warm-up time: t = τ × ln((T<sub>amb</sub> − T<sub>fridge</sub>) / (T<sub>amb</sub> − T<sub>target</sub>)). Metal bowl (τ=60) conducts heat quickly; glass (τ=90) slower; a tall plastic tub (τ=111) slowest due to insulating walls and poor surface-to-volume ratio.'
+  },
+  folds: {
+    title: 'Why does fold count vary?',
+    body: 'Set by your dominant flour\'s gluten character. Strong, elastic flours (Miller &amp; Baker) need only 2 coil folds — the tight network builds quickly and over-folding makes it too stiff. Extensible flours (Caputo Pizzeria) need 4 folds (2 stretch-and-fold + 2 coil) to develop structure progressively. Fewer folds → the coil folds from the tail of the sequence are kept (highest structural value).'
+  },
+  fermentolyse: {
+    title: 'Why this fermentolyse time?',
+    body: 'Fermentolyse lets the gluten hydrate and relax before salt and bassinage are added, cutting mixing time by ~60%. GLOBAL baseline is 45 min. Miller &amp; Baker targets 60 min: stoneground bran absorbs water slowly and the tight network needs longer to relax. Visual cue: dough shaggy at the start, a smooth window panel forming by the end.'
+  },
+  detente: {
+    title: 'Why the bench-rest minimum?',
+    body: 'Gluten relaxation is time-limited, not just temperature-limited. Below ~20 min the network won\'t fully release regardless of temperature, and final shaping will tear the dough. The formula (t = 40 × 2<sup>((17−T)/10)</sup>) gives longer rests at colder temps but is always floored here. Miller &amp; Baker\'s tight network benefits from 28+ min; that\'s why its flour profile sets the floor higher.'
+  },
+  develop: {
+    title: 'Development styles',
+    body: '<strong>Gentle:</strong> coil folds only, no aggressive handling. Best for strong elastic flours (Miller &amp; Baker) that build structure easily and tear if over-worked.<br><br><strong>Standard:</strong> the scheduled stretch-and-fold + coil-fold sequence. Suits most flour blends.<br><br><strong>Intensive:</strong> begin with ~100 slap-and-folds before the first scheduled fold, until the dough is smooth and shiny. For extensible, lower-protein Italian flours (Caputo Pizzeria) that need mechanical development to form a network.'
+  },
+  malt: {
+    title: 'Why diastatic malt?',
+    body: 'Diastatic malt adds active α-amylase enzymes that break starch into fermentable sugars. At 0.5% it boosts crust browning (more reducing sugars for the Maillard reaction) and feeds gas production in the final proof. Caputo Pizzeria has very low natural enzyme activity, so malt compensates. Don\'t exceed 0.5% of flour: over-enzymed dough becomes sticky and slack and won\'t hold its shape.'
+  }
+};
+
+function openInfo(key) {
+  const info = INFO[key];
+  if (!info) return;
+  document.getElementById('infoModalTitle').textContent = info.title;
+  document.getElementById('infoModalBody').innerHTML = info.body;
+  document.getElementById('infoModal').classList.add('open');
+}
+
 
 function stepStart(num, title, time, id) {
   const done = doneSteps.has(id) ? ' done' : '';
@@ -389,6 +1038,7 @@ function toggleStep(id, el) {
   if (doneSteps.has(id)) doneSteps.delete(id); else doneSteps.add(id);
   el.classList.toggle('done');
   el.querySelector('.step-check').textContent = doneSteps.has(id) ? '✓ done' : 'tap to mark done';
+  updateBake();
 }
 
 function syncBlend(src) {
@@ -398,6 +1048,8 @@ function syncBlend(src) {
   if (src === 'slider') { inputA.value = slider.value; inputB.value = 100 - slider.value; }
   else if (src === 'a') { const v = Math.min(100, Math.max(0, +inputA.value)); inputA.value = v; inputB.value = 100 - v; slider.value = v; }
   else { const v = Math.min(100, Math.max(0, +inputB.value)); inputB.value = v; inputA.value = 100 - v; slider.value = 100 - v; }
+  const blendLabel = document.getElementById('blend-label');
+  if (blendLabel) blendLabel.textContent = inputA.value + '% A / ' + inputB.value + '% B';
   update();
 }
 
@@ -414,10 +1066,41 @@ function step(id, delta) {
   update();
 }
 
-// Changing flour resets any manual fold override back to that flour's default.
-function onFlourChange() { foldOverride = null; update(); }
+function onFlourChange() {
+  if (!blendMode) document.getElementById('flourB').value = document.getElementById('flourA').value;
+  foldOverride = null; update();
+}
+let blendMode = false;
+function applyBlendVisibility() {
+  document.getElementById('pctAField').hidden = !blendMode;
+  document.getElementById('blendGroup').hidden = !blendMode;
+  document.getElementById('blendToggle').textContent = blendMode ? '− Use a single flour' : '+ Blend a second flour';
+}
+function toggleBlendMode() {
+  blendMode = !blendMode;
+  const fa = document.getElementById('flourA'), fb = document.getElementById('flourB');
+  if (blendMode) {
+    if (fb.value === fa.value) fb.value = (fa.value === 'wholemeal' ? 'mb' : 'wholemeal');
+    if (+document.getElementById('pctA').value >= 100) {
+      document.getElementById('pctA').value = 85;
+      document.getElementById('pctB').value = 15;
+      document.getElementById('blend').value = 85;
+    }
+  } else {
+    fb.value = fa.value;
+    document.getElementById('pctA').value = 100;
+    document.getElementById('pctB').value = 0;
+    document.getElementById('blend').value = 100;
+  }
+  applyBlendVisibility();
+  update();
+}
+function initBlendMode() {
+  blendMode = (+document.getElementById('pctA').value) < 100;
+  if (!blendMode) document.getElementById('flourB').value = document.getElementById('flourA').value;
+  applyBlendVisibility();
+}
 
-// Manual fold-count override (delta 0 = value typed directly into the field).
 function stepFold(delta) {
   const el = document.getElementById('foldCount');
   const v = Math.min(6, Math.max(1, (+el.value) + delta));
@@ -426,13 +1109,83 @@ function stepFold(delta) {
   update();
 }
 
-// Adjust a flour's base fold sequence to a target count. Fewer folds → keep the
-// last N (the coil folds, which build the most structure); more → append coil folds.
 function buildFolds(base, n) {
   if (n >= base.length) return base.concat(Array(n - base.length).fill('cf'));
   return base.slice(base.length - n);
 }
 
+// ── Override controls ──────────────────────────────────────────────────────
+function ctxNow() {
+  const blendA = +document.getElementById('blend').value;
+  return { override: userOverride, fA: document.getElementById('flourA').value,
+           fB: document.getElementById('flourB').value, blendA };
+}
+function stepOverride(key, delta, min, max) {
+  const base = userOverride[key] != null ? userOverride[key] : Math.round(eff(key, ctxNow()));
+  userOverride[key] = Math.min(max, Math.max(min, base + delta));
+  savePrefs(); update();
+}
+function setOverrideInput(key) {
+  const v = +document.getElementById(key).value;
+  if (!isNaN(v)) userOverride[key] = v;
+  savePrefs(); update();
+}
+function resetOverride(key) { delete userOverride[key]; savePrefs(); update(); }
+function setDevelop(v) { userOverride.develop = v; savePrefs(); update(); }
+function setMalt(v) { userOverride.malt = v; savePrefs(); update(); }
+function toggleAdvanced(el) { el.classList.toggle('open'); document.getElementById('advBody').classList.toggle('open'); }
+
+function shortFlour(name) {
+  return name.replace('Miller & Baker Plain Flour', 'Yitpi').replace('Caputo ', '').replace(' Blue', '').replace(' Flour', '');
+}
+function setPill(key) {
+  const el = document.getElementById('src-' + key);
+  if (!el) return;
+  if (userOverride[key] != null) { el.style.display = ''; el.textContent = '↺ reset'; return; }
+  const s = sourceOf(key, ctxNow());
+  const label = s === 'default' ? '' : s.startsWith('blend of ') ? 'blend' : shortFlour(s);
+  el.textContent = label;
+  el.style.display = label ? '' : 'none';
+}
+
+function setupFinaleObserver() {
+  if (typeof IntersectionObserver === 'undefined' || typeof document.querySelector !== 'function') return;
+  const fin = document.querySelector('.finale');
+  if (!fin) return;
+  if (window._finaleObs) window._finaleObs.disconnect();
+  window._finaleObs = new IntersectionObserver((entries, obs) => {
+    entries.forEach(e => { if (e.isIntersecting) { fin.classList.add('finale-in'); obs.disconnect(); } });
+  }, { threshold: 0.4 });
+  window._finaleObs.observe(fin);
+}
+function popLoaf(el) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+function updateBake() {
+  const total = (typeof document.querySelectorAll === 'function') ? document.querySelectorAll('#recipe .step').length : 0;
+  const p = total > 0 ? Math.max(0, Math.min(1, doneSteps.size / total)) : 0;
+  if (document.documentElement && document.documentElement.style)
+    document.documentElement.style.setProperty('--bake', p.toFixed(3));
+}
+let _revealObs = null, _revealSafety = 0;
+function revealAll() {
+  if (typeof document.querySelectorAll !== 'function') return;
+  document.querySelectorAll('#recipe .reveal:not(.in)').forEach(el => el.classList.add('in'));
+}
+function setupReveals() {
+  if (typeof reduceMotion === 'function' && reduceMotion()) return;
+  if (!('IntersectionObserver' in window) || typeof document.querySelectorAll !== 'function') return;
+  if (!_revealObs) _revealObs = new IntersectionObserver((entries, obs) => {
+    entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); obs.unobserve(en.target); } });
+  }, { threshold: 0.06, rootMargin: '0px 0px -7% 0px' });
+  document.querySelectorAll('#recipe .white-panel').forEach(el => {
+    if (el.dataset.rev) return;
+    el.dataset.rev = '1';
+    if (el.getBoundingClientRect().top > window.innerHeight * 0.9) { el.classList.add('reveal'); _revealObs.observe(el); }
+  });
+  // Safety net: content must never stay hidden if IO/scroll never fire (bg tab, headless, etc.)
+  clearTimeout(_revealSafety);
+  _revealSafety = setTimeout(revealAll, 1200);
+  if (typeof window.addEventListener === 'function') window.addEventListener('load', revealAll, { once: true });
+}
 function update() {
   savePrefs();
   const count = Math.max(1, +document.getElementById('count').value);
@@ -441,43 +1194,31 @@ function update() {
   const blendB = 100 - blendA;
   const fA = document.getElementById('flourA').value;
   const fB = document.getElementById('flourB').value;
-  const userHyd = +document.getElementById('hydration').value;
   const poolishPct = Math.min(0.40, Math.max(0.20, (+document.getElementById('poolishPct').value) / 100));
 
-  // Dominant flour (by blend %) sets the default fold sequence; a manual
-  // override wins when set. Drives fold count everywhere below.
+  const ctx = { override: userOverride, fA, fB, blendA };
+
   const domFlour = blendA >= blendB ? fA : fB;
   const baseFolds = flourInfo[domFlour].folds;
   const folds = foldOverride == null ? baseFolds : buildFolds(baseFolds, foldOverride);
   document.getElementById('foldCount').value = folds.length;
 
-  const s = S[season];
   const isRetard = method === 'retard';
-
   const tempC = Math.max(10, Math.min(35, +document.getElementById('ambientTemp').value));
   const r5 = v => Math.round(v / 5) * 5;
 
-  // Fold intervals and fermentolyse are FIXED.
-  // Dough leaves the mix at DDT (~24°C) and drifts toward ambient slowly — ambient temp
-  // misreads the early bulk, and the poolish is already fermenting so fermentolyse
-  // can't run long without risking gluten breakdown. Go by visual cues, not the clock.
-  const fermentolyseTime = 45;   // fixed; cap 60 min hard
-  const foldInterval = 30;        // fixed regardless of room temp
+  const fermentolyseTime = Math.round(eff('fermentolyse', ctx));
+  const foldInterval = 30;
 
-  // Détente: t = 40 × 2^((17 − T_mean) / 10), hard floor 20 min.
-  // Solved iteratively with time-averaged T_mean under Newton's law (τ = TAU_DIVIDED).
-  // Same-day dough is at ambient throughout so no iteration needed.
   const retardDetenteDuration = solveStageDuration(40, 17, TAU_DIVIDED, TEMPER_TARGET, tempC);
-  const retardDetenteMins = Math.max(20, Math.round(retardDetenteDuration));
-  const samedayDetenteMins = Math.max(20, Math.round(40 * Math.pow(2, (17 - tempC) / 10)));
+  const detenteFloorV = Math.round(eff('detente', ctx));
+  const retardDetenteMins = Math.max(detenteFloorV, Math.round(retardDetenteDuration));
+  const samedayDetenteMins = Math.max(detenteFloorV, Math.round(40 * Math.pow(2, (17 - tempC) / 10)));
   const detenteMins = isRetard ? retardDetenteMins : samedayDetenteMins;
 
-  // End-of-détente dough temp (Newton's law, τ = TAU_DIVIDED) — input to proof formula.
   const retardDoughEndTemp = tempC + (TEMPER_TARGET - tempC) * Math.exp(-retardDetenteMins / TAU_DIVIDED);
   const proofDoughTemp = isRetard ? retardDoughEndTemp : tempC;
 
-  // Final proof: t = 50 × 2^((22 − T_mean) / 10). Solved iteratively (τ = TAU_SHAPED).
-  // Floor = formula at ambient — dough can never proof faster than if already at room temp.
   const proofFloor = 50 * Math.pow(2, (22 - tempC) / 10);
   const proofDuration = Math.max(solveStageDuration(50, 22, TAU_SHAPED, proofDoughTemp, tempC), proofFloor);
   const proofMid = r5(proofDuration);
@@ -485,41 +1226,40 @@ function update() {
   const proofHigh = r5(proofDuration * 1.15);
   const proofTimeStr = `${proofLow}–${proofHigh} min`;
   const shapeToOvenMin = detenteMins + proofMid;
-  // Poolish yeast scales at half the Q10 rate (sqrt of mult) — partial compensation
-  // so overnight timing stays in a predictable range without fully eliminating time variation
+
   const yeastMult = Math.pow(2, (25 - tempC) / 20);
   const poolishHrsMid = 9 * yeastMult;
   const poolishLow = Math.round(poolishHrsMid * 0.85);
   const poolishHigh = Math.round(poolishHrsMid * 1.15);
   const poolishTime = `${poolishLow}–${poolishHigh} hrs`;
-  // Bulk time: mean dough temp over the reference 3h (Newton's law, same τ as container),
-  // then t = 180 × 2^((23 − T_mean) / 10). Extra time goes as undisturbed rest after CF2.
+
   const bulkMeanTemp = tempC + (DDT - tempC) * (temperTau / 180) * (1 - Math.exp(-180 / temperTau));
   const bulkFormulaMins = 180 * Math.pow(2, (23 - bulkMeanTemp) / 10);
-  const fixedFoldsMins = fermentolyseTime + folds.length * foldInterval; // up to and including the last fold
+  const fixedFoldsMins = fermentolyseTime + folds.length * foldInterval;
   const bulkMins = Math.min(Math.max(Math.round(bulkFormulaMins), fixedFoldsMins), 240);
   const undisturbedRestMins = bulkMins - fixedFoldsMins;
   const bulkTime = `${Math.floor(bulkMins / 60)}h${bulkMins % 60 ? ` ${bulkMins % 60}m` : ''}`;
   const k_bulk = (temperTau / 180) * (1 - Math.exp(-180 / temperTau));
   const bulkTooLongBelow = Math.round((23 - 10 * Math.log2(240 / 180) - DDT * k_bulk) / (1 - k_bulk));
-  // Retard duration: anchored at 15h @ 4°C, scaled by Q10 for FRIDGE_TEMP
+
   const retardHrs = Math.round(15 * Math.pow(2, (4 - FRIDGE_TEMP) / 10));
-  // Water temp: 4-factor DDT formula (room, flour≈room, friction 3°C hand-mix, poolish)
-  // Poolish ferments at room temp and is added at room temp regardless of season.
   const poolishTempAssumption = tempC;
   const waterTempCalc = Math.round((DDT * 4) - tempC - tempC - FRICTION - poolishTempAssumption);
-  const waterTempDisplay = waterTempCalc <= 2
-    ? `${waterTempCalc}°C (ice water)`
-    : `~${waterTempCalc}°C`;
+  const waterTempDisplay = waterTempCalc <= 2 ? `${waterTempCalc}°C (ice water)` : `~${waterTempCalc}°C`;
+
   const totalDough = count * pieceWeight * 1.06;
-  const hydAdj = (flourInfo[fA].hydAdj * blendA + flourInfo[fB].hydAdj * blendB) / 100;
-  const baseHyd = (userHyd + hydAdj) / 100;
+  const baseHyd = eff('hydration', ctx) / 100;
+  const developV = eff('develop', ctx);
+  const maltPct = eff('malt', ctx);
+  const maltGrams = totalFlour => totalFlour * (maltPct / 100);
+
   const poolishYeastPct = POOLISH_YEAST_PCT * yeastMult;
   const finalYeastPct = YEAST_PCT * yeastMult;
   const yeastPct = poolishYeastPct + finalYeastPct;
   const totalFlour = totalDough / (1 + baseHyd + SALT_PCT + yeastPct);
   const totalWater = totalFlour * baseHyd;
   const salt = totalFlour * SALT_PCT;
+  const maltG = maltGrams(totalFlour);
 
   const poolishFlour = totalFlour * poolishPct;
   const poolishWater = poolishFlour;
@@ -543,7 +1283,7 @@ function update() {
   const foldInt = foldInterval;
   const T = {};
   T.poolish = poolishMins;
-  T.mix = poolishMins + s.poolishOffsetHrs * 60;
+  T.mix = poolishMins + POOLISH_OFFSET_HRS * 60;
   T.fermentolyseEnd = T.mix + fermentolyseTime;
   const foldTimes = [];
   let foldCursor = T.fermentolyseEnd;
@@ -560,7 +1300,7 @@ function update() {
   T.warmupEnd = T.fridgeOut + warmupMins;
   T.bake = T.warmupEnd + shapeToOvenMin;
 
-  // Schedule fold rows, generated from the flour-driven sequence.
+  // Schedule fold rows
   let schedSf = 0, schedCf = 0;
   const foldSchedRows = folds.map((type, i) => {
     const label = type === 'sf' ? `Stretch &amp; fold #${++schedSf}` : `Coil fold #${++schedCf}`;
@@ -593,9 +1333,9 @@ ${foldSchedRows}
   let steps = '', n = 1;
 
   steps += stepStart(n++, 'Poolish', `${fmt(T.poolish)} · ${poolishTime}`, 's1');
-  steps += `<p>Dissolve yeast in the room-temperature water, then add poolish flour. Stir until just combined. Cover and leave at room temp (${tempC}°C) for ${poolishTime}. ${season === 'summer' && tempC >= 25 ? 'If your kitchen is very warm, check early — it can peak before the upper end.' : ''}</p>`;
+  steps += `<p>Dissolve <strong>${poolishYeast.toFixed(1)}g yeast</strong> in <strong>${r(poolishWater)}g</strong> room-temperature water, then add <strong>${r(poolishFlour)}g</strong> poolish flour. Stir until just combined. Cover and leave at room temp (${tempC}°C) for ${poolishTime}. ${tempC >= 25 ? 'If your kitchen is very warm, check early (it can peak before the upper end).' : ''}</p>`;
   steps += tip(
-    `Ready when: bubbly, slightly domed, yeasty-sweet smell. At ${tempC}°C expect${tempC <= 18 ? ' the upper end of the range or longer' : tempC >= 28 ? ' the lower end — check early' : ' somewhere in the middle'}. Collapsed and boozy = overripe but still usable.`,
+    `Ready when: bubbly, slightly domed, yeasty-sweet smell. At ${tempC}°C expect${tempC <= 18 ? ' the upper end of the range or longer' : tempC >= 28 ? ' the lower end; check early' : ' somewhere in the middle'}. Collapsed and boozy = overripe but still usable.`,
     'How to tell when it\'s ready'
   );
   steps += stepEnd;
@@ -607,7 +1347,7 @@ ${foldSchedRows}
     `To hit DDT ${DDT}°C, your inputs must total ${DDT * 4}.<br><br>
     <strong>1. Add up:</strong> flour + room + poolish = ${tempC} + ${tempC} + ${Math.round(poolishTempAssumption)} = <strong>${tempC * 2 + Math.round(poolishTempAssumption)}°C</strong><br>
     <strong>2. Water temp:</strong> ${DDT * 4} − ${tempC * 2 + Math.round(poolishTempAssumption)} − ${FRICTION}°C friction = <strong>${waterTempCalc}°C</strong><br><br>
-    <em>Winter: don't use water above 40°C — it stresses the yeast. Use warm water and proof bulk in the oven with just the light on instead.</em>`,
+    <em>Cold kitchens: don't use water above 40°C — it stresses the yeast. Use warm water and proof bulk in the oven with just the light on instead.</em>`,
     'DDT formula'
   );
   steps += tip(
@@ -617,14 +1357,18 @@ ${foldSchedRows}
   steps += stepEnd;
 
   steps += stepStart(n++, 'Salt, Yeast & Bassinage', fmt(T.fermentolyseEnd), 's3');
-  steps += `<p>Sprinkle salt and remaining yeast over dough. Pour <strong>${r(bassinage)}g bassinage</strong> on top. Pinch and fold 3–4 min until absorbed and cohesive. Cover and rest <strong>${foldInt} min</strong> before your first fold.</p>`;
+  steps += `<p>Sprinkle <strong>${salt.toFixed(1)}g salt</strong> and <strong>${finalYeast.toFixed(1)}g remaining yeast</strong> over dough. Pour <strong>${r(bassinage)}g bassinage</strong> on top. Pinch and fold 3–4 min until absorbed and cohesive. Cover and rest <strong>${foldInt} min</strong> before your first fold.</p>`;
   steps += tip(
     'Dough will feel like it\'s falling apart when you add the water. Keep pinching — it comes together in 2–3 min. Wet your hands.',
     'Dough falling apart? That\'s normal'
   );
+  steps += tip(
+    'Salt at 1.8% of total flour is Hamelman\'s poolish baguette baseline. Below 1.5%: flat, underseasoned flavour. Above 2.0%: noticeably inhibits yeast. 1.8% hits the sweet spot for flavour, fermentation control, and crust colour from the Maillard reaction.',
+    'Why 1.8% salt?'
+  );
   steps += stepEnd;
 
-  // Bulk-table fold rows, generated from the flour-driven sequence.
+  // Bulk fermentation fold table
   let tblSf = 0, tblCf = 0;
   const foldTableRows = folds.map((type, i) => {
     const isLast = i === folds.length - 1;
@@ -639,8 +1383,15 @@ ${foldSchedRows}
     return `      <tr><td>${fmt(foldTimes[i])}</td><td><strong>${label}</strong> — ${desc}</td></tr>`;
   }).join('\n');
 
+  const devNote = developV === 'intensive'
+    ? `<p class="meta" style="margin-top:6px">Development: begin with ~100 slap-and-folds before the first scheduled fold; work until the dough is smooth and shiny.</p>
+      <img src="images/knead_slap_fold.gif" alt="Slap and fold technique" class="shaping-gif"><p class="gif-caption">Slap-and-fold: drive the dough down onto the bench, stretch and fold back over. Repeat until smooth and shiny.</p>`
+    : developV === 'gentle'
+    ? `<p class="meta" style="margin-top:6px">Development: use coil folds only, no aggressive handling.</p>`
+    : '';
+
   steps += stepStart(n++, 'Bulk Fermentation', bulkTime, 's4');
-  steps += `<p>Folds are structural — keep 30-minute intervals exactly as scheduled. Fold count is set by your flour (<strong>${flourInfo[domFlour].name}</strong>${foldOverride != null ? ', manually overridden' : ''}); the formula-derived extra time goes as undisturbed rest <strong>after the last fold</strong>.</p>
+  steps += `<p>Folds are structural; keep 30-minute intervals exactly as scheduled. Fold count is set by your flour (<strong>${flourInfo[domFlour].name}</strong>${foldOverride != null ? ', manually overridden' : ''}); the formula-derived extra time goes as undisturbed rest <strong>after the last fold</strong>.</p>${devNote}
     <table>
 ${foldTableRows}
       ${isRetard
@@ -650,29 +1401,28 @@ ${foldTableRows}
         : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Divide &amp; preshape</strong></td></tr>`
       }
     </table>
-    <p>${isRetard ? '' : `Rest undisturbed until dough has grown <strong>${growthTarget} from the start of bulk</strong>. It should be airy, jiggly, and show bubbles on the sides.`}</p>`;
+    <p>${isRetard
+      ? `→ Visual cue: domed, jiggly, bubbles at edges, <strong>30–50% larger</strong> than start — not doubled.`
+      : `Rest undisturbed until dough has grown <strong>${growthTarget} from the start of bulk</strong>. It should be airy, jiggly, and show bubbles on the sides.`
+    }</p>`;
   steps += tip(
-    `Visual cue overrides the clock: into the fridge at <strong>30–50% expanded</strong> — domed, jiggly, bubbles visible at the edges, nowhere near doubled.<br><br>Cap at 4 hours. Below ~${bulkTooLongBelow}°C ambient the formula wants longer — use a proofing chamber set to 22–24°C.`,
+    `Visual cue overrides the clock: into the fridge at <strong>30–50% expanded</strong>: domed, jiggly, bubbles visible at the edges, nowhere near doubled.<br><br>Cap at 4 hours. Below ~${bulkTooLongBelow}°C ambient the formula wants longer; use a proofing chamber set to 22–24°C.`,
     'Visual cue & cap'
   );
   steps += stepEnd;
 
   if (isRetard) {
     steps += stepStart(n++, 'Cold Retard', `${fmt(T.fridgeIn)} → ${fmtSched(T.fridgeOut)}`, 's5');
-    steps += `<p>Cover bowl tightly. Fridge at <span class="temp">${FRIDGE_TEMP}°C</span> for <strong>~${retardHrs}h</strong>. Formula: 15h @ 4°C × 2<sup>((4−${FRIDGE_TEMP})/10)</sup> = ${retardHrs}h @ ${FRIDGE_TEMP}°C. 18–36h is safe if needed.</p>`;
-    steps += tip(
-      'Dough may rise a little in the fridge — normal. If it more than doubles, bulk went too far or fridge is too warm.',
-      'How much rise is normal?'
-    );
+    steps += `<p>Cover bowl tightly. Fridge at <span class="temp">${FRIDGE_TEMP}°C</span> for <strong>~${retardHrs}h</strong>. 18–36h is safe if needed.</p>`;
+    steps += tip('A little rise in the fridge is normal. If it more than doubles, bulk went too far or the fridge is too warm.', 'How much rise is normal?');
+    steps += tip(`15h at 4°C as the anchor: cold enough to slow fermentation to ~¼ of room-temp speed, long enough to develop flavour, short enough to not over-proof. The formula (×2^((4−${FRIDGE_TEMP})/10)) just adjusts for your actual fridge temp while keeping the same effective fermentation load. 12–36h is safe; 15h is the centre.`, 'Why ~15h?');
     steps += stepEnd;
-  }
 
-  if (isRetard) {
     steps += stepStart(n++, 'Take out of fridge', `${fmtSched(T.fridgeOut)} · ~${warmupMins} min`, 's5b');
-    steps += tempC < 13 ? `<p style="color:var(--accent);font-weight:500">At ${tempC}°C the warm-up takes a very long time and the formula becomes unreliable. Find a warmer spot — top of the fridge, near the oven, or a proofing box.</p>` : '';
-    steps += `<p>Remove the covered bowl. Leave it at room temp (<span class="temp">${tempC}°C</span>) for <strong>~${warmupMins} min</strong>. Stop when the <strong>core</strong> reads <strong>${TEMPER_TARGET}°C, or within 1°C of ambient</strong> — whichever comes first. Then divide and start preshaping immediately; smaller pieces warm up roughly twice as fast.</p>`;
+    steps += tempC < 13 ? `<p style="color:var(--accent);font-weight:600">At ${tempC}°C the warm-up takes a very long time and the formula becomes unreliable. Find a warmer spot: top of the fridge, near the oven, or a proofing box.</p>` : '';
+    steps += `<p>Remove the covered bowl. Leave it at room temp (<span class="temp">${tempC}°C</span>) for <strong>~${warmupMins} min</strong>. Stop when the <strong>core</strong> reads <strong>${TEMPER_TARGET}°C, or within 1°C of ambient</strong> — whichever is first. Then divide and start preshaping immediately; smaller pieces warm up roughly twice as fast.</p>`;
     steps += tip(
-      `Probe the core, not the surface — surface reads 2–4°C warm and will make you move too early. Formula: t = τ × ln((T − ${FRIDGE_TEMP}) / (T − ${TEMPER_TARGET})), τ = ${temperTau} (metal τ=60, glass τ=90, tall plastic tub τ=111).`,
+      `Probe the core, not the surface: surface reads 2–4°C warm and will make you move too early. Formula: t = τ × ln((T − ${FRIDGE_TEMP}) / (T − ${TEMPER_TARGET})), τ = ${temperTau} (metal τ=60, glass τ=90, tall plastic tub τ=111).`,
       'Probe placement matters'
     );
     steps += stepEnd;
@@ -682,12 +1432,12 @@ ${foldTableRows}
   steps += `<p>Flour bench. Tip dough out gently. Divide into <strong>${count} × ~${r(totalDough / count)}g</strong>. Preshape into loose rounds, flip seam-down, drag with bench scraper for tension. Cover, bench rest <strong>${detenteMins} min</strong>${detenteMins === 20 ? ' <span style="color:var(--muted);font-size:0.85em">(floor — gluten needs real time)</span>' : ''}.</p>`;
   steps += tip(
     isRetard
-      ? 'At ~10°C the dough is firm but not brittle — it should hold its shape without springing back aggressively. Work cleanly and quickly; don\'t let it sit uncovered on the bench.'
+      ? 'At ~10°C the dough is firm but not brittle: it holds its shape without springing back aggressively. Work cleanly and quickly; don\'t let it sit uncovered on the bench.'
       : 'Room-temp dough is slacker and stickier. Use more bench flour and work quickly.',
     isRetard ? 'Working with cold dough' : 'Handling sticky dough'
   );
   steps += tip(
-    `If timing by probe: read the core at the start and end of bench rest, average the two — that's the temperature for the formula.${detenteMins === 20 ? ' (Formula wanted less — 20 min floor applies.)' : ''}`,
+    `If timing by probe: read the core at the start and end of bench rest, average the two; that's the temperature for the formula.${detenteMins === 20 ? ' (Formula wanted less; 20 min floor applies.)' : ''}`,
     'Using a thermometer for détente'
   );
   steps += stepEnd;
@@ -707,7 +1457,7 @@ ${foldTableRows}
       <tr><th>Response</th><th style="text-align:right">Reading</th></tr>
       <tr><td>Springs back instantly and fully</td><td class="amt" style="color:var(--muted)">Under</td></tr>
       <tr><td>Springs back fast, faint dent</td><td class="amt" style="color:var(--muted)">Still under</td></tr>
-      <tr><td>Springs back slowly, dent fades but stays visible</td><td class="amt" style="color:var(--accent);font-weight:500">Ready — bake</td></tr>
+      <tr><td>Springs back slowly, dent fades but stays visible</td><td class="amt" style="color:var(--accent);font-weight:600">Ready — bake</td></tr>
       <tr><td>Barely springs back, dent stays</td><td class="amt">Over</td></tr>
     </table>`,
     'The finger test'
@@ -715,6 +1465,7 @@ ${foldTableRows}
   steps += stepEnd;
 
   steps += stepStart(n++, 'Score & Bake', '22–25 min', 's9');
+  steps += `<img src="images/dough_poke_test.gif" alt="Poke test" class="shaping-gif"><p class="gif-caption">Poke test: dough should spring back slowly and mostly — fully sprung = over-proofed, no spring = under-proofed</p>`;
   steps += `<p>Score 3–5 overlapping cuts at shallow angle. Load onto stone, pour ~1 cup boiling water into steam tray, close door fast.</p>
     <table>
       <tr><td><span class="temp">240°C</span> + steam</td><td>12 min</td></tr>
@@ -722,16 +1473,39 @@ ${foldTableRows}
       <tr><td><span class="temp">240°C</span> dry</td><td>10–13 min</td></tr>
     </table>
     <p>Cool on wire rack <strong>20 min</strong> before cutting.</p>`;
-  steps += tip(
-    'Crust softens as it cools — normal, it crisps back up. For extra crackle, oven off, door ajar, 5 min.',
-    'Getting a crackly crust'
-  );
+  steps += tip('Crust softens as it cools; it crisps back up. For extra crackle, oven off, door ajar, 5 min.', 'Getting a crackly crust');
   steps += stepEnd;
+  steps += `
+    <div class="finale">
+      <svg class="finale-loaf" viewBox="0 0 138 96" role="img" aria-label="A finished baguette, steaming" onclick="popLoaf(this)">
+        <defs>
+          <linearGradient id="crust" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0"   stop-color="#EDC584"/>
+            <stop offset="0.5" stop-color="#D89A4C"/>
+            <stop offset="1"   stop-color="#B26E2C"/>
+          </linearGradient>
+        </defs>
+        <path class="finale-steam" style="--st:4.6s;--sdl:0.5s" d="M60 34 q-5 -11 0 -22"/>
+        <path class="finale-steam" style="--st:5.2s;--sdl:1.5s" d="M78 30 q6 -11 0 -22"/>
+        <path class="finale-steam" style="--st:4.9s;--sdl:2.6s" d="M50 37 q-6 -11 0 -22"/>
+        <g transform="translate(69 64) rotate(-40)">
+          <g class="finale-breathe">
+            <path fill="url(#crust)" d="M-50 0 C -42 -15, 42 -15, 50 0 C 42 15, -42 15, -50 0 Z"/>
+            <ellipse cx="0" cy="-4" rx="42" ry="4" fill="#F0D49A" opacity="0.45"/>
+            <g transform="translate(-18 1.5)"><path class="ear" style="--sd:0.95s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+            <g transform="translate(2 0)"><path class="ear" style="--sd:1.08s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+            <g transform="translate(22 1.5)"><path class="ear" style="--sd:1.21s" d="M-11 0 C -6 -6, 7 -7, 12 -3 C 7 -1.5, -5 1.5, -11 0 Z" fill="#F6E7C6" stroke="#A9702F" stroke-width="0.7"/></g>
+          </g>
+        </g>
+      </svg>
+      <p class="finale-title">You made baguettes.</p>
+      <p class="finale-note">Hold one to your ear as it cools — that faint crackle is the crust singing.</p>
+    </div>`;
 
   document.getElementById('recipe').innerHTML = `
     <div class="white-panel">
       <h2>Formula — ${count} × ${pieceWeight}g</h2>
-      <p class="formula-meta"><strong>${season === 'summer' ? 'Summer' : 'Winter'}</strong> · <strong>${isRetard ? 'Cold Retard' : 'Same Day'}</strong> · Room Temp <span class="temp">${tempC}°C</span> · DDT <span class="temp">${DDT}°C</span> · Water <span class="temp">${waterTempDisplay}</span> · Hydration <strong>${(baseHyd*100).toFixed(0)}%</strong></p>
+      <p class="formula-meta"><strong>${isRetard ? 'Cold Retard' : 'Same Day'}</strong> · Room Temp <span class="temp">${tempC}°C</span> · DDT <span class="temp">${DDT}°C</span> · Water <span class="temp">${waterTempDisplay}</span> · Hydration <strong>${(baseHyd*100).toFixed(0)}%</strong></p>
       <h3>Poolish (${(poolishPct*100).toFixed(0)}% of flour)</h3>
       <table>
         <tr><th>Ingredient</th><th>Amount</th></tr>
@@ -750,6 +1524,7 @@ ${foldTableRows}
         <tr><td>Water <span style="color:var(--muted)">(bassinage)</span></td><td class="amt">${r(bassinage)}g</td></tr>
         <tr><td>Fine Salt</td><td class="amt">${salt.toFixed(1)}g</td></tr>
         <tr><td>Instant Dry Yeast</td><td class="amt">${finalYeast.toFixed(1)}g</td></tr>
+        ${maltPct > 0 ? `<tr><td>Diastatic Malt</td><td class="amt">${maltG.toFixed(1)}g</td></tr>` : ''}
       </table>
       <h3>Totals</h3>
       <table>
@@ -760,22 +1535,320 @@ ${foldTableRows}
     </div>
     <div class="white-panel">
       <h2 class="collapsible-header${scheduleOpen ? ' open' : ''}" onclick="toggleCollapsible(this)">Schedule</h2>
-      <div class="collapsible-body${scheduleOpen ? ' open' : ''}">
-        <div style="display:flex;align-items:center;gap:8px;padding-top:10px;padding-bottom:4px">
-          <label style="font-size:0.7em;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;flex-shrink:0">Poolish start</label>
-          <input type="time" value="${poolishStartValue}" onchange="setPoolishStart(this.value)" style="width:auto;min-height:34px;padding:4px 8px;font-size:0.88em;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--text);font-family:inherit">
+      <div class="collapsible-grid${scheduleOpen ? ' open' : ''}">
+        <div class="collapsible-inner">
+          <div style="display:flex;align-items:center;gap:8px;padding-top:10px;padding-bottom:4px">
+            <label style="font-size:0.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;flex-shrink:0">Poolish start</label>
+            <input type="time" value="${poolishStartValue}" onchange="setPoolishStart(this.value)" style="width:auto;min-height:34px;padding:4px 8px;font-size:0.88rem;border:1.5px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);font-family:inherit">
+          </div>
+          <div class="schedule">${scheduleHtml}</div>
         </div>
-        <div class="schedule">${scheduleHtml}</div>
       </div>
     </div>
     <div class="white-panel">
       <h2>Method</h2>
       ${steps}
     </div>`;
+
+  // ── Sync derived controls + source pills ───────────────────────────────
+  document.getElementById('hydration').value = Math.round(baseHyd * 100);
+  document.getElementById('fermentolyse').value = fermentolyseTime;
+  document.getElementById('detente').value = detenteFloorV;
+  document.querySelectorAll('#developToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === developV));
+  document.querySelectorAll('#maltToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === maltPct));
+  setPill('hydration'); setPill('fermentolyse'); setPill('detente'); setPill('develop'); setPill('malt');
+  const srcFoldsEl = document.getElementById('src-folds');
+  if (srcFoldsEl) srcFoldsEl.textContent = foldOverride != null ? '↺ reset' : shortFlour(flourInfo[domFlour].name);
+
+  // ── Blend label ───────────────────────────────────────────────────────
+  const blLabel = document.getElementById('blend-label');
+  if (blLabel) blLabel.textContent = blendA + '% A / ' + blendB + '% B';
+
+  // ── Hero stats ─────────────────────────────────────────────────────────
+  const hydPct = Math.round(baseHyd * 100);
+  document.getElementById('hero-flour').textContent =
+    fA === fB ? shortFlour(flourInfo[fA].name) : shortFlour(flourInfo[fA].name) + ' blend';
+  document.getElementById('hero-hyd').textContent = hydPct;
+  document.getElementById('hero-next').innerHTML =
+    `<b>${count} × ${pieceWeight}g</b> · ${isRetard ? 'cold retard' : 'same day'} · ${tempC}°C`;
+
+  // Stage strip: hide Retard pill in same-day mode; re-apply done/now state after rebuild
+  document.getElementById('st-retard').style.display = isRetard ? '' : 'none';
+  updateStageStrip();
+  setupStageObserver();
+  setupHeroObserver();
+  setupFinaleObserver();
+  setupReveals();
+  updateBake();
 }
-loadPrefs();
+// ══ Cook Mode engine ═══════════════════════════════════════════════════════
+const STEP_STAGE = Object.fromEntries(Object.entries(STAGE_STEP).map(([s, id]) => [id, s]));
+let cookSteps = [], cookIdx = 0, cookLastFocus = null, _cookBound = false;
+
+function reduceMotion() {
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+function canVT() { return typeof document.startViewTransition === 'function' && !reduceMotion(); }
+
+function collectCookSteps() {
+  const nodes = Array.from(document.querySelectorAll('#recipe .step'));
+  let cur = 'poolish';
+  return nodes.map(el => {
+    const id = el.dataset.step;
+    if (STEP_STAGE[id]) cur = STEP_STAGE[id];
+    const clone = el.cloneNode(true);
+    const h = clone.querySelector('.step-header'); if (h) h.remove();
+    const c = clone.querySelector('.step-check'); if (c) c.remove();
+    return {
+      id,
+      num: (el.querySelector('.step-num')?.textContent || '').replace(/\D/g, ''),
+      title: el.querySelector('.step-title')?.textContent || '',
+      time: el.querySelector('.step-time')?.textContent || '',
+      body: clone.innerHTML,
+      stage: cur
+    };
+  });
+}
+
+function paintCookCard() {
+  const s = cookSteps[cookIdx];
+  const card = document.getElementById('cookCard');
+  card.innerHTML =
+    '<div class="cook-num" aria-hidden="true">' + (s.num || '') + '</div>' +
+    '<h2 class="cook-title">' + s.title + '</h2>' +
+    (s.time ? '<div class="cook-time">🕑 ' + s.time + '</div>' : '') +
+    '<div class="cook-body">' + s.body + '</div>';
+  const scroller = document.getElementById('cookScroll');
+  if (scroller) scroller.scrollTop = 0;
+  document.getElementById('cookStageName').textContent = STAGE_LABEL[s.stage] || '';
+  document.getElementById('cookCount').textContent = (cookIdx + 1) + ' / ' + cookSteps.length;
+  const frac = (cookIdx + 1) / cookSteps.length;
+  document.getElementById('cookFill').style.transform = 'scaleX(' + frac.toFixed(4) + ')';
+  const isDone = doneSteps.has(s.id), last = cookIdx === cookSteps.length - 1;
+  document.getElementById('cookPrev').disabled = cookIdx === 0;
+  const next = document.getElementById('cookNext');
+  next.classList.toggle('is-done', isDone && !last);
+  next.classList.toggle('is-finish', last);
+  next.textContent = last ? (isDone ? 'Finish ✓' : 'Done — finish ✓') : (isDone ? 'Next →' : 'Mark done →');
+  if (s.stage && s.stage !== currentStage) { currentStage = s.stage; updateStageStrip(); }
+}
+
+function renderCookCard(dir) {
+  const root = document.getElementById('cookMode');
+  if (!dir || !canVT()) { paintCookCard(); return; }
+  root.classList.remove('cook-dir-next', 'cook-dir-prev');
+  root.classList.add(dir > 0 ? 'cook-dir-next' : 'cook-dir-prev');
+  const t = document.startViewTransition(paintCookCard);
+  t.finished.finally(() => root.classList.remove('cook-dir-next', 'cook-dir-prev'));
+}
+
+function openCook(startId) {
+  cookSteps = collectCookSteps();
+  if (!cookSteps.length) return;
+  let idx = 0;
+  if (startId) idx = cookSteps.findIndex(s => s.id === startId);
+  else if (currentStage && STAGE_STEP[currentStage]) idx = cookSteps.findIndex(s => s.id === STAGE_STEP[currentStage]);
+  cookIdx = idx < 0 ? 0 : idx;
+  cookLastFocus = document.activeElement;
+  paintCookCard();
+  bindCookGestures();
+  const overlay = document.getElementById('cookMode');
+  const source = document.querySelector('#recipe .step[data-step="' + cookSteps[cookIdx].id + '"]');
+  const reveal = () => {
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    if (source) source.style.viewTransitionName = '';
+    document.getElementById('cookNext').focus();
+  };
+  document.getElementById('cookFab').classList.add('hidden');
+  if (source && canVT()) {
+    source.style.viewTransitionName = 'cook-card';
+    document.startViewTransition(reveal);
+  } else {
+    reveal();
+  }
+}
+
+function cookGo(delta) {
+  const n = cookIdx + delta;
+  if (n < 0 || n >= cookSteps.length) return;
+  cookIdx = n;
+  renderCookCard(delta);
+}
+
+function cookNext() {
+  const s = cookSteps[cookIdx];
+  if (!doneSteps.has(s.id)) {
+    doneSteps.add(s.id);
+    const el = document.querySelector('#recipe .step[data-step="' + s.id + '"]');
+    if (el) { el.classList.add('done'); const c = el.querySelector('.step-check'); if (c) c.textContent = '✓ done'; }
+    burstDone();
+    updateBake();
+  }
+  if (cookIdx === cookSteps.length - 1) { closeCook(true); return; }
+  cookGo(1);
+}
+
+function closeCook(finished) {
+  const overlay = document.getElementById('cookMode');
+  const target = document.querySelector('#recipe .step[data-step="' + (cookSteps[cookIdx] ? cookSteps[cookIdx].id : '') + '"]');
+  if (target) target.scrollIntoView({ block: 'center' });
+  const hide = () => {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (target) target.style.viewTransitionName = 'cook-card';
+  };
+  const cleanup = () => { if (target) target.style.viewTransitionName = ''; };
+  if (target && canVT()) {
+    document.startViewTransition(hide).finished.finally(cleanup);
+  } else {
+    hide(); cleanup();
+    if (target) target.scrollIntoView({ block: 'start' });
+  }
+  document.getElementById('cookFab').classList.remove('hidden');
+  if (cookLastFocus && cookLastFocus.focus) cookLastFocus.focus();
+  if (finished) setTimeout(() => { const f = document.querySelector('.finale-loaf'); if (f) { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); popLoaf(f); } }, 420);
+}
+
+// Wow: a small flour-and-crust puff when a step is marked done
+function burstDone() {
+  if (reduceMotion()) return;
+  const btn = document.getElementById('cookNext');
+  const host = document.getElementById('cookMode');
+  if (!btn || !host) return;
+  const r = btn.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const cols = ['#EDC584', '#D89A4C', '#B26E2C', '#F6E7C6'];
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('span');
+    const sz = 5 + Math.random() * 5;
+    p.style.cssText = 'position:fixed;left:' + cx + 'px;top:' + cy + 'px;width:' + sz + 'px;height:' + sz +
+      'px;border-radius:50%;pointer-events:none;z-index:999;background:' + cols[i % cols.length] + ';will-change:transform,opacity;';
+    host.appendChild(p);
+    const ang = -Math.PI * (0.15 + Math.random() * 0.7);
+    const dist = 45 + Math.random() * 85;
+    const dx = Math.cos(ang) * dist * (Math.random() < 0.5 ? -1 : 1);
+    const dy = Math.sin(ang) * dist - 16;
+    p.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(0.35)', opacity: 0 }
+    ], { duration: 620 + Math.random() * 320, easing: 'cubic-bezier(0.2,0.65,0.25,1)' })
+      .finished.then(() => p.remove()).catch(() => p.remove());
+  }
+  if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+}
+
+function bindCookGestures() {
+  if (_cookBound) return;
+  _cookBound = true;
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('cookMode').classList.contains('open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeCook(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); cookGo(1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); cookGo(-1); }
+  });
+  const cs = document.getElementById('cookScroll');
+  let tx = 0, ty = 0;
+  cs.addEventListener('touchstart', e => { tx = e.changedTouches[0].clientX; ty = e.changedTouches[0].clientY; }, { passive: true });
+  cs.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.4) cookGo(dx < 0 ? 1 : -1);
+  }, { passive: true });
+}
+
+suppressSave = true;
+const sharedState = decodeState(hashParam('r'));
+if (sharedState) {
+  applyState(sharedState);
+  history.replaceState(null, '', location.href.split('#')[0]);
+} else {
+  loadPrefs();
+}
+initBlendMode();
 update();
+suppressSave = false;
+
+// ══ Scroll cinematics — warmth-on-descent + reveal fallback ══════════════════
+(function () {
+  if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') return;
+  const warmth = document.getElementById('warmth');
+  let tick = false;
+  function apply() {
+    tick = false;
+    const y = window.scrollY || window.pageYOffset || 0;
+    const docH = Math.max(1, (document.documentElement.scrollHeight - window.innerHeight));
+    const p = Math.max(0, Math.min(1, y / docH));
+    if (warmth) warmth.style.opacity = (p * 0.9).toFixed(3);   // oven approaches as you descend
+    // Scroll-driven reveal (backs up the IntersectionObserver so content is never stuck hidden)
+    if (typeof document.querySelectorAll === 'function') {
+      const vh = window.innerHeight;
+      document.querySelectorAll('#recipe .reveal:not(.in)').forEach(el => {
+        if (el.getBoundingClientRect().top < vh * 0.92) el.classList.add('in');
+      });
+    }
+  }
+  function onScroll() { if (tick) return; tick = true; requestAnimationFrame(apply); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  onScroll();
+})();
+
+// ══ Theme toggle — light default, Ember-style dark ═══════════════════════════
+(function () {
+  const rootEl = document.documentElement, themeBtn = document.getElementById('themeBtn');
+  if (!themeBtn) return;
+  const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"/></svg>';
+  const MOON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.9A8.5 8.5 0 1 1 11.1 3.2 6.8 6.8 0 0 0 21 12.9z"/></svg>';
+  function applyTheme(m) {
+    const dark = m === 'dark';
+    rootEl.setAttribute('data-theme', m);
+    themeBtn.innerHTML = dark ? SUN : MOON;
+    themeBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    try { localStorage.setItem('baguette_theme', m); } catch (e) {}
+  }
+  themeBtn.addEventListener('click', () => {
+    applyTheme(rootEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+  applyTheme(rootEl.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+})();
 </script>
+
+<!-- ── Scroll cinematics: warmth glow that grows as you near the bake ─────── -->
+<div class="warmth" id="warmth" aria-hidden="true"></div>
+
+<!-- ── Cook Mode — guided one-step focus ─────────────────────────────────── -->
+<button class="cook-fab" id="cookFab" type="button" onclick="openCook()" aria-haspopup="dialog">
+  <span class="cf-play" aria-hidden="true">
+    <svg viewBox="0 0 9 11"><path d="M0 0 L9 5.5 L0 11 Z" fill="currentColor"/></svg>
+  </span>
+  <span class="cf-label" id="cookFabLabel">Cook along</span>
+</button>
+
+<div class="cook" id="cookMode" role="dialog" aria-modal="true" aria-label="Guided cook mode" aria-hidden="true">
+  <div class="cook-top">
+    <button class="cook-exit" type="button" onclick="closeCook()" aria-label="Exit cook mode">✕ Done</button>
+    <div class="cook-stage-name" id="cookStageName">Poolish</div>
+    <div class="cook-count" id="cookCount">1 / 9</div>
+  </div>
+  <div class="cook-progress" aria-hidden="true"><span class="cook-progress-fill" id="cookFill"></span></div>
+  <div class="cook-scroll" id="cookScroll">
+    <article class="cook-card" id="cookCard" aria-live="polite"></article>
+  </div>
+  <div class="cook-nav">
+    <button class="cook-btn cook-prev" id="cookPrev" type="button" onclick="cookGo(-1)" aria-label="Previous step">←</button>
+    <button class="cook-btn cook-next" id="cookNext" type="button" onclick="cookNext()">Mark done →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="infoModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('infoModal').classList.remove('open')">×</button>
+    <h2 id="infoModalTitle" style="margin-top:0"></h2>
+    <div id="infoModalBody" style="font-size:0.9rem;line-height:1.6;color:var(--ink)"></div>
+  </div>
+</div>
 <div class="modal-overlay" id="compareModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal">
     <button class="modal-close" onclick="document.getElementById('compareModal').classList.remove('open')">×</button>
