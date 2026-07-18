@@ -59,6 +59,13 @@
   .d .lane{color:#C8892B}.d p{color:#5C554D}.d h2,.d .go{color:#1A1714}
   .card .badge{position:absolute;top:16px;left:22px;font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;
     text-transform:uppercase;color:#D5402A;border:1px solid rgba(213,64,42,.4);padding:3px 8px;border-radius:20px}
+  /* E — THE LOAF (photo hero, no animation) */
+  .e .bgc{background:
+    linear-gradient(180deg,rgba(10,8,6,.08),rgba(10,8,6,.62) 100%),
+    url(../images/baguette-hero.jpg) center 22%/cover}
+  .e .letter,.e h2,.e .go{color:#FBF3E7;text-shadow:0 1px 6px rgba(0,0,0,.45)}
+  .e .lane{color:#F2C98A;text-shadow:0 1px 4px rgba(0,0,0,.45)}
+  .e p{color:#E4DACB;text-shadow:0 1px 4px rgba(0,0,0,.45)}
 
   footer{max-width:1100px;margin:40px auto 0;color:var(--muted);font-size:.82rem;font-family:var(--mono)}
   @media (prefers-reduced-motion:reduce){.card,.card .bgc{transition:none}}
@@ -67,7 +74,7 @@
 <body>
   <header>
     <p class="tag">Baguette app · redesign · preview stage</p>
-    <h1>Four ways to make a baguette feel alive.</h1>
+    <h1>Five ways to make a baguette feel alive.</h1>
     <p>Each is a working hero, not a mockup: move your cursor, watch it breathe.
       <b style="color:var(--ink)">D</b> is the current direction — the dough→baguette transformation with the
       loaf modelled on your real bakes, A's fonts, Ember's step structure, D's palette, and a light/dark toggle.
@@ -80,6 +87,14 @@
       <div class="lane">dough → oven spring → baguette</div>
       <h2>The Rise</h2>
       <p>Scrub the whole transformation: proof, shape, score, spring, bake. Loaf modelled on your real bakes, A's fonts, Ember step structure, light/dark toggle.</p>
+      <span class="go">Open preview →</span>
+    </a>
+
+    <a class="card e" href="e-photo.html">
+      <span class="bgc"></span><span class="letter">E</span><span class="badge">round 3 · photo pivot</span>
+      <div class="lane">real bake, no animation</div>
+      <h2>The Loaf</h2>
+      <p>Same fonts, palette and light/dark toggle as D, but the hero is your actual bake — no canvas, no scrub bar.</p>
       <span class="go">Open preview →</span>
     </a>
 

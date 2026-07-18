@@ -202,14 +202,18 @@
     // params: L half-length, R half-thickness, p taper power, bulge top rise,
     //         ear 0..1, brown 0..1, flour 0..1, steam 0..1, glow 0..1
     // p = plumpness power, e = end exponent (0.5 round ball -> 1.0 pointed baguette tips)
+    // shaping-onward keyframes (0.32+) stretched for a real baguette's length:width
+    // ratio (~7.5:1 total-length / total-height, vs. ~4.4:1 before — the "stubby
+    // oval" the loaf read as). Proof stages (0.00/0.16) stay round: a proofing
+    // dough ball genuinely is round, that part wasn't the problem.
     const KF=[
       {t:0.00, L:82,  R:80, p:2.2, e:0.50, bulge:0,  ear:0, brown:0,    flour:1,  steam:0,   glow:0,  irr:0.6},
       {t:0.16, L:84,  R:78, p:2.2, e:0.52, bulge:0,  ear:0, brown:0,    flour:1,  steam:0,   glow:0,  irr:0.7},
-      {t:0.32, L:246, R:54, p:2.7, e:0.56, bulge:0,  ear:0, brown:0.02, flour:.98,steam:0,   glow:0,  irr:0.85},
-      {t:0.44, L:252, R:54, p:2.7, e:0.58, bulge:2,  ear:0, brown:0.04, flour:.94,steam:0,   glow:.05,irr:0.85},
-      {t:0.64, L:292, R:62, p:2.7, e:0.60, bulge:12, ear:1, brown:0.24, flour:.64,steam:.35, glow:.55,irr:0.7},
-      {t:0.84, L:306, R:64, p:2.7, e:0.62, bulge:14, ear:1, brown:0.90, flour:.5, steam:1,   glow:1,  irr:0.55},
-      {t:1.00, L:306, R:64, p:2.7, e:0.62, bulge:14, ear:1, brown:1,    flour:.48,steam:.9,  glow:.85,irr:0.52}
+      {t:0.32, L:250, R:42, p:4.6, e:0.68, bulge:0,   ear:0, brown:0.02, flour:.98,steam:0,   glow:0,  irr:0.85},
+      {t:0.44, L:258, R:41, p:4.6, e:0.70, bulge:1.3, ear:0, brown:0.04, flour:.94,steam:0,   glow:.05,irr:0.85},
+      {t:0.64, L:305, R:45, p:4.8, e:0.72, bulge:8,   ear:1, brown:0.24, flour:.64,steam:.35, glow:.55,irr:0.7},
+      {t:0.84, L:320, R:46, p:4.8, e:0.74, bulge:9.5, ear:1, brown:0.90, flour:.5, steam:1,   glow:1,  irr:0.55},
+      {t:1.00, L:320, R:46, p:4.8, e:0.74, bulge:9.5, ear:1, brown:1,    flour:.48,steam:.9,  glow:.85,irr:0.52}
     ];
     function paramsAt(t){
       t=clamp(t,0,1);
@@ -228,10 +232,16 @@
     // static flour speckle offsets (loaf-local, normalized). v spans top->bottom, weighted low.
     const flecks=[]; for(let i=0;i<140;i++){const vv=Math.pow(Math.random(),0.7);
       flecks.push({u:(Math.random()*2-1)*0.96, v:0.12+vv*0.82, r:Math.random()*1.7+.5, a:Math.random()*0.6+0.4});}
-    // crust mottling / blistering — soft darker patches + a few catch-light blisters
-    const mottle=[]; for(let i=0;i<52;i++){
-      mottle.push({u:(Math.random()*2-1)*0.9, v:0.06+Math.random()*0.82, r:Math.random()*10+4,
-        a:Math.random()*0.5+0.25, dark:Math.random()<0.72});}
+    // crust mottling / blistering — mostly soft tonal patches, plus a handful of
+    // raised "bumps" (highlight+shadow pairs) for actual dimensional texture.
+    // Long-tail radius (mostly small flecks, occasional bigger blister) and a
+    // slight per-spot ellipse so nothing reads as a perfect uniform circle.
+    const mottle=[]; for(let i=0;i<85;i++){
+      const rr=Math.pow(Math.random(),2.2)*13+2.5;
+      mottle.push({u:(Math.random()*2-1)*0.92, v:0.05+Math.random()*0.85, r:rr,
+        a:Math.random()*0.5+0.3, dark:Math.random()<0.68,
+        bump:rr>7 && Math.random()<0.55,
+        sx:0.7+Math.random()*0.6, sy:0.7+Math.random()*0.6});}
     // steam particles
     let steam=[];
 
@@ -242,17 +252,41 @@
     const bendC  =[[1.0,0.024,0.8],[2.3,0.012,3.1]];
     function noise(u,arr){let s=0;for(const f of arr)s+=f[1]*Math.sin(f[0]*u*Math.PI+f[2]);return s;}
 
+    // score zone layout constants — shared by the silhouette bump (below) and
+    // drawScores (later), so the crust never bulges somewhere the cuts aren't.
+    const SCORE_ZF=0.94, SCORE_N=5;
+    // pre-shear x-centers of all N scores, matching drawScores' N+1-equal-gap layout.
+    function scoreCentersX(P){
+      const zoneHalf=SCORE_ZF*P.L, zoneW=2*zoneHalf;
+      const gapW=zoneW/(5*SCORE_N+1), scoreW=gapW*4;
+      const xs=[];
+      for(let i=0;i<SCORE_N;i++) xs.push(-zoneHalf+gapW+i*(scoreW+gapW)+scoreW/2);
+      return xs;
+    }
+    // per-score bump-height jitter (fixed, not random-per-frame) so the burst
+    // reads as organically uneven rather than 5 identical mechanical humps.
+    const EAR_JIG=[0.86,1.08,0.94,1.14,0.90];
+    // how much the crust silhouette itself ruptures upward at each score as the
+    // ear opens — a real scored loaf's outline is torn and bumpy at every cut,
+    // not a smooth unbroken oval with texture painted inside it.
+    function earBump(x,P){
+      if(P.ear<=0.02) return 0;
+      const xs=scoreCentersX(P), width=P.L*0.05;
+      let s=0;
+      for(let i=0;i<xs.length;i++){ const d=(x-xs[i])/width; s+=Math.exp(-d*d)*EAR_JIG[i]; }
+      return s*P.R*0.22*P.ear;
+    }
     // top-surface y at loaf-local x. e (end exponent) points the tips like a real baguette.
     function prof(x,P){ return P.R*Math.pow(clamp(1-Math.pow(Math.abs(x)/P.L,P.p),0,1), P.e); }
     function bend(x,P){ const u=clamp(x/P.L,-1,1); return noise(u,bendC)*P.R*(P.irr||0.9); }
     function topY(x,P){
       const u=clamp(x/P.L,-1,1), base=prof(x,P);
       const bg=P.bulge*Math.exp(-Math.pow(x/(P.L*0.62),2));
-      return -(base*(1+noise(u,bumpTop)*(P.irr||0.9))+bg) + bend(x,P);
+      return -(base*(1+noise(u,bumpTop)*(P.irr||0.9))+bg) + bend(x,P) - earBump(x,P);
     }
     function botY(x,P){
       const u=clamp(x/P.L,-1,1), base=prof(x,P);
-      return base*0.82*(1+noise(u,bumpBot)*(P.irr||0.9)) + bend(x,P);
+      return base*0.82*(1+noise(u,bumpBot)*(P.irr||0.9)) + bend(x,P) + earBump(x,P)*0.35;
     }
 
     // rounded-rectangle path (arcTo corners)
@@ -266,28 +300,35 @@
       ctx.arcTo(x,y,x+w,y,r);
       ctx.closePath();
     }
-    // One score = a ROUNDED-CORNER PARALLELOGRAM (the eco-leaf): horizontal long edges,
-    // consistently-angled short edges (horizontal shear), rounded corners. Evenly spaced.
-    function drawEar(xc,yc,len,H,shear,open,b,sp){
+    // One score = a rounded-corner parallelogram, drawn as a plain rect in the
+    // (already-sheared) score-zone frame — see docs/BAGUETTE_SCORE_SPEC.md.
+    // x0 is the pre-shear left edge, w its width; height grows from the open fraction
+    // and is clipped by the caller's zone silhouette, not by this function.
+    function drawScoreStripe(x0,w,H,r,open,b,yc){
       const h=H*clamp((open-0.04)/0.96,0,1);
-      const w=len*clamp(sp,0.02,1);                    // reveal grows left -> right
-      const x0=-len/2, y0=-h/2, r=Math.min(len,H)*0.36;
-      ctx.save(); ctx.translate(xc,yc); ctx.transform(1,0,shear,1,0,0); ctx.lineJoin='round'; ctx.lineCap='round';
       if(h>=2){
+        const y0=yc-h/2;
         // soft drop shadow just under the score
         rrect(x0, y0+h*0.42, w, h*0.5, r); ctx.fillStyle='rgba(58,32,10,'+(0.06+0.08*open)+')'; ctx.fill();
-        // exposed opening — darker, crusty (not raw cream)
+        // exposed opening — darker, crusty (not raw cream). Full blend at full
+        // bake (no damping factor) — a damped blend (e.g. b*0.7) can never reach
+        // a saturated colour even at b=1, which read as flat washed-out beige.
         rrect(x0,y0,w,h,r);
         const cg=ctx.createLinearGradient(0,y0,0,y0+h);
-        cg.addColorStop(0,mix('#F0E2BE','#DDBA7C',b*0.7)); cg.addColorStop(1,mix('#D6C08E','#AE7B37',b*0.9));
+        cg.addColorStop(0,mix('#F0E2BE','#C89552',b)); cg.addColorStop(1,mix('#D6C08E','#7A4A1E',b));
         ctx.fillStyle=cg; ctx.fill();
-        // curled lip band along the top long edge (clipped to the rounded parallelogram)
+        // curled lip band along the top long edge (clipped to the parallelogram)
         ctx.save(); rrect(x0,y0,w,h,r); ctx.clip();
         const lg=ctx.createLinearGradient(0,y0,0,y0+h*0.46);
-        lg.addColorStop(0,mix('#E7D6AC','#894811',b)); lg.addColorStop(0.55,mix('#F2E6BC','#ECB756',b)); lg.addColorStop(1,mix('#D9C39A','#59300B',b));
+        lg.addColorStop(0,mix('#E7D6AC','#6B3208',b)); lg.addColorStop(0.5,mix('#F2E6BC','#F0A93E',b)); lg.addColorStop(1,mix('#D9C39A','#4A2408',b));
         ctx.fillStyle=lg; ctx.fillRect(x0-3,y0-3,w+6,h*0.46);
         // shadow the lip casts onto the opening below it
         ctx.fillStyle='rgba(54,30,8,'+(0.24*open)+')'; ctx.fillRect(x0-3,y0+h*0.40,w+6,h*0.09);
+        // ambient occlusion at the floor of the cut — the deepest recess catches
+        // the least light, so it stays darkest regardless of how open the ear is
+        const aog=ctx.createLinearGradient(0,y0+h*0.72,0,y0+h);
+        aog.addColorStop(0,'rgba(30,15,4,0)'); aog.addColorStop(1,'rgba(30,15,4,'+(0.46*open)+')');
+        ctx.fillStyle=aog; ctx.fillRect(x0-3,y0+h*0.72,w+6,h*0.28);
         ctx.restore();
         // crisp dark outline
         rrect(x0,y0,w,h,r); ctx.strokeStyle=mix('#C6B084','#46260A',b); ctx.lineWidth=1.2; ctx.stroke();
@@ -295,8 +336,47 @@
       // feathered slash (raw), crossfading out as the score opens
       const fa=clamp(1-open/0.16,0,1);
       if(fa>0.02){
-        ctx.strokeStyle='rgba(247,239,216,'+(0.4*fa)+')'; ctx.lineWidth=2.4; ctx.beginPath(); ctx.moveTo(x0,-1); ctx.lineTo(x0+w,-1); ctx.stroke();
-        ctx.strokeStyle='rgba(120,96,58,'+(0.5*fa)+')'; ctx.lineWidth=1.3; ctx.beginPath(); ctx.moveTo(x0,0); ctx.lineTo(x0+w,0); ctx.stroke();
+        ctx.strokeStyle='rgba(247,239,216,'+(0.4*fa)+')'; ctx.lineWidth=2.4; ctx.beginPath(); ctx.moveTo(x0,yc-1); ctx.lineTo(x0+w,yc-1); ctx.stroke();
+        ctx.strokeStyle='rgba(120,96,58,'+(0.5*fa)+')'; ctx.lineWidth=1.3; ctx.beginPath(); ctx.moveTo(x0,yc); ctx.lineTo(x0+w,yc); ctx.stroke();
+      }
+    }
+    // The scored crust: a diagonal stripe pattern (bias-cut look) painted across a
+    // band of the loaf — 5 evenly-spaced rounded-parallelogram cuts separated by
+    // plain, unpainted crust gaps, clipped to the loaf's own silhouette so the top/
+    // bottom edges follow its curve for free. Numeric spec + measurement method:
+    // docs/BAGUETTE_SCORE_SPEC.md. Do not reintroduce per-score leaning shapes —
+    // shear the whole zone once so gaps stay real (unpainted), not overlapping shapes.
+    function drawScores(P,b,sp,open){
+      const Zf=SCORE_ZF, N=SCORE_N, SHEAR=-0.52;
+      const zoneHalf=Zf*P.L, zoneW=2*zoneHalf;
+      const revealW=zoneW*clamp(sp,0.02,1);
+      // N scores + (N+1) horizontal gaps (one at each end too, not just between
+      // scores): zoneW = N*scoreW + (N+1)*gapW, scoreW = 4*gapW. gapW is also
+      // reused below as the TOP/BOTTOM crust margin, so all three (the two edge
+      // margins and every gap) read as the same width — see BAGUETTE_SCORE_SPEC.md.
+      const gapW=zoneW/(5*N+1), scoreW=gapW*4, r=scoreW*0.16, H=P.R*1.7;
+      // the loaf's cross-section isn't symmetric around local y=0 (topY includes
+      // the bulge, botY doesn't) — center the score band on the silhouette's own
+      // midpoint, not on y=0, or the fixed-height rect drifts closer to one edge.
+      const yc=(topY(0,P)+botY(0,P))/2;
+      ctx.save();
+      // clip 1: loaf silhouette within the score zone, inset by a CONSTANT gapW
+      // (additive, not a multiplicative %) so the top/bottom margin is the same
+      // absolute width as the horizontal gaps everywhere along the zone, including
+      // near the tips where topY/botY shrink toward 0. Clamped so it can't invert.
+      const M=48;
+      ctx.beginPath();
+      for(let i=0;i<=M;i++){const x=-zoneHalf+zoneW*i/M; const y=Math.min(topY(x,P)+gapW,-1); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+      for(let i=M;i>=0;i--){const x=-zoneHalf+zoneW*i/M; ctx.lineTo(x,Math.max(botY(x,P)-gapW,1));}
+      ctx.closePath(); ctx.clip();
+      // clip 2: left -> right reveal window (pre-shear x, matches scoreProg timing)
+      ctx.beginPath(); ctx.rect(-zoneHalf-2,-P.R*3,revealW+2,P.R*6); ctx.clip();
+      // shear the whole zone once; plain vertical stripes become the parallel
+      // diagonal bands seen in the reference — no per-stripe lean math needed.
+      ctx.transform(1,0,SHEAR,1,0,0); ctx.lineJoin='round'; ctx.lineCap='round';
+      for(let i=0;i<N;i++){
+        const x0=-zoneHalf+gapW+i*(scoreW+gapW);
+        drawScoreStripe(x0,scoreW,H,r,open,b,yc);
       }
       ctx.restore();
     }
@@ -357,6 +437,21 @@
       // rim definition
       ctx.lineWidth=1.4; ctx.strokeStyle=mix('#C9B488','#472606',b); ctx.stroke();
 
+      // --- top-ridge specular highlight: steam glazes the crust, so the crown
+      // catches the oven light like a real baked shine — brightest at the bulge,
+      // fading toward the tapered tips where the surface angles away from it ---
+      if(b>0.06){
+        ctx.save(); ctx.clip();  // body path still current
+        ctx.save(); ctx.translate(0,-(P.R+P.bulge)*0.55); ctx.scale(1,0.4);
+        const hi=Math.min(b*1.3,1);
+        const hl=ctx.createRadialGradient(0,0,0,0,0,P.L*0.85);
+        hl.addColorStop(0,   `rgba(255,247,222,${0.34*hi})`);
+        hl.addColorStop(0.55,`rgba(255,247,222,${0.13*hi})`);
+        hl.addColorStop(1,   'rgba(255,247,222,0)');
+        ctx.fillStyle=hl; ctx.beginPath(); ctx.arc(0,0,P.L*0.85,0,7); ctx.fill();
+        ctx.restore(); ctx.restore();
+      }
+
       // --- caramelised tips (pointes darken as they bake) ---
       if(b>0.02){
         ctx.save(); ctx.clip();  // clip to loaf body (path still current)
@@ -375,10 +470,26 @@
         ctx.save(); ctx.clip();  // body path still current
         for(const m of mottle){
           const x=m.u*P.L*0.95, y=lerp(topY(x,P),botY(x,P),m.v), rr=m.r*(0.6+b*0.6);
-          const g2=ctx.createRadialGradient(x,y,0,x,y,rr);
-          if(m.dark){ g2.addColorStop(0,'rgba(88,46,14,'+(0.38*m.a*b)+')'); g2.addColorStop(1,'rgba(88,46,14,0)'); }
-          else       { g2.addColorStop(0,'rgba(255,228,156,'+(0.26*m.a*b)+')'); g2.addColorStop(1,'rgba(255,228,156,0)'); }
-          ctx.fillStyle=g2; ctx.beginPath(); ctx.arc(x,y,rr,0,7); ctx.fill();
+          if(m.bump){
+            // raised blister: highlight + shadow crescent, offset opposite the
+            // loaf's own top-ridge light source, so it reads as a bump, not a
+            // flat tinted patch.
+            ctx.save(); ctx.translate(x,y); ctx.scale(m.sx,m.sy);
+            const hg=ctx.createRadialGradient(-rr*0.35,-rr*0.4,0,-rr*0.35,-rr*0.4,rr*0.9);
+            hg.addColorStop(0,'rgba(255,238,190,'+(0.5*m.a*b)+')'); hg.addColorStop(1,'rgba(255,238,190,0)');
+            ctx.fillStyle=hg; ctx.beginPath(); ctx.arc(0,0,rr,0,7); ctx.fill();
+            const sg3=ctx.createRadialGradient(rr*0.4,rr*0.45,0,rr*0.4,rr*0.45,rr*0.95);
+            sg3.addColorStop(0,'rgba(70,36,10,'+(0.42*m.a*b)+')'); sg3.addColorStop(1,'rgba(70,36,10,0)');
+            ctx.fillStyle=sg3; ctx.beginPath(); ctx.arc(0,0,rr,0,7); ctx.fill();
+            ctx.restore();
+          } else {
+            ctx.save(); ctx.translate(x,y); ctx.scale(m.sx,m.sy);
+            const g2=ctx.createRadialGradient(0,0,0,0,0,rr);
+            if(m.dark){ g2.addColorStop(0,'rgba(88,46,14,'+(0.36*m.a*b)+')'); g2.addColorStop(1,'rgba(88,46,14,0)'); }
+            else       { g2.addColorStop(0,'rgba(255,228,156,'+(0.24*m.a*b)+')'); g2.addColorStop(1,'rgba(255,228,156,0)'); }
+            ctx.fillStyle=g2; ctx.beginPath(); ctx.arc(0,0,rr,0,7); ctx.fill();
+            ctx.restore();
+          }
         }
         ctx.restore();
       }
@@ -392,21 +503,9 @@
         }
       }
 
-      // --- score: overlapping feathered slashes that open in place into wide ears ---
+      // --- score: 5 non-overlapping diagonal parallelogram cuts, see BAGUETTE_SCORE_SPEC.md ---
       const sp=scoreProg(t), open=P.ear;
-      if(sp>0){
-        // ~5 smaller ears, steeper diagonal, heavily overlapping down the whole length —
-        // the classic baguette grigne (see reference photos), not a few big horizontal ears.
-        // five rounded-parallelogram scores, evenly spaced with gaps; shear -0.6 = consistent lean
-        const ears=[
-          {c:-0.56,len:0.18,yf:0.32,hf:0.56},
-          {c:-0.28,len:0.19,yf:0.30,hf:0.60},
-          {c: 0.00,len:0.19,yf:0.28,hf:0.62},
-          {c: 0.28,len:0.19,yf:0.30,hf:0.60},
-          {c: 0.56,len:0.18,yf:0.32,hf:0.56}
-        ];
-        for(const E of ears){ const xc=E.c*P.L; drawEar(xc, topY(xc,P)*E.yf, E.len*P.L, P.R*E.hf, -0.6, open, b, sp); }
-      }
+      if(sp>0) drawScores(P,b,sp,open);
       ctx.restore(); // end loaf transform
 
       // --- steam (screen space, above loaf) ---

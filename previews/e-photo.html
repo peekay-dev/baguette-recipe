@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE LOAF — Baguette redesign preview E</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,500;1,6..96,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --disp:'Bodoni Moda'; --serif:'Bodoni Moda'; --body:'Hanken Grotesk';
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  /* light (default) */
+  :root,[data-theme="light"]{
+    --paper:#EDEBE4; --paper-2:#E4E1D8; --ink:#1A1714; --muted:#5C554D;
+    --wheat:#C8892B; --poppy:#D5402A; --line:#CFC9BC;
+    --btn2-bg:rgba(26,23,20,.05); --btn2-bg-h:rgba(26,23,20,.1); --btn2-bd:rgba(26,23,20,.22);
+    --grain-op:.5;
+    --grad:radial-gradient(125% 90% at 50% 6%, #F5F3EC 0%, #EDEBE4 44%, #E3DFD4 100%);
+  }
+  /* dark — Ember-style oven glow */
+  [data-theme="dark"]{
+    --paper:#151110; --paper-2:#1C1613; --ink:#F4E7D8; --muted:#B39A86;
+    --wheat:#E7AF52; --poppy:#FF7A2E; --line:rgba(216,154,74,.20);
+    --btn2-bg:rgba(244,231,216,.06); --btn2-bg-h:rgba(244,231,216,.12); --btn2-bd:rgba(216,154,74,.35);
+    --grain-op:.35;
+    --grad:radial-gradient(58% 44% at 50% 74%, rgba(255,122,46,.15), transparent 70%),
+           radial-gradient(120% 100% at 50% 120%, rgba(226,74,24,.22), transparent 62%),
+           linear-gradient(180deg,#181310 0%, #120E0C 58%, #0E0A09 100%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body),system-ui,sans-serif;background:var(--grad) fixed,var(--paper);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden;transition:color .4s var(--ease)}
+  body::before{content:"";position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:var(--grain-op);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E");}
+
+  .hero{min-height:100svh;display:flex;flex-direction:column;padding:clamp(18px,4vw,42px)}
+  .topline{display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:.8rem;color:var(--muted)}
+  .topline .mark{font-family:var(--body);font-weight:700;letter-spacing:.18em;font-size:.78rem;color:var(--ink);text-transform:uppercase}
+  .topline .hyd{color:var(--wheat);font-weight:600;font-variant-numeric:tabular-nums}
+  .topright{display:flex;align-items:center;gap:14px}
+  .theme{width:38px;height:38px;border-radius:50%;border:1px solid var(--btn2-bd);background:var(--btn2-bg);
+    color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:background .2s,transform .2s,border-color .2s}
+  .theme:hover{background:var(--btn2-bg-h);transform:scale(1.06)}
+  .theme:focus-visible{outline:2px solid var(--wheat);outline-offset:2px}
+  .theme svg{width:17px;height:17px}
+
+  .headline{text-align:center;margin:clamp(14px,3vw,26px) 0 6px}
+  .headline .k{font-family:var(--disp),serif;font-weight:600;letter-spacing:-.015em;
+    font-size:clamp(1.9rem,5.8vw,3.9rem);line-height:.98;color:var(--ink);text-wrap:balance}
+  .headline .k .w{font-style:italic;font-weight:600;color:var(--wheat)}
+  .headline .s{margin-top:10px;color:var(--muted);font-size:clamp(.95rem,1.5vw,1.08rem);max-width:52ch;
+    margin-left:auto;margin-right:auto;text-wrap:pretty}
+
+  /* stage — the real bake, as a photo, standing in for the canvas animation.
+     Landscape crop (matches the old canvas stage's width/aspect) so it fills
+     the screen width instead of sitting as a narrow portrait column. */
+  .stage-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+  .photo{position:relative;width:min(920px,100%);margin:0 auto;aspect-ratio:16/9;border-radius:28px;
+    overflow:hidden;box-shadow:0 30px 60px -22px rgba(26,23,20,.4),0 8px 22px rgba(26,23,20,.14);
+    border:1px solid var(--line)}
+  .photo img{width:100%;height:100%;object-fit:cover;object-position:50% 32%;display:block}
+  .photo::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+    border-radius:inherit;pointer-events:none}
+
+  .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+  .btn{font-family:var(--body);font-weight:600;font-size:.95rem;padding:14px 26px;border-radius:100px;cursor:pointer;
+    min-height:48px;display:inline-flex;align-items:center;gap:9px;border:1px solid transparent;
+    transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .3s}
+  .btn-1{background:linear-gradient(180deg,#E4A64D,#B06C1C);color:#2A1804;
+    box-shadow:0 8px 26px rgba(176,108,28,.34),inset 0 1px 0 rgba(255,255,255,.38)}
+  .btn-1:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(176,108,28,.46),inset 0 1px 0 rgba(255,255,255,.38)}
+  .btn-2{background:var(--btn2-bg);color:var(--ink);border-color:var(--btn2-bd)}
+  .btn-2:hover{transform:translateY(-2px);background:var(--btn2-bg-h)}
+
+  /* below: six-phase breakdown (B-style cells) */
+  .below{background:var(--paper-2);border-top:2px solid var(--ink);padding:clamp(46px,8vw,96px) clamp(20px,5vw,56px)}
+  .below-wrap{max-width:1120px;margin:0 auto}
+  .below h2{font-family:var(--disp),serif;font-weight:600;font-size:clamp(2rem,5vw,3.4rem);
+    line-height:1.0;letter-spacing:-.02em;max-width:20ch;text-wrap:balance}
+  .below h2 em{font-style:italic;font-weight:600;color:var(--wheat)}
+  /* Ember-style vertical step list */
+  .steps{margin-top:40px;display:grid;gap:0}
+  .step{display:grid;grid-template-columns:auto 1fr auto;gap:clamp(16px,3vw,34px);align-items:baseline;
+    padding:22px clamp(10px,2vw,20px);border-top:1px solid var(--line);transition:background .3s var(--ease)}
+  .step:last-child{border-bottom:1px solid var(--line)}
+  .step:hover{background:rgba(26,23,20,.03)}
+  .step .n{font-family:var(--serif),serif;font-style:italic;font-weight:600;font-size:1.6rem;color:var(--poppy);
+    font-variant-numeric:tabular-nums;line-height:1}
+  .step .t{max-width:60ch}
+  .step .t h3{font-size:1.12rem;font-weight:700;color:var(--ink)}
+  .step .t p{color:var(--muted);font-size:.94rem;margin-top:3px}
+  .step .time{font-variant-numeric:tabular-nums;color:var(--wheat);font-weight:700;white-space:nowrap;font-size:.9rem}
+  .foot{margin-top:54px;text-align:center;color:var(--muted);font-size:.85rem}
+  .foot a{color:var(--wheat)}
+  @media (max-width:520px){.step{grid-template-columns:auto 1fr;row-gap:4px}.step .time{grid-column:2}}
+</style>
+</head>
+<body>
+  <section class="hero">
+    <div class="topline">
+      <span class="mark">Poolish&nbsp;·&nbsp;Perth</span>
+      <div class="topright">
+        <span>hydration <span class="hyd">75%</span></span>
+        <button class="theme" id="theme" aria-label="Switch colour theme" aria-pressed="false"></button>
+      </div>
+    </div>
+
+    <div class="headline">
+      <h1 class="k">Watch dough become&nbsp;<span class="w">Baguette</span></h1>
+      <p class="s">Straight off the rack: poolish sourdough baguettes, scored by hand and sprung
+        in a home oven. This is the loaf the method below is built to produce.</p>
+    </div>
+
+    <div class="stage-wrap">
+      <div class="photo">
+        <img src="../images/baguette-hero.jpg" alt="Three baked poolish sourdough baguettes cooling on a wire rack, showing open ears and a deep amber crust">
+      </div>
+
+      <div class="cta-row">
+        <button class="btn btn-1">Bake this loaf →</button>
+        <button class="btn btn-2">The full method</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="below">
+    <div class="below-wrap">
+      <h2>Six stages, one <em>living</em> dough.</h2>
+      <div class="steps">
+        <div class="step"><span class="n">01</span><div class="t"><h3>Proof</h3><p>A slack ball of poolish dough, breathing as wild-slow yeast gasses it up.</p></div><span class="time">12–16 h</span></div>
+        <div class="step"><span class="n">02</span><div class="t"><h3>Shape</h3><p>Pre-shaped, rested, then rolled out long under flat palms into a knobbly, floured torpedo.</p></div><span class="time">~20 min</span></div>
+        <div class="step"><span class="n">03</span><div class="t"><h3>Score</h3><p>One long, confident slash down the spine with a wet lame, feathering as the skin tears.</p></div><span class="time">seconds</span></div>
+        <div class="step"><span class="n">04</span><div class="t"><h3>Oven spring</h3><p>Trapped gas expands violently in the heat. The score bursts open into a raised ear.</p></div><span class="time">first 8 min</span></div>
+        <div class="step"><span class="n">05</span><div class="t"><h3>Bake</h3><p>Sugars caramelise, the crust deepens amber, the tips darken, steam sets the shine.</p></div><span class="time">22 min total</span></div>
+        <div class="step"><span class="n">06</span><div class="t"><h3>Baguette</h3><p>Crackling crust, open crumb. It sings as it cools on the rack.</p></div><span class="time">cool 30 min</span></div>
+      </div>
+      <p class="foot">Preview <b>E &middot; THE LOAF</b> &nbsp;·&nbsp; D's fonts, palette &amp; theme toggle &middot; photo hero, no animation &nbsp;·&nbsp; <a href="index.html">back to all previews</a></p>
+    </div>
+  </section>
+
+<script>
+  (function(){
+    // ---- theme (light default, Ember-style dark) — same toggle as preview D ----
+    const rootEl=document.documentElement, themeBtn=document.getElementById('theme');
+    const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"/></svg>';
+    const MOON='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.9A8.5 8.5 0 1 1 11.1 3.2 6.8 6.8 0 0 0 21 12.9z"/></svg>';
+    let dark=false;
+    function applyTheme(m){ dark=(m==='dark'); rootEl.setAttribute('data-theme',m);
+      themeBtn.innerHTML=dark?SUN:MOON; themeBtn.setAttribute('aria-pressed',dark?'true':'false');
+      try{localStorage.setItem('d-theme',m)}catch(e){} }
+    themeBtn.addEventListener('click',()=>applyTheme(dark?'light':'dark'));
+    let savedT; try{savedT=localStorage.getItem('d-theme')}catch(e){}
+    applyTheme(savedT || (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+  })();
+</script>
+</body>
+</html>
