@@ -713,7 +713,7 @@ let poolishStartValue = '21:00';
 const BASSINAGE_PCT = 0.03, SALT_PCT = 0.018;
 const DDT = 24;
 const YEAST_PCT = 0.0033;
-const POOLISH_YEAST_PCT = 0.002;
+const POOLISH_YEAST_PCT_OF_POOLISH_FLOUR = 0.002;
 const FRIDGE_TEMP = 3;
 const TEMPER_TARGET = 10;
 const TAU_DIVIDED = 30;
@@ -1253,7 +1253,7 @@ function update() {
   const maltPct = eff('malt', ctx);
   const maltGrams = totalFlour => totalFlour * (maltPct / 100);
 
-  const poolishYeastPct = POOLISH_YEAST_PCT * yeastMult;
+  const poolishYeastPct = poolishPct * POOLISH_YEAST_PCT_OF_POOLISH_FLOUR * yeastMult;
   const finalYeastPct = YEAST_PCT * yeastMult;
   const yeastPct = poolishYeastPct + finalYeastPct;
   const totalFlour = totalDough / (1 + baseHyd + SALT_PCT + yeastPct);
@@ -1340,8 +1340,12 @@ ${foldSchedRows}
   );
   steps += stepEnd;
 
+  const remFlourStr = blendB > 0
+    ? `${r(finalFlourA)}g ${fAName} + ${r(finalFlourB)}g ${fBName}`
+    : `${r(finalFlour)}g flour`;
+  const maltStr = maltPct > 0 ? ` and <strong>${maltG.toFixed(1)}g diastatic malt</strong>` : '';
   steps += stepStart(n++, 'Fermentolyse', `${fmt(T.mix)} · ${fermentolyseTime} min rest`, 's2');
-  steps += `<p>Add fermentolyse water to a large bowl, then the poolish, then the remaining flour (<strong>hold back the ${r(bassinage)}g bassinage</strong>). Mix by hand — pinch and fold until no dry flour remains. Cover, rest <strong>${fermentolyseTime} minutes</strong>.</p>`;
+  steps += `<p>Add <strong>${r(fermentolyseWater)}g fermentolyse water</strong> to a large bowl, then all the poolish, then <strong>${remFlourStr}</strong>${maltStr} (<strong>hold back the ${r(bassinage)}g bassinage</strong> water for later). Mix by hand — pinch and fold until no dry flour remains. Cover, rest <strong>${fermentolyseTime} minutes</strong>.</p>`;
   steps += `<p class="meta">Fermentolyse hydration: ${fermentolyseHyd}% · Use water at <span class="temp">${waterTempDisplay}</span> → DDT ${DDT}°C</p>`;
   steps += tip(
     `To hit DDT ${DDT}°C, your inputs must total ${DDT * 4}.<br><br>
