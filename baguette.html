@@ -1432,15 +1432,13 @@ ${foldSchedRows}
     ? `<p class="meta" style="margin-top:6px">Development: use coil folds only, no aggressive handling.</p>`
     : '';
 
-  steps += stepStart(n++, 'Bulk Fermentation', bulkTime, 's4');
+  steps += stepStart(n++, 'Bulk Fermentation', fmt(T.fermentolyseEnd), 's4');
   steps += `<p>Folds are structural; keep 30-minute intervals exactly as scheduled. Fold count is set by your flour (<strong>${flourInfo[domFlour].name}</strong>${foldOverride != null ? ', manually overridden' : ''}); the formula-derived extra time goes as undisturbed rest <strong>after the last fold</strong>.</p>${devNote}
     <table>
 ${foldTableRows}
       ${isRetard
-        ? (undisturbedRestMins > 0
-          ? `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong> — ${undisturbedRestMins} min rest for a total of ${bulkTime} bulk</td></tr>`
-          : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong></td></tr>`)
-        : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Divide &amp; preshape</strong></td></tr>`
+        ? `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Into the fridge</strong> — bulk fermentation total <strong>${bulkTime}</strong>, counted since the start of Fermentolyse (step 2)</td></tr>`
+        : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Finish bulk fermentation</strong> — total <strong>${bulkTime}</strong>, counted since the start of Fermentolyse (step 2)</td></tr>`
       }
     </table>
     <p>→ Visual cue: domed, jiggly, bubbles at edges, <strong>30–50% larger</strong> than start — not doubled.</p>`;
