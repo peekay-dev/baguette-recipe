@@ -15,28 +15,29 @@ out of the fridge on day 3 with no room-temp final proof.
 
 Found while reviewing whether Same Day's rest times track ambient temperature
 correctly. Bulk fermentation, détente, and final proof were all confirmed to
-already be temperature- and (mostly) method-aware — verified numerically at
-12/15/18/22/26/30°C. Two real issues were found instead:
+already be temperature-aware — verified numerically at 12/15/18/22/26/30°C.
+One real bug was found, and one design simplification made as a result:
 
-1. **`baguette.html:1412-1415`** — the "Visual cue & cap" tip under Bulk
-   Fermentation is hardcoded to *"into the fridge at 30–50% expanded"*
-   regardless of method. For Same Day this contradicts the paragraph
-   immediately above it, which correctly shows the method-aware
-   `growthTarget` (70–80% for Same Day). Fix: branch this tip on `isRetard`
-   the same way the paragraph above it does.
-2. **Same Day's bulk clock isn't calibrated to its own growth target.**
-   `bulkMins` is computed once, pre-divergence, from a single formula shared
-   by both methods — correct, since bulk happens before methods diverge, and
-   it's already ambient-temp-scaled (e.g. undisturbed rest after last fold is
-   ~18 min at 26°C vs ~105 min at 12°C, at default settings). But that shared
-   formula is tuned around Cold Retard's 30–50% target; reaching Same Day's
-   70–80% physically takes longer. Cold Retard's copy already tells the baker
-   to trust the visual cue over the clock — Same Day's paragraph doesn't
-   carry the same caveat. Fix: add a short caveat to the Same Day bulk
-   paragraph noting the displayed time may undershoot 70–80% growth, so the
-   visual cue should win there too.
+1. **Bug — `baguette.html:1412-1415`.** The "Visual cue & cap" tip under Bulk
+   Fermentation was hardcoded to *"into the fridge at 30–50% expanded"*
+   regardless of method. For Same Day this contradicted the paragraph
+   immediately above it, which showed a different, method-specific
+   `growthTarget` (70–80% for Same Day vs 50–60% for Cold Retard) — two
+   numbers for the same stage, disagreeing with each other. Fixed by
+   branching the "next action" wording (into the fridge / divide & preshape)
+   while keeping one growth percentage.
+2. **Simplification, per user decision:** rather than keep two different
+   growth targets in sync (and having Same Day's clock under-shoot its own
+   higher target — Cold Retard's copy already said "trust the visual cue
+   over the clock" but Same Day's didn't), **all methods now target the same
+   bulk growth (30–50% / "domed, jiggly, not doubled")** — Cold Retard's
+   original number, which the user has relied on successfully. `growthTarget`
+   removed as dead code; the visual-cue paragraph and tip are now unified,
+   branching only on the next action, not the percentage.
 
-No formula changes — copy/branching only.
+No formula changes — copy/branching only. This also simplifies Part 2 below:
+Shaped Retard's bulk fermentation needs no special-casing at all now, since
+every method already shares the same bulk target.
 
 ## Part 2 — Shaped Retard method
 
@@ -67,12 +68,10 @@ under-bulked shaped loaf came out flat after scoring — consistent with
 insufficient structure/gas going into the long cold stage.
 
 **Decision:** Shaped Retard's bulk fermentation reuses the *exact same*
-formula and growth target as today's Cold Retard method (50–60% growth,
-same ambient-temp-scaled `bulkMins`/`bulkFormulaMins`/`fixedFoldsMins`/
-`undisturbedRestMins` computation). This requires no new bulk-timing code —
-bulk is already computed pre-divergence and shared across methods; Shaped
-Retard just needs to display the same 50–60% growth-target copy Cold Retard
-uses today, not Same Day's 70–80%.
+formula and growth target as every other method now (see Part 1 — all
+methods target 30–50% growth, ambient-temp-scaled
+`bulkMins`/`bulkFormulaMins`/`fixedFoldsMins`/`undisturbedRestMins`,
+unchanged). No method-specific bulk code needed for Shaped Retard at all.
 
 ### Détente (bench rest before final shape)
 

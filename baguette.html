@@ -301,9 +301,9 @@
               font-size: 0.9rem; padding-top: 8px; }
   .schedule .time { font-weight: 600; white-space: nowrap; color: var(--accent);
                     font-variant-numeric: tabular-nums; }
-  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; font-size: 0.85rem; }
+  .compare { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 8px 0; font-size: 0.85rem; }
   .compare > div { padding: 10px; border-radius: 10px; border: 1px solid var(--line); }
-  .compare > div:last-child { background: var(--accent-soft); }
+  .compare > div:not(:first-child) { background: var(--accent-soft); }
   .compare h4 { font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; color: var(--accent);
                 text-transform: uppercase; letter-spacing: 0.08em; }
   .compare ul { padding-left: 16px; margin: 0; }
@@ -630,6 +630,7 @@
       <div class="toggle" id="methodToggle">
         <button class="active" data-v="retard" onclick="setMethod('retard')">Cold Retard</button>
         <button data-v="sameday" onclick="setMethod('sameday')">Same Day</button>
+        <button data-v="shaped" onclick="setMethod('shaped')">Shaped Retard</button>
       </div>
     </div>
   </div>
@@ -694,6 +695,16 @@
           </div>
         </div>
       </div>
+      <div class="control-row" id="shapedRetardField" style="display:none">
+        <div class="field">
+          <label for="shapedRetardHrs">Fridge time after shaping (hrs) <button class="info-btn" onclick="event.stopPropagation();openInfo('shapedRetardHrs')" aria-label="Why no formula for this?">?</button> <span class="src" id="src-shapedRetardHrs" onclick="resetOverride('shapedRetardHrs')"></span></label>
+          <div class="stepper">
+            <button onclick="stepOverride('shapedRetardHrs',-1,8,24)">−</button>
+            <input type="number" id="shapedRetardHrs" value="15" min="8" max="24" step="1" onchange="setOverrideInput('shapedRetardHrs')">
+            <button onclick="stepOverride('shapedRetardHrs',1,8,24)">+</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -709,6 +720,13 @@ let scheduleOpen = false;
 let currentStage = null;
 const STAGES = ['poolish', 'mix', 'bulk', 'retard', 'shape', 'bake'];
 const STAGE_STEP = { poolish: 's1', mix: 's2', bulk: 's4', retard: 's5', shape: 's6', bake: 's8' };
+// Cold Retard chills before shaping; Shaped Retard chills after — the stage
+// strip's order (and which stage the "bake" tab jumps to) follows suit.
+const STAGE_ORDER = {
+  retard:  ['poolish', 'mix', 'bulk', 'retard', 'shape', 'bake'],
+  sameday: ['poolish', 'mix', 'bulk', 'shape', 'bake'],
+  shaped:  ['poolish', 'mix', 'bulk', 'shape', 'retard', 'bake']
+};
 let poolishStartValue = '21:00';
 const BASSINAGE_PCT = 0.03, SALT_PCT = 0.018;
 const DDT = 24;
@@ -738,8 +756,8 @@ function setPoolishStart(val) { poolishStartValue = val; update(); }
 const POOLISH_OFFSET_HRS = 12;
 
 // ── Flour-profile architecture ─────────────────────────────────────────────
-const GLOBAL = { hydration: 72, fermentolyse: 45, detente: 20, bakeC: 240, develop: 'standard', malt: 0 };
-const CONTINUOUS = ['hydration', 'fermentolyse', 'detente', 'bakeC'];
+const GLOBAL = { hydration: 72, fermentolyse: 45, detente: 20, bakeC: 240, develop: 'standard', malt: 0, shapedRetardHrs: 15 };
+const CONTINUOUS = ['hydration', 'fermentolyse', 'detente', 'bakeC', 'shapedRetardHrs'];
 
 const flourInfo = {
   mb: {
@@ -799,20 +817,22 @@ function tapStage(name) {
 }
 const STAGE_LABEL = { poolish: 'Poolish', mix: 'Mix & Rest', bulk: 'Bulk Ferment',
                       retard: 'Cold Retard', shape: 'Shape', bake: 'Bake' };
-function visibleStages() { return STAGES.filter(s => s !== 'retard' || method === 'retard'); }
+function visibleStages() { return STAGE_ORDER[method]; }
 function updateStageStrip() {
-  const idx = currentStage ? STAGES.indexOf(currentStage) : -1;
+  const order = visibleStages();
+  const idx = currentStage ? order.indexOf(currentStage) : -1;
   STAGES.forEach((s, i) => {
     const el = document.getElementById('st-' + s);
     if (!el) return;
-    el.classList.toggle('done', i < idx);
-    el.classList.toggle('now', i === idx);
+    const pos = order.indexOf(s);
+    el.style.order = pos === -1 ? i : pos;
+    el.classList.toggle('done', pos !== -1 && pos < idx);
+    el.classList.toggle('now', pos === idx);
   });
   // Spring progress underline (fraction of visible stages completed)
-  const vis = visibleStages();
-  const done = currentStage ? vis.filter(s => STAGES.indexOf(s) <= idx).length : 0;
+  const done = currentStage ? idx + 1 : 0;
   const fill = document.getElementById('stageFill');
-  if (fill) fill.style.transform = 'scaleX(' + (done / vis.length).toFixed(4) + ')';
+  if (fill) fill.style.transform = 'scaleX(' + (done / order.length).toFixed(4) + ')';
   updateCookFab();
 }
 function updateCookFab() {
@@ -856,8 +876,8 @@ function onScrollSpy() {
 function setupStageObserver() {
   if (typeof window === 'undefined' || typeof window.addEventListener !== 'function'
       || typeof document.querySelector !== 'function') return;
-  _stageEls = Object.entries(STAGE_STEP)
-    .map(([stage, id]) => ({ stage, el: document.querySelector('[data-step="' + id + '"]') }))
+  _stageEls = visibleStages()
+    .map(stage => ({ stage, el: document.querySelector('[data-step="' + STAGE_STEP[stage] + '"]') }))
     .filter(x => x.el);
   if (!window._scrollSpyBound) {
     window.addEventListener('scroll', onScrollSpy, { passive: true });
@@ -1015,6 +1035,10 @@ const INFO = {
   malt: {
     title: 'Why diastatic malt?',
     body: 'Diastatic malt adds active α-amylase enzymes that break starch into fermentable sugars. At 0.5% it boosts crust browning (more reducing sugars for the Maillard reaction) and feeds gas production in the final proof. Caputo Pizzeria has very low natural enzyme activity, so malt compensates. Don\'t exceed 0.5% of flour: over-enzymed dough becomes sticky and slack and won\'t hold its shape.'
+  },
+  shapedRetardHrs: {
+    title: 'Why no formula for this?',
+    body: 'In Shaped Retard, the fridge stage does double duty as bulk clean-up <em>and</em> final proof — there\'s no room-temp check-in to judge doneness by feel. That\'s a very different regime from the app\'s other cold-time formulas (which model a fridge-to-near-freezing curve over a few hours of warm-up or a single overnight bulk retard); extrapolating the Q10 proof model down to fridge temp for a full final proof lands around 3 hours, way off from the 8–24h bakers actually use. Rather than fake precision, this is a plain adjustable default: 15h is the centre (same anchor as Cold Retard\'s bulk-retard), shift up if the dough looked under-developed going in, shift down past ~18h if you\'re seeing over-proofing.'
   }
 };
 
@@ -1204,7 +1228,9 @@ function update() {
   document.getElementById('foldCount').value = folds.length;
 
   const isRetard = method === 'retard';
+  const isShaped = method === 'shaped';
   const tempC = Math.max(10, Math.min(35, +document.getElementById('ambientTemp').value));
+  const shapedRetardHrsV = Math.round(eff('shapedRetardHrs', ctx));
   const r5 = v => Math.round(v / 5) * 5;
 
   const fermentolyseTime = Math.round(eff('fermentolyse', ctx));
@@ -1276,7 +1302,6 @@ function update() {
   const fAName = flourInfo[fA].name;
   const fBName = flourInfo[fB].name;
   const proofTime = proofTimeStr;
-  const growthTarget = isRetard ? '50–60%' : '70–80%';
 
   const [ph, pmins] = poolishStartValue.split(':').map(Number);
   const poolishMins = ph * 60 + pmins;
@@ -1299,6 +1324,10 @@ function update() {
   const warmupMins = (isRetard && tempC > TEMPER_TARGET) ? Math.round(temperTau * Math.log((tempC - FRIDGE_TEMP) / (tempC - TEMPER_TARGET))) : 0;
   T.warmupEnd = T.fridgeOut + warmupMins;
   T.bake = T.warmupEnd + shapeToOvenMin;
+  T.spFridgeIn = T.sdShape;
+  T.spFridgeOut = T.spFridgeIn + shapedRetardHrsV * 60;
+  T.spBake = T.spFridgeOut;
+  T.spDone = T.spBake + 30;
 
   // Schedule fold rows
   let schedSf = 0, schedCf = 0;
@@ -1319,6 +1348,15 @@ ${foldSchedRows}
       <span class="time">${fmtSched(T.fridgeOut)}</span><span>Take out of fridge → warm-up ~${warmupMins} min</span>
       <span class="time">${fmtSched(T.warmupEnd)}</span><span>Preshape → shape → proof</span>
       <span class="time">${fmtSched(T.bake)}</span><span>Score → bake</span>`;
+  } else if (isShaped) {
+    scheduleHtml = `
+      <span class="time">${fmtSched(T.poolish)}</span><span>Mix poolish → room temp overnight</span>
+      <span class="time">${fmtSched(T.mix)}</span><span>Mix fermentolyse (${poolishTime})</span>
+      <span class="time">${fmtSched(T.fermentolyseEnd)}</span><span>Add salt + bassinage + yeast</span>
+${foldSchedRows}
+      <span class="time">${fmtSched(T.sdPreshape)}</span><span>Preshape → bench rest ${samedayDetenteMins} min</span>
+      <span class="time">${fmtSched(T.sdShape)}</span><span>Final shape → straight into the fridge (~${shapedRetardHrsV}h)</span>
+      <span class="time">${fmtSched(T.spFridgeOut)}</span><span>Score → bake straight from the fridge → done by ${fmt(T.spDone)}</span>`;
   } else {
     scheduleHtml = `
       <span class="time">${fmtSched(T.poolish)}</span><span>Mix poolish → room temp overnight</span>
@@ -1405,12 +1443,9 @@ ${foldTableRows}
         : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Divide &amp; preshape</strong></td></tr>`
       }
     </table>
-    <p>${isRetard
-      ? `→ Visual cue: domed, jiggly, bubbles at edges, <strong>30–50% larger</strong> than start — not doubled.`
-      : `Rest undisturbed until dough has grown <strong>${growthTarget} from the start of bulk</strong>. It should be airy, jiggly, and show bubbles on the sides.`
-    }</p>`;
+    <p>→ Visual cue: domed, jiggly, bubbles at edges, <strong>30–50% larger</strong> than start — not doubled.</p>`;
   steps += tip(
-    `Visual cue overrides the clock: into the fridge at <strong>30–50% expanded</strong>: domed, jiggly, bubbles visible at the edges, nowhere near doubled.<br><br>Cap at 4 hours. Below ~${bulkTooLongBelow}°C ambient the formula wants longer; use a proofing chamber set to 22–24°C.`,
+    `Visual cue overrides the clock: ${isRetard ? 'into the fridge' : 'divide &amp; preshape'} at <strong>30–50% expanded</strong>: domed, jiggly, bubbles visible at the edges, nowhere near doubled.<br><br>Cap at 4 hours. Below ~${bulkTooLongBelow}°C ambient the formula wants longer; use a proofing chamber set to 22–24°C.`,
     'Visual cue & cap'
   );
   steps += stepEnd;
@@ -1454,31 +1489,57 @@ ${foldTableRows}
   steps += `<img src="images/6_roll_seal_even_alt.gif" alt="Roll to seal" class="shaping-gif"><p class="gif-caption">5. Roll gently to seal the seam and even out the thickness</p>`;
   steps += stepEnd;
 
-  steps += stepStart(n++, 'Final Proof', proofTime, 's8');
-  steps += `<p>Cover couche. Proof at room temp <strong>${proofTime}</strong> — start checking at <strong>${Math.round(proofDuration * 0.8)} min</strong>. Preheat oven to <span class="temp">240°C</span> with baking stone and steam tray.</p>`;
-  steps += tip(
-    `<table>
-      <tr><th>Response</th><th style="text-align:right">Reading</th></tr>
-      <tr><td>Springs back instantly and fully</td><td class="amt" style="color:var(--muted)">Under</td></tr>
-      <tr><td>Springs back fast, faint dent</td><td class="amt" style="color:var(--muted)">Still under</td></tr>
-      <tr><td>Springs back slowly, dent fades but stays visible</td><td class="amt" style="color:var(--accent);font-weight:600">Ready — bake</td></tr>
-      <tr><td>Barely springs back, dent stays</td><td class="amt">Over</td></tr>
-    </table>`,
-    'The finger test'
-  );
-  steps += stepEnd;
+  if (isShaped) {
+    steps += stepStart(n++, 'Into the Fridge', `${fmtSched(T.spFridgeIn)} → ${fmtSched(T.spFridgeOut)}`, 's5');
+    steps += `<p>Place shaped loaves straight onto a well-floured couche or tray, seam-down — no bench rest first. Cover loosely (or drape a floured linen over the top) and fridge at <span class="temp">${FRIDGE_TEMP}°C</span> for <strong>~${shapedRetardHrsV}h</strong>.</p>`;
+    steps += tip(
+      'Use snug folds in the couche between loaves so a long chill doesn\'t spread them — cold dough loses tension slowly, and an unsupported loaf will flatten over many hours.',
+      'Supporting the shape overnight'
+    );
+    steps += tip(
+      `There's no room-temp final proof or finger test in this method — the fridge time <em>is</em> the final proof, just stretched out slowly by the cold. Default is ${shapedRetardHrsV}h; if the dough looked under-developed going in, lean toward the top of the 8–24h range next time.${shapedRetardHrsV > 18 ? ' Past ~18h, watch for over-proofing risk — very puffy, fragile dough that barely holds a fingerprint means trimming the hours back next time.' : ''}`,
+      'Why no formula here?'
+    );
+    steps += stepEnd;
 
-  steps += stepStart(n++, 'Score & Bake', '22–25 min', 's9');
-  steps += `<img src="images/dough_poke_test.gif" alt="Poke test" class="shaping-gif"><p class="gif-caption">Poke test: dough should spring back slowly and mostly — fully sprung = over-proofed, no spring = under-proofed</p>`;
-  steps += `<p>Score 3–5 overlapping cuts at shallow angle. Load onto stone, pour ~1 cup boiling water into steam tray, close door fast.</p>
-    <table>
-      <tr><td><span class="temp">240°C</span> + steam</td><td>12 min</td></tr>
-      <tr><td>Remove steam, vent</td><td>—</td></tr>
-      <tr><td><span class="temp">240°C</span> dry</td><td>10–13 min</td></tr>
-    </table>
-    <p>Cool on wire rack <strong>20 min</strong> before cutting.</p>`;
-  steps += tip('Crust softens as it cools; it crisps back up. For extra crackle, oven off, door ajar, 5 min.', 'Getting a crackly crust');
-  steps += stepEnd;
+    steps += stepStart(n++, 'Score & Bake', `${fmtSched(T.spFridgeOut)} · straight from the fridge`, 's8');
+    steps += `<img src="images/dough_poke_test.gif" alt="Poke test" class="shaping-gif"><p class="gif-caption">Cold dough scores cleanly and holds its cuts open — no need to wait for it to warm up.</p>`;
+    steps += `<p>Straight from the fridge: score 3–5 overlapping cuts at a shallow angle, load onto a hot stone, pour ~1 cup boiling water into the steam tray, close the door fast. Starting cold, expect ~2 min longer in the oven than a room-temp bake.</p>
+      <table>
+        <tr><td><span class="temp">240°C</span> + steam</td><td>13–14 min</td></tr>
+        <tr><td>Remove steam, vent</td><td>—</td></tr>
+        <tr><td><span class="temp">240°C</span> dry</td><td>11–14 min</td></tr>
+      </table>
+      <p>Cool on wire rack <strong>20 min</strong> before cutting.</p>`;
+    steps += tip('Crust softens as it cools; it crisps back up. For extra crackle, oven off, door ajar, 5 min.', 'Getting a crackly crust');
+    steps += stepEnd;
+  } else {
+    steps += stepStart(n++, 'Final Proof', proofTime, 's8');
+    steps += `<p>Cover couche. Proof at room temp <strong>${proofTime}</strong> — start checking at <strong>${Math.round(proofDuration * 0.8)} min</strong>. Preheat oven to <span class="temp">240°C</span> with baking stone and steam tray.</p>`;
+    steps += tip(
+      `<table>
+        <tr><th>Response</th><th style="text-align:right">Reading</th></tr>
+        <tr><td>Springs back instantly and fully</td><td class="amt" style="color:var(--muted)">Under</td></tr>
+        <tr><td>Springs back fast, faint dent</td><td class="amt" style="color:var(--muted)">Still under</td></tr>
+        <tr><td>Springs back slowly, dent fades but stays visible</td><td class="amt" style="color:var(--accent);font-weight:600">Ready — bake</td></tr>
+        <tr><td>Barely springs back, dent stays</td><td class="amt">Over</td></tr>
+      </table>`,
+      'The finger test'
+    );
+    steps += stepEnd;
+
+    steps += stepStart(n++, 'Score & Bake', '22–25 min', 's9');
+    steps += `<img src="images/dough_poke_test.gif" alt="Poke test" class="shaping-gif"><p class="gif-caption">Poke test: dough should spring back slowly and mostly — fully sprung = over-proofed, no spring = under-proofed</p>`;
+    steps += `<p>Score 3–5 overlapping cuts at shallow angle. Load onto stone, pour ~1 cup boiling water into steam tray, close door fast.</p>
+      <table>
+        <tr><td><span class="temp">240°C</span> + steam</td><td>12 min</td></tr>
+        <tr><td>Remove steam, vent</td><td>—</td></tr>
+        <tr><td><span class="temp">240°C</span> dry</td><td>10–13 min</td></tr>
+      </table>
+      <p>Cool on wire rack <strong>20 min</strong> before cutting.</p>`;
+    steps += tip('Crust softens as it cools; it crisps back up. For extra crackle, oven off, door ajar, 5 min.', 'Getting a crackly crust');
+    steps += stepEnd;
+  }
   steps += `
     <div class="finale">
       <svg class="finale-loaf" viewBox="0 0 138 96" role="img" aria-label="A finished baguette, steaming" onclick="popLoaf(this)">
@@ -1509,7 +1570,7 @@ ${foldTableRows}
   document.getElementById('recipe').innerHTML = `
     <div class="white-panel">
       <h2>Formula — ${count} × ${pieceWeight}g</h2>
-      <p class="formula-meta"><strong>${isRetard ? 'Cold Retard' : 'Same Day'}</strong> · Room Temp <span class="temp">${tempC}°C</span> · DDT <span class="temp">${DDT}°C</span> · Water <span class="temp">${waterTempDisplay}</span> · Hydration <strong>${(baseHyd*100).toFixed(0)}%</strong></p>
+      <p class="formula-meta"><strong>${isRetard ? 'Cold Retard' : isShaped ? 'Shaped Retard' : 'Same Day'}</strong> · Room Temp <span class="temp">${tempC}°C</span> · DDT <span class="temp">${DDT}°C</span> · Water <span class="temp">${waterTempDisplay}</span> · Hydration <strong>${(baseHyd*100).toFixed(0)}%</strong></p>
       <h3>Poolish (${(poolishPct*100).toFixed(0)}% of flour)</h3>
       <table>
         <tr><th>Ingredient</th><th>Amount</th></tr>
@@ -1558,9 +1619,11 @@ ${foldTableRows}
   document.getElementById('hydration').value = Math.round(baseHyd * 100);
   document.getElementById('fermentolyse').value = fermentolyseTime;
   document.getElementById('detente').value = detenteFloorV;
+  document.getElementById('shapedRetardHrs').value = shapedRetardHrsV;
+  document.getElementById('shapedRetardField').style.display = isShaped ? '' : 'none';
   document.querySelectorAll('#developToggle button').forEach(b => b.classList.toggle('active', b.dataset.v === developV));
   document.querySelectorAll('#maltToggle button').forEach(b => b.classList.toggle('active', +b.dataset.v === maltPct));
-  setPill('hydration'); setPill('fermentolyse'); setPill('detente'); setPill('develop'); setPill('malt');
+  setPill('hydration'); setPill('fermentolyse'); setPill('detente'); setPill('develop'); setPill('malt'); setPill('shapedRetardHrs');
   const srcFoldsEl = document.getElementById('src-folds');
   if (srcFoldsEl) srcFoldsEl.textContent = foldOverride != null ? '↺ reset' : shortFlour(flourInfo[domFlour].name);
 
@@ -1574,10 +1637,10 @@ ${foldTableRows}
     fA === fB ? shortFlour(flourInfo[fA].name) : shortFlour(flourInfo[fA].name) + ' blend';
   document.getElementById('hero-hyd').textContent = hydPct;
   document.getElementById('hero-next').innerHTML =
-    `<b>${count} × ${pieceWeight}g</b> · ${isRetard ? 'cold retard' : 'same day'} · ${tempC}°C`;
+    `<b>${count} × ${pieceWeight}g</b> · ${isRetard ? 'cold retard' : isShaped ? 'shaped retard' : 'same day'} · ${tempC}°C`;
 
   // Stage strip: hide Retard pill in same-day mode; re-apply done/now state after rebuild
-  document.getElementById('st-retard').style.display = isRetard ? '' : 'none';
+  document.getElementById('st-retard').style.display = method !== 'sameday' ? '' : 'none';
   updateStageStrip();
   setupStageObserver();
   setupHeroObserver();
@@ -1876,6 +1939,16 @@ suppressSave = false;
           <li>Tighter, more even crumb</li>
           <li>Warm dough = stickier to shape</li>
           <li>Done in ~5–6 hrs after poolish</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Shaped Retard</h4>
+        <ul>
+          <li>Complex flavour, closer to Cold Retard</li>
+          <li>Great blistering; cold dough scores cleanly</li>
+          <li>Open, irregular crumb</li>
+          <li>Shape once, no second warm handling</li>
+          <li>Bake straight from the fridge — no morning wait</li>
         </ul>
       </div>
     </div>
