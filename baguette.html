@@ -190,6 +190,8 @@
     font-family: var(--body); transition: background 0.12s; }
   .stepper button:hover { background: var(--accent-soft); }
   .stepper button:active { background: var(--line); }
+  .stepper button:disabled { color: var(--muted); opacity: 0.4; cursor: not-allowed; background: transparent; }
+  .stepper input:disabled { color: var(--muted); opacity: 0.72; cursor: not-allowed; }
 
   /* Toggle group */
   .toggle { display: flex; gap: 3px; padding: 3px; background: var(--bg); border-radius: 12px;
@@ -663,9 +665,9 @@
         <div class="field">
           <label for="fermentolyse">Pre-mix rest (min) <button class="info-btn" onclick="event.stopPropagation();openInfo('fermentolyse')" aria-label="Why this fermentolyse time?">?</button> <span class="src" id="src-fermentolyse" onclick="resetOverride('fermentolyse')"></span></label>
           <div class="stepper">
-            <button onclick="stepOverride('fermentolyse',-5,30,90)">−</button>
+            <button id="fermentolyseDown" onclick="stepOverride('fermentolyse',-5,30,90)">−</button>
             <input type="number" id="fermentolyse" value="45" min="30" max="90" step="5" onchange="setOverrideInput('fermentolyse')">
-            <button onclick="stepOverride('fermentolyse',5,30,90)">+</button>
+            <button id="fermentolyseUp" onclick="stepOverride('fermentolyse',5,30,90)">+</button>
           </div>
         </div>
         <div class="field">
@@ -737,6 +739,10 @@ const TEMPER_TARGET = 10;
 const TAU_DIVIDED = 30;
 const TAU_SHAPED = 20;
 const FRICTION = 2;
+const BULK_ANCHOR_MINS = 180;
+const SHAPED_BULK_ANCHOR_MINS = 116;
+const SHAPED_FERMENTOLYSE_MINS = 30;
+const SHAPED_FINAL_YEAST_FACTOR = 0.60;
 
 function fmt(absMin) {
   const norm = ((absMin % 1440) + 1440) % 1440;
@@ -999,6 +1005,27 @@ function solveStageDuration(anchor, anchorTemp, tau, T_start, T_amb) {
   return t;
 }
 
+function fermentolyseDuration(activeMethod, ctx) {
+  return activeMethod === 'shaped'
+    ? SHAPED_FERMENTOLYSE_MINS
+    : Math.round(eff('fermentolyse', ctx));
+}
+
+function bulkFormulaDuration(activeMethod, tempC, tau) {
+  if (activeMethod === 'shaped') {
+    // Calibrated to ~2h20 total bulk at 18°C with a 24°C DDT in a metal bowl.
+    return solveStageDuration(SHAPED_BULK_ANCHOR_MINS, 23, tau, DDT, tempC);
+  }
+  const bulkMeanTemp = tempC + (DDT - tempC) * (tau / BULK_ANCHOR_MINS)
+    * (1 - Math.exp(-BULK_ANCHOR_MINS / tau));
+  return BULK_ANCHOR_MINS * Math.pow(2, (23 - bulkMeanTemp) / 10);
+}
+
+function finalDoughYeastPct(activeMethod, yeastMultiplier) {
+  return YEAST_PCT * yeastMultiplier
+    * (activeMethod === 'shaped' ? SHAPED_FINAL_YEAST_FACTOR : 1);
+}
+
 function tip(text, hint) {
   return `<div class="tip" tabindex="0" onclick="event.stopPropagation();this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open')}"><div class="tip-toggle"><span class="tip-hint">${hint || ''}</span><span class="chev">▾</span></div><div class="tip-body"><div class="tip-body-inner">${text}</div></div></div>`;
 }
@@ -1024,6 +1051,10 @@ const INFO = {
     title: 'Why this fermentolyse time?',
     body: 'Fermentolyse lets the gluten hydrate and relax before salt and bassinage are added, cutting mixing time by ~60%. GLOBAL baseline is 45 min. Miller &amp; Baker targets 60 min: stoneground bran absorbs water slowly and the tight network needs longer to relax. Visual cue: dough shaggy at the start, a smooth window panel forming by the end.'
   },
+  fermentolyseShaped: {
+    title: 'Why a fixed 30-minute rest?',
+    body: 'Shaped Retard uses a fixed 30-minute fermentolyse as part of its shorter mix-day bulk. The dough continues developing through the folds, then completes its final proof slowly in the fridge. This fixed value applies only to Shaped Retard; the flour-profile timing is retained for the other methods.'
+  },
   detente: {
     title: 'Why the bench-rest minimum?',
     body: 'Gluten relaxation is time-limited, not just temperature-limited. Below ~20 min the network won\'t fully release regardless of temperature, and final shaping will tear the dough. The formula (t = 40 × 2<sup>((17−T)/10)</sup>) gives longer rests at colder temps but is always floored here. Miller &amp; Baker\'s tight network benefits from 28+ min; that\'s why its flour profile sets the floor higher.'
@@ -1043,7 +1074,7 @@ const INFO = {
 };
 
 function openInfo(key) {
-  const info = INFO[key];
+  const info = INFO[key === 'fermentolyse' && method === 'shaped' ? 'fermentolyseShaped' : key];
   if (!info) return;
   document.getElementById('infoModalTitle').textContent = info.title;
   document.getElementById('infoModalBody').innerHTML = info.body;
@@ -1165,6 +1196,13 @@ function shortFlour(name) {
 function setPill(key) {
   const el = document.getElementById('src-' + key);
   if (!el) return;
+  if (key === 'fermentolyse' && method === 'shaped') {
+    el.style.display = '';
+    el.style.pointerEvents = 'none';
+    el.textContent = 'fixed · shaped retard';
+    return;
+  }
+  el.style.pointerEvents = '';
   if (userOverride[key] != null) { el.style.display = ''; el.textContent = '↺ reset'; return; }
   const s = sourceOf(key, ctxNow());
   const label = s === 'default' ? '' : s.startsWith('blend of ') ? 'blend' : shortFlour(s);
@@ -1233,7 +1271,7 @@ function update() {
   const shapedRetardHrsV = Math.round(eff('shapedRetardHrs', ctx));
   const r5 = v => Math.round(v / 5) * 5;
 
-  const fermentolyseTime = Math.round(eff('fermentolyse', ctx));
+  const fermentolyseTime = fermentolyseDuration(method, ctx);
   const foldInterval = 30;
 
   const retardDetenteDuration = solveStageDuration(40, 17, TAU_DIVIDED, TEMPER_TARGET, tempC);
@@ -1259,8 +1297,7 @@ function update() {
   const poolishHigh = Math.round(poolishHrsMid * 1.15);
   const poolishTime = `${poolishLow}–${poolishHigh} hrs`;
 
-  const bulkMeanTemp = tempC + (DDT - tempC) * (temperTau / 180) * (1 - Math.exp(-180 / temperTau));
-  const bulkFormulaMins = 180 * Math.pow(2, (23 - bulkMeanTemp) / 10);
+  const bulkFormulaMins = bulkFormulaDuration(method, tempC, temperTau);
   const fixedFoldsMins = fermentolyseTime + folds.length * foldInterval;
   const bulkMins = Math.min(Math.max(Math.round(bulkFormulaMins), fixedFoldsMins), 240);
   const undisturbedRestMins = bulkMins - fixedFoldsMins;
@@ -1280,7 +1317,9 @@ function update() {
   const maltGrams = totalFlour => totalFlour * (maltPct / 100);
 
   const poolishYeastPct = poolishPct * POOLISH_YEAST_PCT_OF_POOLISH_FLOUR * yeastMult;
-  const finalYeastPct = YEAST_PCT * yeastMult;
+  // Shaped Retard gets a long cold final proof, so reduce only the yeast added
+  // to the final dough by 40%; the poolish inoculation above remains unchanged.
+  const finalYeastPct = finalDoughYeastPct(method, yeastMult);
   const yeastPct = poolishYeastPct + finalYeastPct;
   const totalFlour = totalDough / (1 + baseHyd + SALT_PCT + yeastPct);
   const totalWater = totalFlour * baseHyd;
@@ -1441,10 +1480,14 @@ ${foldTableRows}
         : `<tr><td>${fmt(T.bulkEnd)}</td><td><strong>Finish bulk fermentation</strong> — total <strong>${bulkTime}</strong>, counted since the start of Fermentolyse (step 2)</td></tr>`
       }
     </table>
-    <p>→ Visual cue: domed, jiggly, bubbles at edges, <strong>30–50% larger</strong> than start — not doubled.</p>`;
+    <p>→ ${isShaped
+      ? 'Shaped Retard cue: smoother and aerated, bubbles beginning at the edges, with some visible rise — do not wait for the full 30–50% expansion used by the other methods.'
+      : 'Visual cue: domed, jiggly, bubbles at edges, <strong>30–50% larger</strong> than start — not doubled.'}</p>`;
   steps += tip(
-    `Visual cue overrides the clock: ${isRetard ? 'into the fridge' : 'divide &amp; preshape'} at <strong>30–50% expanded</strong>: domed, jiggly, bubbles visible at the edges, nowhere near doubled.<br><br>Cap at 4 hours. Below ~${bulkTooLongBelow}°C ambient the formula wants longer; use a proofing chamber set to 22–24°C.`,
-    'Visual cue & cap'
+    isShaped
+      ? `The shorter clock is intentional because the shaped loaves complete their final proof during the long cold retard. At 18°C with a metal bowl, total bulk is about <strong>2h 20m from the start of Fermentolyse</strong>, including the fixed 30-minute rest and folds. Divide and preshape when the dough is aerated and beginning to rise; do not wait for it to look fully bulked.`
+      : `Visual cue overrides the clock: ${isRetard ? 'into the fridge' : 'divide &amp; preshape'} at <strong>30–50% expanded</strong>: domed, jiggly, bubbles visible at the edges, nowhere near doubled.<br><br>Cap at 4 hours. Below ~${bulkTooLongBelow}°C ambient the formula wants longer; use a proofing chamber set to 22–24°C.`,
+    isShaped ? 'Why the shorter bulk?' : 'Visual cue & cap'
   );
   steps += stepEnd;
 
@@ -1616,6 +1659,9 @@ ${foldTableRows}
   // ── Sync derived controls + source pills ───────────────────────────────
   document.getElementById('hydration').value = Math.round(baseHyd * 100);
   document.getElementById('fermentolyse').value = fermentolyseTime;
+  document.getElementById('fermentolyse').disabled = isShaped;
+  document.getElementById('fermentolyseDown').disabled = isShaped;
+  document.getElementById('fermentolyseUp').disabled = isShaped;
   document.getElementById('detente').value = detenteFloorV;
   document.getElementById('shapedRetardHrs').value = shapedRetardHrsV;
   document.getElementById('shapedRetardField').style.display = isShaped ? '' : 'none';

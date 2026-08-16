@@ -58,6 +58,15 @@ check('source default',       sourceOf('fermentolyse', ctx({ fA:'bread', fB:'nuv
 check('buildFolds trims tail', JSON.stringify(buildFolds(['sf','sf','cf','cf'], 2)) === JSON.stringify(['cf','cf']));
 check('buildFolds extends',    JSON.stringify(buildFolds(['cf','cf'], 4)) === JSON.stringify(['cf','cf','cf','cf']));
 
+// Shaped Retard uses its own shorter mix-day calibration. Other methods keep
+// the flour-profile fermentolyse and original bulk formula.
+check('shaped fermentolyse fixed at 30', fermentolyseDuration('shaped', ctx({ override:{ fermentolyse:90 } })) === 30);
+check('cold-retard fermentolyse keeps flour profile', fermentolyseDuration('retard', ctx()) === 60);
+check('shaped bulk is about 2h20 at 18C', Math.round(bulkFormulaDuration('shaped', 18, 60)) === 140);
+check('cold-retard bulk formula unchanged at 18C', Math.round(bulkFormulaDuration('retard', 18, 60)) === 223);
+check('shaped final-dough yeast reduced by 40%', finalDoughYeastPct('shaped', 1) === finalDoughYeastPct('retard', 1) * 0.6);
+check('cold-retard and same-day final yeast match', finalDoughYeastPct('retard', 1) === finalDoughYeastPct('sameday', 1));
+
 // loadPrefs tolerates a legacy `season` key from old baguette.html prefs
 global.localStorage.getItem = () => JSON.stringify({ season:'winter', hydration:'68', method:'sameday' });
 assert.doesNotThrow(() => loadPrefs(), 'loadPrefs tolerates legacy season key'); passed++;

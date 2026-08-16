@@ -35,9 +35,9 @@ One real bug was found, and one design simplification made as a result:
    removed as dead code; the visual-cue paragraph and tip are now unified,
    branching only on the next action, not the percentage.
 
-No formula changes — copy/branching only. This also simplifies Part 2 below:
-Shaped Retard's bulk fermentation needs no special-casing at all now, since
-every method already shares the same bulk target.
+No formula changes were made to Cold Retard or Same Day. Shaped Retard was
+subsequently recalibrated as described below; its shorter mix-day bulk is now
+an intentional method-specific exception.
 
 ## Part 2 — Shaped Retard method
 
@@ -67,11 +67,16 @@ The user separately confirmed from direct experience: a recent bake with an
 under-bulked shaped loaf came out flat after scoring — consistent with
 insufficient structure/gas going into the long cold stage.
 
-**Decision:** Shaped Retard's bulk fermentation reuses the *exact same*
-formula and growth target as every other method now (see Part 1 — all
-methods target 30–50% growth, ambient-temp-scaled
-`bulkMins`/`bulkFormulaMins`/`fixedFoldsMins`/`undisturbedRestMins`,
-unchanged). No method-specific bulk code needed for Shaped Retard at all.
+**Revised decision (2026-08-02):** direct bake calibration supersedes the
+initial shared-bulk decision. Shaped Retard now uses a shorter,
+ambient-temperature-scaled bulk formula calibrated to approximately **2h 20m
+at 18°C** with a 24°C DDT and metal bowl, rather than roughly 3.5–3.75h. Its
+fermentolyse is fixed at **30 minutes**, regardless of flour profile or saved
+override. The shorter bulk is deliberate because the shaped loaves complete
+their final proof during the long cold retard. The instant dry yeast added to
+the **final dough** is also reduced by **40%** for Shaped Retard only; poolish
+yeast remains unchanged. Cold Retard and Same Day retain their existing
+fermentolyse profiles, bulk formula, and yeast quantities unchanged.
 
 ### Détente (bench rest before final shape)
 
