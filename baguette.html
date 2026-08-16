@@ -1021,9 +1021,12 @@ function bulkFormulaDuration(activeMethod, tempC, tau) {
   return BULK_ANCHOR_MINS * Math.pow(2, (23 - bulkMeanTemp) / 10);
 }
 
-function finalDoughYeastPct(activeMethod, yeastMultiplier) {
-  return YEAST_PCT * yeastMultiplier
-    * (activeMethod === 'shaped' ? SHAPED_FINAL_YEAST_FACTOR : 1);
+// Baker's-percentage cascade (per docs/Baker Percentages Worked Example.xlsx):
+// total yeast% derives total flour weight; poolish yeast is carved OUT of that
+// total (not added on top), and whatever remains is the final-dough addition.
+function finalDoughYeastWeight(totalYeastWeightG, poolishYeastWeightG, activeMethod) {
+  const factor = activeMethod === 'shaped' ? SHAPED_FINAL_YEAST_FACTOR : 1;
+  return Math.max(0, totalYeastWeightG - poolishYeastWeightG) * factor;
 }
 
 function tip(text, hint) {
@@ -1317,11 +1320,12 @@ function update() {
   const maltGrams = totalFlour => totalFlour * (maltPct / 100);
 
   const poolishYeastPct = poolishPct * POOLISH_YEAST_PCT_OF_POOLISH_FLOUR * yeastMult;
-  // Shaped Retard gets a long cold final proof, so reduce only the yeast added
-  // to the final dough by 40%; the poolish inoculation above remains unchanged.
-  const finalYeastPct = finalDoughYeastPct(method, yeastMult);
-  const yeastPct = poolishYeastPct + finalYeastPct;
-  const totalFlour = totalDough / (1 + baseHyd + SALT_PCT + yeastPct);
+  // Baker's-percentage cascade (see docs/Baker Percentages Worked Example.xlsx):
+  // one total yeast% drives total flour weight; poolish yeast is carved out of
+  // that total below, not added on top. Shaped Retard's yeast cut applies only
+  // to what's left over for the final-dough addition.
+  const totalYeastPct = YEAST_PCT * yeastMult;
+  const totalFlour = totalDough / (1 + baseHyd + SALT_PCT + totalYeastPct);
   const totalWater = totalFlour * baseHyd;
   const salt = totalFlour * SALT_PCT;
   const maltG = maltGrams(totalFlour);
@@ -1337,7 +1341,7 @@ function update() {
   const bassinage = totalFlour * BASSINAGE_PCT;
   const fermentolyseWater = totalWater - poolishWater - bassinage;
   const fermentolyseHyd = ((fermentolyseWater / finalFlour) * 100).toFixed(0);
-  const finalYeast = totalFlour * finalYeastPct;
+  const finalYeast = finalDoughYeastWeight(totalFlour * totalYeastPct, poolishYeast, method);
   const fAName = flourInfo[fA].name;
   const fBName = flourInfo[fB].name;
   const proofTime = proofTimeStr;

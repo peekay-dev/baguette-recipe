@@ -64,8 +64,13 @@ check('shaped fermentolyse fixed at 30', fermentolyseDuration('shaped', ctx({ ov
 check('cold-retard fermentolyse keeps flour profile', fermentolyseDuration('retard', ctx()) === 60);
 check('shaped bulk is about 2h20 at 18C', Math.round(bulkFormulaDuration('shaped', 18, 60)) === 140);
 check('cold-retard bulk formula unchanged at 18C', Math.round(bulkFormulaDuration('retard', 18, 60)) === 223);
-check('shaped final-dough yeast reduced by 40%', finalDoughYeastPct('shaped', 1) === finalDoughYeastPct('retard', 1) * 0.6);
-check('cold-retard and same-day final yeast match', finalDoughYeastPct('retard', 1) === finalDoughYeastPct('sameday', 1));
+// Baker's-percentage cascade (docs/Baker Percentages Worked Example.xlsx):
+// final-dough yeast is what's left after poolish yeast is carved out of the
+// total, not the full total-yeast% added on top of poolish's share.
+check('final yeast is total minus poolish', finalDoughYeastWeight(100, 20, 'retard') === 80);
+check('shaped final-dough yeast reduced by 40% off the remainder', finalDoughYeastWeight(100, 20, 'shaped') === finalDoughYeastWeight(100, 20, 'retard') * 0.6);
+check('cold-retard and same-day final yeast match', finalDoughYeastWeight(100, 20, 'retard') === finalDoughYeastWeight(100, 20, 'sameday'));
+check('final yeast never goes negative', finalDoughYeastWeight(10, 20, 'retard') === 0);
 
 // loadPrefs tolerates a legacy `season` key from old baguette.html prefs
 global.localStorage.getItem = () => JSON.stringify({ season:'winter', hydration:'68', method:'sameday' });
