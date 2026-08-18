@@ -1313,7 +1313,7 @@ function update() {
   const waterTempCalc = Math.round((DDT * 4) - tempC - tempC - FRICTION - poolishTempAssumption);
   const waterTempDisplay = waterTempCalc <= 2 ? `${waterTempCalc}°C (ice water)` : `~${waterTempCalc}°C`;
 
-  const totalDough = count * pieceWeight * 1.06;
+  const totalDough = count * pieceWeight;
   const baseHyd = eff('hydration', ctx) / 100;
   const developV = eff('develop', ctx);
   const maltPct = eff('malt', ctx);
